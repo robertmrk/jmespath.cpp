@@ -29,7 +29,7 @@
 
 namespace jmespath {
 
-json search(const string &searchExpression, const json &document)
+Json search(const String &searchExpression, const Json &document)
 {
     return {};
 }

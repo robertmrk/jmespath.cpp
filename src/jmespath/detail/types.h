@@ -36,12 +36,24 @@
  */
 namespace jmespath { namespace detail {
 /**
+ * @brief 8 bit character type
+ */
+using Char              = char;
+/**
  * @brief UTF-8 encoded string type
  */
-using string    = std::string;
+using String            = std::basic_string<Char>;
+/**
+ * @brief 32 bit character type
+ */
+using UnicodeChar       = char32_t;
+/**
+ * @brief UTF-32 encoded string type
+ */
+using UnicodeString     = std::basic_string<UnicodeChar>;
 /**
  * @brief JSON data type
  */
-using json      = nlohmann::json;
+using Json      = nlohmann::json;
 }} // namespace jmespath::detail
 #endif // TYPES_H

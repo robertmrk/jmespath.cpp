@@ -37,8 +37,8 @@
  */
 namespace jmespath {
 
-using detail::json;
-using detail::string;
+using detail::Json;
+using detail::String;
 /**
  * @brief Finds or creates the results for the \a searchExpression
  * evaluated on the given \a document.
@@ -48,7 +48,7 @@ using detail::string;
  * @param document Input JSON document
  * @return Result of the evaluation of the \a searchExpression in JSON format
  */
-json search(const string& searchExpression,
-            const json& document);
+Json search(const String& searchExpression,
+            const Json& document);
 } // namespace jmespath
 #endif // JMESPATH_H
