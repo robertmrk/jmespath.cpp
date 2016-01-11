@@ -25,5 +25,17 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#define CATCH_CONFIG_MAIN
 #include "catch.hpp"
+#include <jmespath/jmespath.h>
+
+TEST_CASE("Search function")
+{
+    using namespace jmespath;
+
+    SECTION("returns null if search expression is empty")
+    {
+        auto result = search("", {});
+
+        REQUIRE(result.is_null());
+    }
+}

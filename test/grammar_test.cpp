@@ -54,29 +54,33 @@ TEST_CASE("Grammar")
 
     Grammar<String::const_iterator> grammar;
 
-    SECTION("can be used to parse unquoted string")
+    SECTION("can be used to parse")
     {
-        REQUIRE(parseExpression(grammar, "identifierName") == "identifierName");
-    }
+        SECTION("unquoted string")
+        {
+            REQUIRE(parseExpression(grammar, "identifierName")
+                    == "identifierName");
+        }
 
-    SECTION("can be used to parse quoted string")
-    {
-        REQUIRE(parseExpression(grammar, "\"identifier with space\"")
-                == "identifier with space");
-    }
+        SECTION("quoted string")
+        {
+            REQUIRE(parseExpression(grammar, "\"identifier with space\"")
+                    == "identifier with space");
+        }
 
-    SECTION("can be used to parse string with escaped characters")
-    {
-        REQUIRE(parseExpression(grammar, "\"\\\\\\\"\\/\"") == "\\\"/");
-    }
+        SECTION("string with escaped characters")
+        {
+            REQUIRE(parseExpression(grammar, "\"\\\\\\\"\\/\"") == "\\\"/");
+        }
 
-    SECTION("can be used to parse string with escaped symbols")
-    {
-        REQUIRE(parseExpression(grammar, "\"\\t\\n\\b\"") == "\t\n\b");
-    }
+        SECTION("string with escaped symbols")
+        {
+            REQUIRE(parseExpression(grammar, "\"\\t\\n\\b\"") == "\t\n\b");
+        }
 
-    SECTION("can be used to parse string with unicode escapes")
-    {
-        REQUIRE(parseExpression(grammar, "\"\\u0041\"") == "A");
+        SECTION("string with unicode escapes")
+        {
+            REQUIRE(parseExpression(grammar, "\"\\u0041\"") == "A");
+        }
     }
 }
