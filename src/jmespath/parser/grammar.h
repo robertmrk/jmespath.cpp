@@ -29,6 +29,7 @@
 #define GRAMMAR_H
 #include "jmespath/detail/types.h"
 #include <boost/spirit/include/qi.hpp>
+#include <boost/phoenix.hpp>
 
 /**
  * @namespace jmespath::parser
@@ -37,6 +38,8 @@
 namespace jmespath { namespace parser {
 
 namespace qi = boost::spirit::qi;
+namespace encoding = qi::standard_wide;
+namespace phx = boost::phoenix;
 using namespace detail;
 
 /**
@@ -46,60 +49,110 @@ using namespace detail;
  * @tparam Skipper Character skipper parser type
  * @sa http://jmespath.org/specification.html#grammar
  */
-template <typename Iterator, typename Skipper = qi::standard_wide::space_type>
-struct Grammar : qi::grammar<Iterator, String(), Skipper>
+template <typename Iterator, typename Skipper = encoding::space_type>
+class Grammar : public qi::grammar<Iterator, String(), Skipper>
 {
+    public:
     /**
      * @brief Constructs a Grammar object
      */
-    Grammar() : Grammar::base_type(identifierRule)
+    Grammar() : Grammar::base_type(m_identifierRule)
     {
-        using qi::ascii::char_;
+        using encoding::char_;
         using qi::lit;
         using qi::lexeme;
         using qi::int_parser;
 
-        identifierRule = unquotedStringRule | quotedStringRule;
-        unquotedStringRule = lexeme[ (char_('\x41', '\x5A')
-                                      | char_('\x61', '\x7A')
-                                      | char_('\x5F'))
-                >> *(char_('\x30', '\x39')
-                     | char_('\x41', '\x5A')
-                     | char_('\x5F')
-                     | char_('\x61', '\x7A')) ];
-        quotedStringRule = lexeme[ quoteRule >> +(unescapedCharRule
-                                                  | escapedCharRule)
-                                             >> quoteRule ];
-        unescapedCharRule = char_('\x20', '\x21')
-                | char_('\x23', '\x5B')
-                | char_('\x5D', '\x7E');
-        quoteRule = lit('\"');
-        escapeRule = lit('\\');
-        escapedCharRule = lexeme[ escapeRule >> (char_('\"')
-                                                  | char_('\\')
-                                                  | char_('/')
-                                                  | controlCharacterSymbols
-                                                  | unicodeCharRule) ];
-        unicodeCharRule = lexeme[ lit('u')
-                >> int_parser<Char, 16, 4, 4>() ];
-        controlCharacterSymbols.add
-                ("b", '\x08')     // backspace
-                ("f", '\x0C')     // form feed
-                ("n", '\x0A')     // line feed
-                ("r", '\x0D')     // carriage return
-                ("t", '\x09');    // tab
+        m_identifierRule = m_unquotedStringRule | m_quotedStringRule;
+        m_unquotedStringRule
+                = lexeme[ ((char_(U'\x41', U'\x5A')
+                            | char_(U'\x61', U'\x7A')
+                            | char_(U'\x5F'))[phx::bind(&Grammar::appendUtf8,
+                                                        this,
+                                                        qi::_val,
+                                                        qi::_1)]
+                >> *(char_(U'\x30', U'\x39')
+                     | char_(U'\x41', U'\x5A')
+                     | char_(U'\x5F')
+                     | char_(U'\x61', U'\x7A'))[phx::bind(&Grammar::appendUtf8,
+                                                          this,
+                                                          qi::_val,
+                                                          qi::_1)]) ];
+        m_quotedStringRule
+                = lexeme[ m_quoteRule
+                >> +(m_unescapedCharRule
+                     | m_escapedCharRule)[phx::bind(&Grammar::appendUtf8,
+                                                  this,
+                                                  qi::_val,
+                                                  qi::_1)]
+                >> m_quoteRule ];
+        m_unescapedCharRule = char_(U'\x20', U'\x21')
+                | char_(U'\x23', U'\x5B')
+                | char_(U'\x5D', U'\U0010FFFF');
+        m_quoteRule = lit('\"');
+        m_escapeRule = lit('\\');
+        m_escapedCharRule = lexeme[ m_escapeRule >> (char_(U'\"')
+                                                 | char_(U'\\')
+                                                 | char_(U'/')
+                                                 | m_controlCharacterSymbols
+                                                 | m_surrogatePairCharacterRule
+                                                 | m_unicodeCharRule) ];
+        m_surrogatePairCharacterRule
+                = lexeme[ (m_unicodeCharRule >> m_escapeRule >> m_unicodeCharRule)
+                [qi::_pass = (qi::_1 >= 0xD800 && qi::_1 <= 0xDBFF),
+                qi::_val = phx::bind(&Grammar::parseSurrogatePair,
+                                     this,
+                                     qi::_1,
+                                     qi::_2)] ];
+        m_unicodeCharRule = lexeme[ lit('u')
+                >> int_parser<UnicodeChar, 16, 4, 4>() ];
+        m_controlCharacterSymbols.add
+                (U"b", U'\x08')     // backspace
+                (U"f", U'\x0C')     // form feed
+                (U"n", U'\x0A')     // line feed
+                (U"r", U'\x0D')     // carriage return
+                (U"t", U'\x09');    // tab
     }
 
-    qi::rule<Iterator, String(), Skipper>   identifierRule;
-    qi::rule<Iterator, String()>            quotedStringRule;
-    qi::rule<Iterator, String()>            unquotedStringRule;
-    qi::rule<Iterator, Char()>              unescapedCharRule;
-    qi::rule<Iterator, Char()>              escapedCharRule;
-    qi::rule<Iterator, Char()>              unicodeCharRule;
-    qi::rule<Iterator>                      quoteRule;
-    qi::rule<Iterator>                      escapeRule;
-    qi::symbols<Char, Char>                 controlCharacterSymbols;
-};
+    private:
+    qi::rule<Iterator, String(), Skipper>   m_identifierRule;
+    qi::rule<Iterator, String()>            m_quotedStringRule;
+    qi::rule<Iterator, String()>            m_unquotedStringRule;
+    qi::rule<Iterator, UnicodeChar()>       m_unescapedCharRule;
+    qi::rule<Iterator, UnicodeChar()>       m_escapedCharRule;
+    qi::rule<Iterator, UnicodeChar()>       m_unicodeCharRule;
+    qi::rule<Iterator, UnicodeChar()>       m_surrogatePairCharacterRule;
+    qi::rule<Iterator>                      m_quoteRule;
+    qi::rule<Iterator>                      m_escapeRule;
+    qi::symbols<UnicodeChar, UnicodeChar>   m_controlCharacterSymbols;
 
+    /**
+     * @brief Appends the \a utf32Char character to the \a utf8String encoded in
+     * UTF-8.
+     * @param utf8String The string where the encoded value of the \a utf32Char
+     * will be appended.
+     * @param utf32Char The input character encoded in UTF-32
+     */
+    void appendUtf8(String& utf8String, UnicodeChar utf32Char) const
+    {
+        auto outIt = std::back_inserter(utf8String);
+        boost::utf8_output_iterator<decltype(outIt)> utf8OutIt(outIt);
+        *utf8OutIt++ = utf32Char;
+    }
+    /**
+     * @brief Parses a surrogate pair character
+     * @param highSurrogate High surrogate
+     * @param lowSurrogate Low surrogate
+     * @return The result of @a highSurrogate and @a lowSurrogate combined
+     * into a single codepoint
+     */
+    UnicodeChar parseSurrogatePair(UnicodeChar const& highSurrogate, UnicodeChar const& lowSurrogate)
+    {
+        UnicodeChar unicodeChar = 0x10000;
+        unicodeChar += (highSurrogate & 0x03FF) << 10;
+        unicodeChar += (lowSurrogate & 0x03FF);
+        return unicodeChar;
+    }
+};
 }} // jmespath::parser
 #endif // GRAMMAR_H

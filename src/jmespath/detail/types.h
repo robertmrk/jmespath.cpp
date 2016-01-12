@@ -28,6 +28,7 @@
 #ifndef TYPES_H
 #define TYPES_H
 #include <string>
+#include <boost/regex/pending/unicode_iterator.hpp>
 #include "json.hpp"
 
 /**
@@ -51,6 +52,16 @@ using UnicodeChar       = char32_t;
  * @brief UTF-32 encoded string type
  */
 using UnicodeString     = std::basic_string<UnicodeChar>;
+/**
+ * @brief UTF-32 string iterator adaptor
+ */
+using UnicodeIteratorAdaptor
+    = boost::u8_to_u32_iterator<String::const_iterator>;
+/**
+ * @brief UTF-8 string iterator adaptor
+ */
+using StringIteratorAdaptor
+    = boost::u32_to_u8_iterator<UnicodeString::const_iterator>;
 /**
  * @brief JSON data type
  */

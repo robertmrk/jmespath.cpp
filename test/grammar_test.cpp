@@ -27,22 +27,25 @@
 ****************************************************************************/
 #include "catch.hpp"
 #include "jmespath/parser/grammar.h"
+#include "jmespath/detail/types.h"
 #include <boost/spirit/include/qi.hpp>
 
 using namespace jmespath::parser;
+using namespace jmespath::detail;
 
 template <typename GrammarT>
 typename GrammarT::start_type::attr_type
 parseExpression(const GrammarT& grammar, const String& expression)
 {
     namespace qi = boost::spirit::qi;
+    namespace encoding = qi::standard_wide;
 
     typename GrammarT::start_type::attr_type result;
-    auto it = std::cbegin(expression);
-    auto endIt = std::cend(expression);
+    UnicodeIteratorAdaptor it(std::cbegin(expression));
+    UnicodeIteratorAdaptor endIt(std::cend(expression));
 
     qi::phrase_parse(it, endIt,
-                     grammar, qi::standard_wide::space,
+                     grammar, encoding::space,
                      result);
     return result;
 }
@@ -52,7 +55,7 @@ TEST_CASE("Grammar")
     using namespace jmespath::parser;
     namespace qi = boost::spirit::qi;
 
-    Grammar<String::const_iterator> grammar;
+    Grammar<UnicodeIteratorAdaptor> grammar;
 
     SECTION("can be used to parse")
     {
@@ -80,7 +83,19 @@ TEST_CASE("Grammar")
 
         SECTION("string with unicode escapes")
         {
-            REQUIRE(parseExpression(grammar, "\"\\u0041\"") == "A");
+            REQUIRE(parseExpression(grammar, "\"\\u20AC\"") == "\xE2\x82\xAC");
+        }
+
+        SECTION("string with encoded unicode characters")
+        {
+            REQUIRE(parseExpression(grammar, "\"\xE2\x82\xAC\"")
+                    == "\xE2\x82\xAC");
+        }
+
+        SECTION("string with surrogate pair unicode escapes")
+        {
+            REQUIRE(parseExpression(grammar, "\"\\uD834\\uDD1E\"")
+                    == u8"\U0001D11E");
         }
     }
 }
