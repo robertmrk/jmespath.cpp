@@ -32,7 +32,7 @@
 #include "json.hpp"
 
 /**
- * @namespace detail
+ * @namespace jmespath::detail
  * @brief Contains the implementation details of the library
  */
 namespace jmespath { namespace detail {
