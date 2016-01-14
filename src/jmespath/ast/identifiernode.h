@@ -25,30 +25,41 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef JMESPATH_H
-#define JMESPATH_H
-#include <string>
+#ifndef IDENTIFIERNODE_H
+#define IDENTIFIERNODE_H
+#include "jmespath/ast/expressionnode.h"
 #include "jmespath/detail/types.h"
-#include "json.hpp"
+#include <boost/fusion/include/adapt_struct.hpp>
 
-/**
- * @brief The top level namespace which contains the public
- * functions of the library
- */
-namespace jmespath {
+namespace jmespath { namespace ast {
 
-using detail::Json;
-using detail::String;
+using jmespath::detail::String;
 /**
- * @brief Finds or creates the results for the \a searchExpression
- * evaluated on the given \a document.
- *
- * The \a searchExpression string should be encoded in UTF-8.
- * @param searchExpression JMESPath search expression.
- * @param document Input JSON document
- * @return Result of the evaluation of the \a searchExpression in JSON format
+ * @brief The IdentifierNode class represents a JMESPath identifier
  */
-Json search(const String& searchExpression,
-            const Json& document);
-} // namespace jmespath
-#endif // JMESPATH_H
+class IdentifierNode : public ExpressionNode
+{
+public:
+    /**
+     * @brief Constructs an IdentifierNode object with an empty name.
+     */
+    IdentifierNode();
+    /**
+     * @brief Constructs an IdentifierNode object with the given @a identifier
+     * parameter as its name.
+     * @param identifier The identifier's name.
+     */
+    IdentifierNode(const String& identifier);
+    bool operator==(const IdentifierNode& other) const;
+    /**
+     * @brief Name of the identifier
+     */
+    String identifier;
+};
+}} // namespace jmespath::ast
+
+BOOST_FUSION_ADAPT_STRUCT(
+    jmespath::ast::IdentifierNode,
+    (jmespath::detail::String, identifier)
+)
+#endif // IDENTIFIERNODE_H

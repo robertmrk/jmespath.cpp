@@ -25,30 +25,45 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef JMESPATH_H
-#define JMESPATH_H
-#include <string>
-#include "jmespath/detail/types.h"
-#include "json.hpp"
+#include "jmespath/interpreter/expressionevaluator.h"
+#include "jmespath/ast/identifiernode.h"
 
-/**
- * @brief The top level namespace which contains the public
- * functions of the library
- */
-namespace jmespath {
+namespace jmespath { namespace interpreter {
 
-using detail::Json;
-using detail::String;
-/**
- * @brief Finds or creates the results for the \a searchExpression
- * evaluated on the given \a document.
- *
- * The \a searchExpression string should be encoded in UTF-8.
- * @param searchExpression JMESPath search expression.
- * @param document Input JSON document
- * @return Result of the evaluation of the \a searchExpression in JSON format
- */
-Json search(const String& searchExpression,
-            const Json& document);
-} // namespace jmespath
-#endif // JMESPATH_H
+ExpressionEvaluator::ExpressionEvaluator()
+    : AbstractVisitor()
+{
+}
+
+ExpressionEvaluator::ExpressionEvaluator(const Json &contextValue)
+    : AbstractVisitor()
+{
+    setContext(contextValue);
+}
+
+void ExpressionEvaluator::setContext(const Json &value)
+{
+    m_context = value;
+}
+
+Json ExpressionEvaluator::currentContext() const
+{
+    return m_context;
+}
+
+void ExpressionEvaluator::visit(ast::AbstractNode *node)
+{
+    node->accept(this);
+}
+
+void ExpressionEvaluator::visit(ast::ExpressionNode *node)
+{
+    node->accept(this);
+}
+
+void ExpressionEvaluator::visit(ast::IdentifierNode *node)
+{
+    m_context = m_context[node->identifier];
+}
+
+}} // namespace jmespath::interpreter

@@ -25,30 +25,54 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef JMESPATH_H
-#define JMESPATH_H
-#include <string>
+#ifndef EXPRESSIONEVALUATOR_H
+#define EXPRESSIONEVALUATOR_H
+#include "jmespath/interpreter/abstractvisitor.h"
 #include "jmespath/detail/types.h"
-#include "json.hpp"
 
-/**
- * @brief The top level namespace which contains the public
- * functions of the library
- */
-namespace jmespath {
+namespace jmespath { namespace interpreter {
 
 using detail::Json;
-using detail::String;
 /**
- * @brief Finds or creates the results for the \a searchExpression
- * evaluated on the given \a document.
- *
- * The \a searchExpression string should be encoded in UTF-8.
- * @param searchExpression JMESPath search expression.
- * @param document Input JSON document
- * @return Result of the evaluation of the \a searchExpression in JSON format
+ * @brief The ExpressionEvaluator class evaluates the AST structure.
  */
-Json search(const String& searchExpression,
-            const Json& document);
-} // namespace jmespath
-#endif // JMESPATH_H
+class ExpressionEvaluator : public AbstractVisitor
+{
+public:
+    /**
+     * @brief Constructs an empty ExpressionEvaluator object.
+     *
+     * Before calling any of the visit functions the object should be
+     * initialized by setting the evaluation context with the \sa setContext
+     * method.
+     */
+    ExpressionEvaluator();
+    /**
+     * @brief Constructs an ExpressionEvaluator object with the given
+     * @a document as the context for the evaluation of the AST.
+     * @param document JSON document on which the AST will be evaluated
+     */
+    ExpressionEvaluator(const Json& contextValue);
+    /**
+     * @brief Sets the context of the evaluation.
+     * @param value JSON document to be used as the context.
+     */
+    void setContext(const Json& value);
+    /**
+     * @brief Returns the current evaluation context.
+     * @return JSON document used as the context.
+     */
+    Json currentContext() const;
+
+    void visit(ast::AbstractNode *node);
+    void visit(ast::ExpressionNode *node);
+    void visit(ast::IdentifierNode *node);
+
+private:
+    /**
+     * @brief Stores the evaluation context.
+     */
+    Json m_context;
+};
+}} // namespace jmespath::interpreter
+#endif // EXPRESSIONEVALUATOR_H

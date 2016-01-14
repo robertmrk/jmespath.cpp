@@ -25,30 +25,32 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef JMESPATH_H
-#define JMESPATH_H
-#include <string>
-#include "jmespath/detail/types.h"
-#include "json.hpp"
+#include "fakeit.hpp"
+#include <jmespath/jmespath.h>
 
-/**
- * @brief The top level namespace which contains the public
- * functions of the library
- */
-namespace jmespath {
+TEST_CASE("Search function")
+{
+    using namespace jmespath;
 
-using detail::Json;
-using detail::String;
-/**
- * @brief Finds or creates the results for the \a searchExpression
- * evaluated on the given \a document.
- *
- * The \a searchExpression string should be encoded in UTF-8.
- * @param searchExpression JMESPath search expression.
- * @param document Input JSON document
- * @return Result of the evaluation of the \a searchExpression in JSON format
- */
-Json search(const String& searchExpression,
-            const Json& document);
-} // namespace jmespath
-#endif // JMESPATH_H
+    SECTION("returns null if search expression is empty")
+    {
+        auto result = search("", {});
+
+        REQUIRE(result.is_null());
+    }
+
+    SECTION("evaluates expression")
+    {
+        String identifier{"identifier"};
+        String value{"value"};
+        Json document{{identifier, value}};
+        String expression = identifier;
+        Json expectedResult = value;
+        REQUIRE(document.is_object());
+        REQUIRE(expectedResult.is_string());
+
+        auto result = search(expression, document);
+
+        REQUIRE(result == expectedResult);
+    }
+}

@@ -25,30 +25,33 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef JMESPATH_H
-#define JMESPATH_H
-#include <string>
-#include "jmespath/detail/types.h"
-#include "json.hpp"
+#ifndef EXCEPTIONS_H
+#define EXCEPTIONS_H
+#include <stdexcept>
+#include <boost/exception/all.hpp>
+
+namespace jmespath { namespace detail {
+/**
+ * @brief InfoSearchExpression contains the JMESPath expression being evaluated
+ */
+using InfoSearchExpression
+    = boost::error_info<struct tag_search_expression, std::string>;
+/**
+ * @brief InfoSyntaxErrorLocation contains the location of the syntax error
+ * in the JMESPath expression
+ */
+using InfoSyntaxErrorLocation
+    = boost::error_info<struct tag_syntax_error_location, int>;
 
 /**
- * @brief The top level namespace which contains the public
- * functions of the library
+ * @brief The Exception struct is the common base class for
+ * for all the exceptions thrown by the library
  */
-namespace jmespath {
-
-using detail::Json;
-using detail::String;
+struct Exception : virtual boost::exception, virtual std::exception {};
 /**
- * @brief Finds or creates the results for the \a searchExpression
- * evaluated on the given \a document.
- *
- * The \a searchExpression string should be encoded in UTF-8.
- * @param searchExpression JMESPath search expression.
- * @param document Input JSON document
- * @return Result of the evaluation of the \a searchExpression in JSON format
+ * @brief The SyntaxError struct represents a syntax error in
+ * the evaluated expression
  */
-Json search(const String& searchExpression,
-            const Json& document);
-} // namespace jmespath
-#endif // JMESPATH_H
+struct SyntaxError : virtual Exception {};
+}} // namespace jmespath::detail
+#endif // EXCEPTIONS_H

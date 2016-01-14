@@ -25,30 +25,27 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef JMESPATH_H
-#define JMESPATH_H
-#include <string>
-#include "jmespath/detail/types.h"
-#include "json.hpp"
+#include "fakeit.hpp"
+#include "jmespath/ast/expressionnode.h"
+#include "jmespath/interpreter/abstractvisitor.h"
 
-/**
- * @brief The top level namespace which contains the public
- * functions of the library
- */
-namespace jmespath {
+TEST_CASE("ExpressionNode")
+{
+    using namespace jmespath::ast;
+    using namespace jmespath::interpreter;
+    using namespace fakeit;
 
-using detail::Json;
-using detail::String;
-/**
- * @brief Finds or creates the results for the \a searchExpression
- * evaluated on the given \a document.
- *
- * The \a searchExpression string should be encoded in UTF-8.
- * @param searchExpression JMESPath search expression.
- * @param document Input JSON document
- * @return Result of the evaluation of the \a searchExpression in JSON format
- */
-Json search(const String& searchExpression,
-            const Json& document);
-} // namespace jmespath
-#endif // JMESPATH_H
+    SECTION("calls visitor with the dynamic type of the node")
+    {
+        ExpressionNode node;
+        AbstractNode* abstractNode = &node;
+        Mock<AbstractVisitor> visitor;
+        When(OverloadedMethod(visitor, visit, void(ExpressionNode*)))
+                .AlwaysReturn();
+
+        abstractNode->accept(&visitor.get());
+
+        Verify(OverloadedMethod(visitor, visit, void(ExpressionNode*))).Once();
+        VerifyNoOtherInvocations(visitor);
+    }
+}

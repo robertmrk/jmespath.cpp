@@ -25,30 +25,38 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef JMESPATH_H
-#define JMESPATH_H
-#include <string>
-#include "jmespath/detail/types.h"
-#include "json.hpp"
+#ifndef ABSTRACTVISITOR_H
+#define ABSTRACTVISITOR_H
+
+namespace jmespath { namespace ast {
+
+class AbstractNode;
+class ExpressionNode;
+class IdentifierNode;
+}} // namespace jmespath::ast
 
 /**
- * @brief The top level namespace which contains the public
- * functions of the library
+ * @namespace jmespath::interpreter
+ * @brief Classes for interpreting the AST of the JMESPath expression.
  */
-namespace jmespath {
-
-using detail::Json;
-using detail::String;
+namespace jmespath { namespace interpreter {
 /**
- * @brief Finds or creates the results for the \a searchExpression
- * evaluated on the given \a document.
- *
- * The \a searchExpression string should be encoded in UTF-8.
- * @param searchExpression JMESPath search expression.
- * @param document Input JSON document
- * @return Result of the evaluation of the \a searchExpression in JSON format
+ * @brief The AbstractVisitor class is an interface which
+ * defines the member functions required to visit every
+ * type of AST node
  */
-Json search(const String& searchExpression,
-            const Json& document);
-} // namespace jmespath
-#endif // JMESPATH_H
+class AbstractVisitor
+{
+public:
+    /**
+     * @brief Visits the given @a node.
+     * @param node Pointer to the node
+     * @{
+     */
+    virtual void visit(ast::AbstractNode* node) = 0;
+    virtual void visit(ast::ExpressionNode* node) = 0;
+    virtual void visit(ast::IdentifierNode* node) = 0;
+    /** @}*/
+};
+}} // namespace jmespath::interpreter
+#endif // ABSTRACTVISITOR_H
