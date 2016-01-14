@@ -25,32 +25,4 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "fakeit.hpp"
-#include <jmespath/jmespath.h>
-
-TEST_CASE("Search function")
-{
-    using namespace jmespath;
-
-    SECTION("returns null if search expression is empty")
-    {
-        auto result = search("", {});
-
-        REQUIRE(result.is_null());
-    }
-
-    SECTION("evaluates expression")
-    {
-        String identifier{"identifier"};
-        String value{"value"};
-        Json document{{identifier, value}};
-        String expression = identifier;
-        Json expectedResult = value;
-        REQUIRE(document.is_object());
-        REQUIRE(expectedResult.is_string());
-
-        auto result = search(expression, document);
-
-        REQUIRE(result == expectedResult);
-    }
-}
+#include "abstractvisitor.h"

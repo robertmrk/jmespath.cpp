@@ -25,32 +25,29 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "fakeit.hpp"
-#include <jmespath/jmespath.h>
+#include "jmespath/ast/identifiernode.h"
+#include "jmespath/interpreter/abstractvisitor.h"
 
-TEST_CASE("Search function")
+namespace jmespath { namespace ast {
+
+IdentifierNode::IdentifierNode()
+    : ExpressionNode()
 {
-    using namespace jmespath;
-
-    SECTION("returns null if search expression is empty")
-    {
-        auto result = search("", {});
-
-        REQUIRE(result.is_null());
-    }
-
-    SECTION("evaluates expression")
-    {
-        String identifier{"identifier"};
-        String value{"value"};
-        Json document{{identifier, value}};
-        String expression = identifier;
-        Json expectedResult = value;
-        REQUIRE(document.is_object());
-        REQUIRE(expectedResult.is_string());
-
-        auto result = search(expression, document);
-
-        REQUIRE(result == expectedResult);
-    }
 }
+
+IdentifierNode::IdentifierNode(const detail::String &identifier)
+    : ExpressionNode(),
+      identifier(identifier)
+{
+}
+
+bool IdentifierNode::operator==(const IdentifierNode &other) const
+{
+    if (this != &other)
+    {
+        return identifier == other.identifier;
+    }
+    return true;
+}
+
+}} // namespace jmespath::ast

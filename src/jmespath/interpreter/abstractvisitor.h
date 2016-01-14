@@ -25,32 +25,38 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "fakeit.hpp"
-#include <jmespath/jmespath.h>
+#ifndef ABSTRACTVISITOR_H
+#define ABSTRACTVISITOR_H
 
-TEST_CASE("Search function")
+namespace jmespath { namespace ast {
+
+class AbstractNode;
+class ExpressionNode;
+class IdentifierNode;
+}} // namespace jmespath::ast
+
+/**
+ * @namespace jmespath::interpreter
+ * @brief Classes for interpreting the AST of the JMESPath expression.
+ */
+namespace jmespath { namespace interpreter {
+/**
+ * @brief The AbstractVisitor class is an interface which
+ * defines the member functions required to visit every
+ * type of AST node
+ */
+class AbstractVisitor
 {
-    using namespace jmespath;
-
-    SECTION("returns null if search expression is empty")
-    {
-        auto result = search("", {});
-
-        REQUIRE(result.is_null());
-    }
-
-    SECTION("evaluates expression")
-    {
-        String identifier{"identifier"};
-        String value{"value"};
-        Json document{{identifier, value}};
-        String expression = identifier;
-        Json expectedResult = value;
-        REQUIRE(document.is_object());
-        REQUIRE(expectedResult.is_string());
-
-        auto result = search(expression, document);
-
-        REQUIRE(result == expectedResult);
-    }
-}
+public:
+    /**
+     * @brief Visits the given @a node.
+     * @param node Pointer to the node
+     * @{
+     */
+    virtual void visit(ast::AbstractNode* node) = 0;
+    virtual void visit(ast::ExpressionNode* node) = 0;
+    virtual void visit(ast::IdentifierNode* node) = 0;
+    /** @}*/
+};
+}} // namespace jmespath::interpreter
+#endif // ABSTRACTVISITOR_H

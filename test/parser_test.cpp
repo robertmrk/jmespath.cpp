@@ -25,7 +25,7 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "catch.hpp"
+#include "fakeit.hpp"
 #include <boost/spirit/include/qi.hpp>
 #include <boost/phoenix.hpp>
 #include "jmespath/parser/parser.h"

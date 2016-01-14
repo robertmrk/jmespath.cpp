@@ -26,31 +26,26 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include <jmespath/jmespath.h>
+#include "jmespath/ast/expressionnode.h"
+#include "jmespath/interpreter/abstractvisitor.h"
 
-TEST_CASE("Search function")
+TEST_CASE("ExpressionNode")
 {
-    using namespace jmespath;
+    using namespace jmespath::ast;
+    using namespace jmespath::interpreter;
+    using namespace fakeit;
 
-    SECTION("returns null if search expression is empty")
+    SECTION("calls visitor with the dynamic type of the node")
     {
-        auto result = search("", {});
+        ExpressionNode node;
+        AbstractNode* abstractNode = &node;
+        Mock<AbstractVisitor> visitor;
+        When(OverloadedMethod(visitor, visit, void(ExpressionNode*)))
+                .AlwaysReturn();
 
-        REQUIRE(result.is_null());
-    }
+        abstractNode->accept(&visitor.get());
 
-    SECTION("evaluates expression")
-    {
-        String identifier{"identifier"};
-        String value{"value"};
-        Json document{{identifier, value}};
-        String expression = identifier;
-        Json expectedResult = value;
-        REQUIRE(document.is_object());
-        REQUIRE(expectedResult.is_string());
-
-        auto result = search(expression, document);
-
-        REQUIRE(result == expectedResult);
+        Verify(OverloadedMethod(visitor, visit, void(ExpressionNode*))).Once();
+        VerifyNoOtherInvocations(visitor);
     }
 }

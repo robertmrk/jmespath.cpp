@@ -1,3 +1,9 @@
 [submodule "third_party/json"]
 	path = third_party/json
 	url = https://github.com/nlohmann/json.git
+[submodule "third_party/FakeIt"]
+	path = third_party/FakeIt
+	url = https://github.com/eranpeer/FakeIt.git
+[submodule "test/jmespath.test"]
+	path = test/jmespath.test
+	url = https://github.com/jmespath/jmespath.test.git

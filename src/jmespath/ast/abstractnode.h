@@ -25,32 +25,35 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "fakeit.hpp"
-#include <jmespath/jmespath.h>
+#ifndef ABSTRACTNODE_H
+#define ABSTRACTNODE_H
 
-TEST_CASE("Search function")
+namespace jmespath { namespace interpreter {
+
+class AbstractVisitor;
+}}
+
+/**
+ * @namespace jmespath::ast
+ * @brief Classes which represent the AST nodes
+ */
+namespace jmespath { namespace ast {
+/**
+ * @brief The AbstractNode class is the common interface class
+ * for all AST node types
+ */
+class AbstractNode
 {
-    using namespace jmespath;
-
-    SECTION("returns null if search expression is empty")
-    {
-        auto result = search("", {});
-
-        REQUIRE(result.is_null());
-    }
-
-    SECTION("evaluates expression")
-    {
-        String identifier{"identifier"};
-        String value{"value"};
-        Json document{{identifier, value}};
-        String expression = identifier;
-        Json expectedResult = value;
-        REQUIRE(document.is_object());
-        REQUIRE(expectedResult.is_string());
-
-        auto result = search(expression, document);
-
-        REQUIRE(result == expectedResult);
-    }
-}
+public:
+    /**
+     * @brief Accepts the given \a visitor object.
+     *
+     * Subclasses should implement this function by calling the visit
+     * method of the \a visitor with a pointer to the node object itself
+     * and the accept method of the node's member nodes with the \a visitor as
+     * the parameter.
+     */
+    virtual void accept(interpreter::AbstractVisitor* visitor) = 0;
+};
+}} // namespace jmespath::ast
+#endif // ABSTRACTNODE_H

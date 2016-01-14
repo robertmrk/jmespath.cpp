@@ -25,7 +25,7 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "catch.hpp"
+#include "fakeit.hpp"
 #include "jmespath/parser/grammar.h"
 #include "jmespath/detail/types.h"
 #include <boost/spirit/include/qi.hpp>
@@ -54,6 +54,7 @@ TEST_CASE("Grammar")
 {
     using namespace jmespath::parser;
     namespace qi = boost::spirit::qi;
+    namespace ast = jmespath::ast;
 
     Grammar<UnicodeIteratorAdaptor> grammar;
 
@@ -62,40 +63,44 @@ TEST_CASE("Grammar")
         SECTION("unquoted string")
         {
             REQUIRE(parseExpression(grammar, "identifierName")
-                    == "identifierName");
+                    == ast::IdentifierNode{"identifierName"});
         }
 
         SECTION("quoted string")
         {
-            REQUIRE(parseExpression(grammar, "\"identifier with space\"")
-                    == "identifier with space");
+            REQUIRE(parseExpression(grammar,
+                                    "\"identifier with space\"")
+                    == ast::IdentifierNode{"identifier with space"});
         }
 
         SECTION("string with escaped characters")
         {
-            REQUIRE(parseExpression(grammar, "\"\\\\\\\"\\/\"") == "\\\"/");
+            REQUIRE(parseExpression(grammar, "\"\\\\\\\"\\/\"")
+                    == ast::IdentifierNode{"\\\"/"});
         }
 
         SECTION("string with escaped symbols")
         {
-            REQUIRE(parseExpression(grammar, "\"\\t\\n\\b\"") == "\t\n\b");
+            REQUIRE(parseExpression(grammar, "\"\\t\\n\\b\"")
+                    == ast::IdentifierNode{"\t\n\b"});
         }
 
         SECTION("string with unicode escapes")
         {
-            REQUIRE(parseExpression(grammar, "\"\\u20AC\"") == "\xE2\x82\xAC");
+            REQUIRE(parseExpression(grammar, "\"\\u20AC\"")
+                    == ast::IdentifierNode{"\xE2\x82\xAC"});
         }
 
         SECTION("string with encoded unicode characters")
         {
             REQUIRE(parseExpression(grammar, "\"\xE2\x82\xAC\"")
-                    == "\xE2\x82\xAC");
+                    == ast::IdentifierNode{"\xE2\x82\xAC"});
         }
 
         SECTION("string with surrogate pair unicode escapes")
         {
             REQUIRE(parseExpression(grammar, "\"\\uD834\\uDD1E\"")
-                    == u8"\U0001D11E");
+                    == ast::IdentifierNode{u8"\U0001D11E"});
         }
     }
 }

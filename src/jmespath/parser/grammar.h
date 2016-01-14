@@ -28,6 +28,7 @@
 #ifndef GRAMMAR_H
 #define GRAMMAR_H
 #include "jmespath/detail/types.h"
+#include "jmespath/ast/identifiernode.h"
 #include <boost/spirit/include/qi.hpp>
 #include <boost/phoenix.hpp>
 
@@ -50,7 +51,7 @@ using namespace detail;
  * @sa http://jmespath.org/specification.html#grammar
  */
 template <typename Iterator, typename Skipper = encoding::space_type>
-class Grammar : public qi::grammar<Iterator, String(), Skipper>
+class Grammar : public qi::grammar<Iterator, ast::IdentifierNode(), Skipper>
 {
 public:
     /**
@@ -149,7 +150,7 @@ public:
     }
 
 private:
-    qi::rule<Iterator, String(), Skipper>   m_identifierRule;
+    qi::rule<Iterator, ast::IdentifierNode(), Skipper>   m_identifierRule;
     qi::rule<Iterator, String()>            m_quotedStringRule;
     qi::rule<Iterator, String()>            m_unquotedStringRule;
     qi::rule<Iterator, UnicodeChar()>       m_unescapedCharRule;

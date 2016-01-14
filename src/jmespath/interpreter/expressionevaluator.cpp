@@ -25,32 +25,45 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "fakeit.hpp"
-#include <jmespath/jmespath.h>
+#include "jmespath/interpreter/expressionevaluator.h"
+#include "jmespath/ast/identifiernode.h"
 
-TEST_CASE("Search function")
+namespace jmespath { namespace interpreter {
+
+ExpressionEvaluator::ExpressionEvaluator()
+    : AbstractVisitor()
 {
-    using namespace jmespath;
-
-    SECTION("returns null if search expression is empty")
-    {
-        auto result = search("", {});
-
-        REQUIRE(result.is_null());
-    }
-
-    SECTION("evaluates expression")
-    {
-        String identifier{"identifier"};
-        String value{"value"};
-        Json document{{identifier, value}};
-        String expression = identifier;
-        Json expectedResult = value;
-        REQUIRE(document.is_object());
-        REQUIRE(expectedResult.is_string());
-
-        auto result = search(expression, document);
-
-        REQUIRE(result == expectedResult);
-    }
 }
+
+ExpressionEvaluator::ExpressionEvaluator(const Json &contextValue)
+    : AbstractVisitor()
+{
+    setContext(contextValue);
+}
+
+void ExpressionEvaluator::setContext(const Json &value)
+{
+    m_context = value;
+}
+
+Json ExpressionEvaluator::currentContext() const
+{
+    return m_context;
+}
+
+void ExpressionEvaluator::visit(ast::AbstractNode *node)
+{
+    node->accept(this);
+}
+
+void ExpressionEvaluator::visit(ast::ExpressionNode *node)
+{
+    node->accept(this);
+}
+
+void ExpressionEvaluator::visit(ast::IdentifierNode *node)
+{
+    m_context = m_context[node->identifier];
+}
+
+}} // namespace jmespath::interpreter

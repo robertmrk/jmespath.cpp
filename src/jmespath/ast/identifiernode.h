@@ -25,32 +25,41 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "fakeit.hpp"
-#include <jmespath/jmespath.h>
+#ifndef IDENTIFIERNODE_H
+#define IDENTIFIERNODE_H
+#include "jmespath/ast/expressionnode.h"
+#include "jmespath/detail/types.h"
+#include <boost/fusion/include/adapt_struct.hpp>
 
-TEST_CASE("Search function")
+namespace jmespath { namespace ast {
+
+using jmespath::detail::String;
+/**
+ * @brief The IdentifierNode class represents a JMESPath identifier
+ */
+class IdentifierNode : public ExpressionNode
 {
-    using namespace jmespath;
+public:
+    /**
+     * @brief Constructs an IdentifierNode object with an empty name.
+     */
+    IdentifierNode();
+    /**
+     * @brief Constructs an IdentifierNode object with the given @a identifier
+     * parameter as its name.
+     * @param identifier The identifier's name.
+     */
+    IdentifierNode(const String& identifier);
+    bool operator==(const IdentifierNode& other) const;
+    /**
+     * @brief Name of the identifier
+     */
+    String identifier;
+};
+}} // namespace jmespath::ast
 
-    SECTION("returns null if search expression is empty")
-    {
-        auto result = search("", {});
-
-        REQUIRE(result.is_null());
-    }
-
-    SECTION("evaluates expression")
-    {
-        String identifier{"identifier"};
-        String value{"value"};
-        Json document{{identifier, value}};
-        String expression = identifier;
-        Json expectedResult = value;
-        REQUIRE(document.is_object());
-        REQUIRE(expectedResult.is_string());
-
-        auto result = search(expression, document);
-
-        REQUIRE(result == expectedResult);
-    }
-}
+BOOST_FUSION_ADAPT_STRUCT(
+    jmespath::ast::IdentifierNode,
+    (jmespath::detail::String, identifier)
+)
+#endif // IDENTIFIERNODE_H
