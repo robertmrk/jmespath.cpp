@@ -1,0 +1,32 @@
+language: cpp
+
+sudo: false
+
+matrix:
+  include:
+    - os: osx
+      osx_image: xcode7.2 # clang 3.7
+      compiler: clang
+      env: COMPILER=clang
+    - os: osx
+      osx_image: xcode6.4 # clang 3.6
+      compiler: clang
+      env: COMPILER=clang
+    - os: osx
+      osx_image: beta-xcode6.2 # clang 3.5
+      compiler: clang
+      env: COMPILER=clang
+
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install cmake; fi
+
+before_script:  
+  - mkdir build
+  - cd build
+  - cmake ..
+
+script:
+  - make
+  - cd test
+  - ./unit
+  - ./compliance
