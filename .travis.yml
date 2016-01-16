@@ -24,6 +24,7 @@ matrix:
         - cmake .. -DCMAKE_BUILD_TYPE=Debug -DJMESPATH_COVERAGE_INFO=ON
         - make unit
         - ./test/unit
+        - cd ..
         - coveralls --exclude test --exclude third_party --include src --gcov-options '\-lp'
     - os: osx
       osx_image: xcode6.4 # clang 3.6
