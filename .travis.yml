@@ -9,7 +9,14 @@ matrix:
       compiler: clang
       env: COMPILER=clang
       before_install:
-        - pip install --user git+git://github.com/eddyxu/cpp-coveralls.git
+        - brew update
+        - brew install pyenv
+        - eval "$(pyenv init -)"
+        - pyenv install 2.7.6
+        - pyenv global 2.7.6
+        - pyenv rehash
+        - pip install cpp-coveralls
+        - pyenv rehash
       after_success:
         - cd ..
         - make clean
