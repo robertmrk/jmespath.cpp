@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.0)
 set(JMESPATH_UNITTEST_TARGET_NAME unit)
 set(JMESPATH_COMPLIANCETEST_TARGET_NAME compliance)
 set(JMESPATH_COPY_COMPLIANCETEST_FILES_TARGET_NAME copy_tests)
+set(JMESPATH_COVERAGE_INFO OFF CACHE BOOL "Generate code coverage information")
 
 add_executable(${JMESPATH_UNITTEST_TARGET_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/unit.cpp
@@ -12,6 +13,11 @@ add_executable(${JMESPATH_UNITTEST_TARGET_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/expressionnode_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/expressionevaluator_test.cpp)
 target_link_libraries(${JMESPATH_UNITTEST_TARGET_NAME} ${JMESPATH_TARGET_NAME})
+if (${JMESPATH_COVERAGE_INFO})
+    set_target_properties(${JMESPATH_UNITTEST_TARGET_NAME} PROPERTIES
+        COMPILE_FLAGS "--coverage"
+        LINK_FLAGS "--coverage")
+endif ()
 
 add_executable(${JMESPATH_COMPLIANCETEST_TARGET_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/compliance.cpp)
