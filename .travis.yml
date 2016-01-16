@@ -17,6 +17,7 @@ matrix:
         - pyenv rehash
         - pip install cpp-coveralls
         - pyenv rehash
+        - brew install cmake
       after_success:
         - cd ..
         - make clean
@@ -28,13 +29,14 @@ matrix:
       osx_image: xcode6.4 # clang 3.6
       compiler: clang
       env: COMPILER=clang
+      before_install: 
+        - brew install cmake
     - os: osx
       osx_image: beta-xcode6.2 # clang 3.5
       compiler: clang
       env: COMPILER=clang
-
-before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install cmake; fi
+      before_install: 
+        - brew install cmake
 
 before_script:  
   - mkdir build
