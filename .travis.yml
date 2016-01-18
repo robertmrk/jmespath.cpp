@@ -4,10 +4,38 @@ sudo: false
 
 matrix:
   include:
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources: ['george-edison55-precise-backports', 'ubuntu-toolchain-r-test']
+          packages: ['cmake', 'cmake-data', 'g++-4.9', 'gcc-4.9']
+      before_install:
+        - wget http://sourceforge.net/projects/boost/files/boost/1.57.0/boost_1_57_0.tar.bz2/download -O boost.tar.bz2
+        - tar -xjf boost.tar.bz2
+        - export BOOST_ROOT=$PWD/boost_1_57_0
+        - export CMAKE_CXX=g++-4.9
+        - export CMAKE_CC=gcc-4.9
+      env: COMPILER=g++-4.9
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources: ['george-edison55-precise-backports', 'ubuntu-toolchain-r-test']
+          packages: ['cmake', 'cmake-data', 'g++-5', 'gcc-5']
+      before_install:
+        - wget http://sourceforge.net/projects/boost/files/boost/1.57.0/boost_1_57_0.tar.bz2/download -O boost.tar.bz2
+        - tar -xjf boost.tar.bz2
+        - export BOOST_ROOT=$PWD/boost_1_57_0
+        - export CMAKE_CXX=g++-5
+        - export CMAKE_CC=gcc-5
+      env: COMPILER=g++-5
     - os: osx
       osx_image: xcode7.2 # clang 3.7
       compiler: clang
-      env: COMPILER=clang
+      env: COMPILER=clang++
+      env: CMAKE_CXX=clang++
+      env: CMAKE_CC=clang
       before_install:
         - brew update
         - brew install pyenv
@@ -19,7 +47,6 @@ matrix:
         - pyenv rehash
         - brew install cmake
       after_success:
-        - cd ..
         - make clean
         - cmake .. -DCMAKE_BUILD_TYPE=Debug -DJMESPATH_COVERAGE_INFO=ON
         - make unit
@@ -29,23 +56,28 @@ matrix:
     - os: osx
       osx_image: xcode6.4 # clang 3.6
       compiler: clang
-      env: COMPILER=clang
+      env: COMPILER=clang++
+      env: CMAKE_CXX=clang++
+      env: CMAKE_CC=clang
       before_install: 
         - brew install cmake
     - os: osx
       osx_image: beta-xcode6.2 # clang 3.5
       compiler: clang
-      env: COMPILER=clang
+      env: COMPILER=clang++
+      env: CMAKE_CXX=clang++
+      env: CMAKE_CC=clang
       before_install: 
         - brew install cmake
 
 before_script:  
   - mkdir build
   - cd build
-  - cmake ..
+  - cmake -DCMAKE_C_COMPILER=$CMAKE_CC -DCMAKE_CXX_COMPILER=$CMAKE_CXX ..
 
 script:
   - make
   - cd test
   - ./unit
   - ./compliance
+  - cd ..

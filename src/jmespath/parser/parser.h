@@ -71,9 +71,9 @@ public:
         {
             // create begin and end iterators to the expression
             // retain the value of the begin iterator
-            IteratorType beginIt(std::cbegin(expression));
+            IteratorType beginIt(expression.cbegin());
             IteratorType it = beginIt;
-            IteratorType endIt(std::cend(expression));
+            IteratorType endIt(expression.cend());
 
             ResultType result;
             // parse JMESPath expression and create the result

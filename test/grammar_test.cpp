@@ -41,8 +41,8 @@ parseExpression(const GrammarT& grammar, const String& expression)
     namespace encoding = qi::standard_wide;
 
     typename GrammarT::start_type::attr_type result;
-    UnicodeIteratorAdaptor it(std::cbegin(expression));
-    UnicodeIteratorAdaptor endIt(std::cend(expression));
+    UnicodeIteratorAdaptor it(expression.cbegin());
+    UnicodeIteratorAdaptor endIt(expression.cend());
 
     qi::phrase_parse(it, endIt,
                      grammar, encoding::space,
