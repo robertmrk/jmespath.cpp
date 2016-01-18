@@ -3,7 +3,7 @@ project(jmespath.cpp)
 
 set(JMESPATH_PROJECT_NAME jmespath.cpp)
 set(JMESPATH_TARGET_NAME jmespath)
-set(CMAKE_CXX_FLAGS "-std=c++14")
+set(CMAKE_CXX_FLAGS "-std=c++1y")
 
 find_package(Boost 1.57 REQUIRED)
 
