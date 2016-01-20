@@ -3,7 +3,16 @@ project(jmespath.cpp)
 
 set(JMESPATH_PROJECT_NAME jmespath.cpp)
 set(JMESPATH_TARGET_NAME jmespath)
-set(CMAKE_CXX_FLAGS "-std=c++1y")
+if ((${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+        OR (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+        OR (${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang"))
+    #std=c++1y - use c++14 language standard
+    set(CMAKE_CXX_FLAGS "-std=c++1y")
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
+    #wd4348 - ingore warning C4348 (A template parameter was redefined.)
+    #EHsc - set synchronous exception handling
+    set(CMAKE_CXX_FLAGS "/EHsc /wd4348")
+endif()
 
 find_package(Boost 1.57 REQUIRED)
 
