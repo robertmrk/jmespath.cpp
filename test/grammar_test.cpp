@@ -38,7 +38,7 @@ typename GrammarT::start_type::attr_type
 parseExpression(const GrammarT& grammar, const String& expression)
 {
     namespace qi = boost::spirit::qi;
-    namespace encoding = qi::standard_wide;
+    namespace encoding = qi::unicode;
 
     typename GrammarT::start_type::attr_type result;
     UnicodeIteratorAdaptor it(expression.cbegin());
@@ -93,8 +93,8 @@ TEST_CASE("Grammar")
 
         SECTION("string with encoded unicode characters")
         {
-            REQUIRE(parseExpression(grammar, "\"\xE2\x82\xAC\"")
-                    == ast::IdentifierNode{"\xE2\x82\xAC"});
+            REQUIRE(parseExpression(grammar, u8"\"\U00103C02\"")
+                    == ast::IdentifierNode{u8"\U00103C02"});
         }
 
         SECTION("string with surrogate pair unicode escapes")

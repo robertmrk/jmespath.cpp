@@ -34,7 +34,7 @@
 namespace jmespath { namespace parser {
 
 namespace qi = boost::spirit::qi;
-namespace encoding = qi::standard_wide;
+namespace encoding = qi::unicode;
 using namespace detail;
 
 /**
