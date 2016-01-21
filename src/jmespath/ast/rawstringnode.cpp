@@ -25,41 +25,27 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "fakeit.hpp"
-#include "jmespath/ast/expressionnode.h"
-#include "jmespath/ast/identifiernode.h"
 #include "jmespath/ast/rawstringnode.h"
-#include "jmespath/interpreter/abstractvisitor.h"
 
-TEST_CASE("ExpressionNode")
+namespace jmespath { namespace ast {
+
+RawStringNode::RawStringNode()
+    : Node()
 {
-    using namespace jmespath::ast;
-    using namespace jmespath::interpreter;
-    using namespace fakeit;
-
-    SECTION("can be constructed")
-    {
-        SECTION("without parameters")
-        {
-            REQUIRE_NOTHROW(ExpressionNode{});
-        }
-
-        SECTION("with identifier")
-        {
-            IdentifierNode identifier;
-
-            ExpressionNode expression{identifier};
-
-            REQUIRE(expression.expression == identifier);
-        }
-
-        SECTION("with raw string")
-        {
-            RawStringNode rawString;
-
-            ExpressionNode expression{rawString};
-
-            REQUIRE(expression.expression == rawString);
-        }
-    }
 }
+
+RawStringNode::RawStringNode(const detail::String &string)
+    : Node(),
+      rawString(string)
+{
+}
+
+bool RawStringNode::operator==(const RawStringNode &other) const
+{
+    if (this != &other)
+    {
+        return rawString == other.rawString;
+    }
+    return true;
+}
+}} // namespace jmespath::ast

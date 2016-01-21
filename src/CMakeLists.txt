@@ -14,10 +14,18 @@ list(APPEND JMESPATH_SOURCE_FILES
     ${JMESPATH_PARSER_SOURCE_DIR}/parser.h
     ${JMESPATH_AST_SOURCE_DIR}/abstractnode.h
     ${JMESPATH_AST_SOURCE_DIR}/abstractnode.cpp
+    ${JMESPATH_AST_SOURCE_DIR}/node.h
+    ${JMESPATH_AST_SOURCE_DIR}/node.cpp
+    ${JMESPATH_AST_SOURCE_DIR}/variantnode.h
+    ${JMESPATH_AST_SOURCE_DIR}/variantnode.cpp
     ${JMESPATH_AST_SOURCE_DIR}/expressionnode.h
     ${JMESPATH_AST_SOURCE_DIR}/expressionnode.cpp
     ${JMESPATH_AST_SOURCE_DIR}/identifiernode.h
     ${JMESPATH_AST_SOURCE_DIR}/identifiernode.cpp
+    ${JMESPATH_AST_SOURCE_DIR}/rawstringnode.h
+    ${JMESPATH_AST_SOURCE_DIR}/rawstringnode.cpp
+    ${JMESPATH_AST_SOURCE_DIR}/variantvisitoradaptor.h
+    ${JMESPATH_AST_SOURCE_DIR}/variantvisitoradaptor.cpp
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/abstractvisitor.h
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/abstractvisitor.cpp
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/expressionevaluator.h

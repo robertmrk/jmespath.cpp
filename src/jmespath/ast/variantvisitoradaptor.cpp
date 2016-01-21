@@ -25,41 +25,18 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "fakeit.hpp"
-#include "jmespath/ast/expressionnode.h"
-#include "jmespath/ast/identifiernode.h"
-#include "jmespath/ast/rawstringnode.h"
-#include "jmespath/interpreter/abstractvisitor.h"
+#include "jmespath/ast/variantvisitoradaptor.h"
+#include "jmespath/detail/exceptions.h"
 
-TEST_CASE("ExpressionNode")
+namespace jmespath{ namespace ast {
+
+VariantVisitorAdaptor::VariantVisitorAdaptor(interpreter::AbstractVisitor *visitor)
+    : boost::static_visitor<>(),
+      m_visitor(visitor)
 {
-    using namespace jmespath::ast;
-    using namespace jmespath::interpreter;
-    using namespace fakeit;
-
-    SECTION("can be constructed")
+    if (!m_visitor)
     {
-        SECTION("without parameters")
-        {
-            REQUIRE_NOTHROW(ExpressionNode{});
-        }
-
-        SECTION("with identifier")
-        {
-            IdentifierNode identifier;
-
-            ExpressionNode expression{identifier};
-
-            REQUIRE(expression.expression == identifier);
-        }
-
-        SECTION("with raw string")
-        {
-            RawStringNode rawString;
-
-            ExpressionNode expression{rawString};
-
-            REQUIRE(expression.expression == rawString);
-        }
+        BOOST_THROW_EXCEPTION(detail::InvalidAgrument());
     }
 }
+}} // namespace jmespath::ast

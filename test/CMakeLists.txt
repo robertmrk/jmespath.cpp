@@ -10,8 +10,13 @@ add_executable(${JMESPATH_UNITTEST_TARGET_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/grammar_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/search_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/parser_test.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/node_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/expressionnode_test.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/expressionevaluator_test.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/identifiernode_test.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rawstringnode_test.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/variantnode_test.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/expressionevaluator_test.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/variantvisitoradaptor_test.cpp)
 target_link_libraries(${JMESPATH_UNITTEST_TARGET_NAME} ${JMESPATH_TARGET_NAME})
 set_target_properties(${JMESPATH_UNITTEST_TARGET_NAME} PROPERTIES
     COMPILE_DEFINITIONS "BOOST_SPIRIT_UNICODE=1")

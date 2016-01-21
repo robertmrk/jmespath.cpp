@@ -27,7 +27,7 @@
 ****************************************************************************/
 #ifndef IDENTIFIERNODE_H
 #define IDENTIFIERNODE_H
-#include "jmespath/ast/expressionnode.h"
+#include "jmespath/ast/node.h"
 #include "jmespath/detail/types.h"
 #include <boost/fusion/include/adapt_struct.hpp>
 
@@ -37,7 +37,7 @@ using jmespath::detail::String;
 /**
  * @brief The IdentifierNode class represents a JMESPath identifier
  */
-class IdentifierNode : public ExpressionNode
+class IdentifierNode : public Node
 {
 public:
     /**
@@ -50,6 +50,12 @@ public:
      * @param identifier The identifier's name.
      */
     IdentifierNode(const String& identifier);
+    /**
+     * @brief Equality compares this node to the \a other
+     * @param other The node that should be compared.
+     * @return Returns true if this object is equal to the \a other, otherwise
+     * false
+     */
     bool operator==(const IdentifierNode& other) const;
     /**
      * @brief Name of the identifier

@@ -27,6 +27,8 @@
 ****************************************************************************/
 #include "jmespath/interpreter/expressionevaluator.h"
 #include "jmespath/ast/identifiernode.h"
+#include "jmespath/ast/rawstringnode.h"
+#include "jmespath/ast/expressionnode.h"
 
 namespace jmespath { namespace interpreter {
 
@@ -56,6 +58,11 @@ void ExpressionEvaluator::visit(ast::AbstractNode *node)
     node->accept(this);
 }
 
+void ExpressionEvaluator::visit(ast::Node *node)
+{
+    node->accept(this);
+}
+
 void ExpressionEvaluator::visit(ast::ExpressionNode *node)
 {
     node->accept(this);
@@ -64,6 +71,11 @@ void ExpressionEvaluator::visit(ast::ExpressionNode *node)
 void ExpressionEvaluator::visit(ast::IdentifierNode *node)
 {
     m_context = m_context[node->identifier];
+}
+
+void ExpressionEvaluator::visit(ast::RawStringNode *node)
+{
+    m_context = node->rawString;
 }
 
 }} // namespace jmespath::interpreter

@@ -25,41 +25,25 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "fakeit.hpp"
-#include "jmespath/ast/expressionnode.h"
-#include "jmespath/ast/identifiernode.h"
-#include "jmespath/ast/rawstringnode.h"
-#include "jmespath/interpreter/abstractvisitor.h"
+#ifndef NODE_H
+#define NODE_H
+#include "jmespath/ast/abstractnode.h"
 
-TEST_CASE("ExpressionNode")
+namespace jmespath { namespace ast {
+
+/**
+ * @brief The Node class is the common base class for all node types which
+ * provides default implementations for the methods declared in AbstractNode.
+ */
+class Node : public AbstractNode
 {
-    using namespace jmespath::ast;
-    using namespace jmespath::interpreter;
-    using namespace fakeit;
-
-    SECTION("can be constructed")
-    {
-        SECTION("without parameters")
-        {
-            REQUIRE_NOTHROW(ExpressionNode{});
-        }
-
-        SECTION("with identifier")
-        {
-            IdentifierNode identifier;
-
-            ExpressionNode expression{identifier};
-
-            REQUIRE(expression.expression == identifier);
-        }
-
-        SECTION("with raw string")
-        {
-            RawStringNode rawString;
-
-            ExpressionNode expression{rawString};
-
-            REQUIRE(expression.expression == rawString);
-        }
-    }
-}
+public:
+    /**
+     * @brief Calls the visit method of the given \a visitor with the
+     * dynamic type of the node.
+     * @param visitor A visitor implementation
+     */
+    void accept(interpreter::AbstractVisitor* visitor) override;
+};
+}} // namespace jmespath::ast
+#endif // NODE_H

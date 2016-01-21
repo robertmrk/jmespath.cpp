@@ -25,41 +25,47 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "fakeit.hpp"
-#include "jmespath/ast/expressionnode.h"
-#include "jmespath/ast/identifiernode.h"
-#include "jmespath/ast/rawstringnode.h"
-#include "jmespath/interpreter/abstractvisitor.h"
+#ifndef RAWSTRINGNODE_H
+#define RAWSTRINGNODE_H
+#include "jmespath/ast/node.h"
+#include "jmespath/detail/types.h"
+#include <boost/fusion/include/adapt_struct.hpp>
 
-TEST_CASE("ExpressionNode")
+namespace jmespath { namespace ast {
+
+using jmespath::detail::String;
+/**
+ * @brief The RawStringNode class represents raw string literals.
+ */
+class RawStringNode : public Node
 {
-    using namespace jmespath::ast;
-    using namespace jmespath::interpreter;
-    using namespace fakeit;
+public:
+    /**
+     * @brief Constructs an empty RawStringNode object.
+     */
+    RawStringNode();
+    /**
+     * @brief Constructs a RawStringNode object with its value initialized to
+     * \a string
+     * @param string The raw string value.
+     */
+    RawStringNode(const String& string);
+    /**
+     * @brief Equality compares this node to the \a other
+     * @param other The node that should be compared.
+     * @return Returns true if this object is equal to the \a other, otherwise
+     * false
+     */
+    bool operator==(const RawStringNode& other) const;
+    /**
+     * @brief The raw string value
+     */
+    String rawString;
+};
+}} // namespace jmespath::ast
 
-    SECTION("can be constructed")
-    {
-        SECTION("without parameters")
-        {
-            REQUIRE_NOTHROW(ExpressionNode{});
-        }
-
-        SECTION("with identifier")
-        {
-            IdentifierNode identifier;
-
-            ExpressionNode expression{identifier};
-
-            REQUIRE(expression.expression == identifier);
-        }
-
-        SECTION("with raw string")
-        {
-            RawStringNode rawString;
-
-            ExpressionNode expression{rawString};
-
-            REQUIRE(expression.expression == rawString);
-        }
-    }
-}
+BOOST_FUSION_ADAPT_STRUCT(
+    jmespath::ast::RawStringNode,
+    (jmespath::detail::String, rawString)
+)
+#endif // RAWSTRINGNODE_H

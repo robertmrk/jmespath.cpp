@@ -25,41 +25,51 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "fakeit.hpp"
-#include "jmespath/ast/expressionnode.h"
-#include "jmespath/ast/identifiernode.h"
-#include "jmespath/ast/rawstringnode.h"
+#ifndef VARIANTVISITOR_H
+#define VARIANTVISITOR_H
 #include "jmespath/interpreter/abstractvisitor.h"
+#include <boost/variant.hpp>
 
-TEST_CASE("ExpressionNode")
+namespace jmespath{ namespace ast {
+
+/**
+ * @brief The VariantVisitorAdaptor class adapts an AbstractVisitor
+ * implementation to the boost::static_visitor interface, so it can be used
+ * to visit boost::variant objects.
+ */
+class VariantVisitorAdaptor : public boost::static_visitor<>
 {
-    using namespace jmespath::ast;
-    using namespace jmespath::interpreter;
-    using namespace fakeit;
-
-    SECTION("can be constructed")
+public:
+    /**
+     * @brief Constructs a VariantVisitorAdaptor object with the given
+     * \a visitor
+     * @param visitor The visitor object to which the visit calls will be
+     * forwarded.
+     */
+    VariantVisitorAdaptor(interpreter::AbstractVisitor* visitor);
+    /**
+     * @brief Calls the appropriate visit method of the visitor object with the
+     * address of the \a variant object.
+     * @param variant The object that the visitor should visit.
+     */
+    template <typename T>
+    void operator() (T& variant) const
     {
-        SECTION("without parameters")
-        {
-            REQUIRE_NOTHROW(ExpressionNode{});
-        }
-
-        SECTION("with identifier")
-        {
-            IdentifierNode identifier;
-
-            ExpressionNode expression{identifier};
-
-            REQUIRE(expression.expression == identifier);
-        }
-
-        SECTION("with raw string")
-        {
-            RawStringNode rawString;
-
-            ExpressionNode expression{rawString};
-
-            REQUIRE(expression.expression == rawString);
-        }
+        m_visitor->visit(&variant);
     }
-}
+    /**
+     * @brief Does nothing, defined to ignore empty variants and to avoid
+     * calling the visitor object with a blank value.
+     */
+    void operator() (boost::blank&) const
+    {
+    }
+
+private:
+    /**
+     * @brief The visitor object to which the visit calls will be forwarded.
+     */
+    interpreter::AbstractVisitor* m_visitor;
+};
+}} // namespace jmespath::ast
+#endif // VARIANTVISITOR_H

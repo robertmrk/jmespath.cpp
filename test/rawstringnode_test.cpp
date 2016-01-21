@@ -26,40 +26,32 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/ast/expressionnode.h"
-#include "jmespath/ast/identifiernode.h"
 #include "jmespath/ast/rawstringnode.h"
-#include "jmespath/interpreter/abstractvisitor.h"
 
-TEST_CASE("ExpressionNode")
+TEST_CASE("RawStringNode")
 {
     using namespace jmespath::ast;
-    using namespace jmespath::interpreter;
     using namespace fakeit;
 
-    SECTION("can be constructed")
+    SECTION("can be default constructed")
     {
-        SECTION("without parameters")
-        {
-            REQUIRE_NOTHROW(ExpressionNode{});
-        }
+        REQUIRE_NOTHROW(RawStringNode{});
+    }
 
-        SECTION("with identifier")
-        {
-            IdentifierNode identifier;
+    SECTION("can be constructed with string value")
+    {
+        String value{"name"};
+        RawStringNode node{value};
 
-            ExpressionNode expression{identifier};
+        REQUIRE(node.rawString == value);
+    }
 
-            REQUIRE(expression.expression == identifier);
-        }
+    SECTION("can be compared for equality")
+    {
+        String value{"name"};
+        RawStringNode node1{value};
+        RawStringNode node2{value};
 
-        SECTION("with raw string")
-        {
-            RawStringNode rawString;
-
-            ExpressionNode expression{rawString};
-
-            REQUIRE(expression.expression == rawString);
-        }
+        REQUIRE(node1 == node2);
     }
 }

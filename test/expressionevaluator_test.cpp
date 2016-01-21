@@ -28,11 +28,15 @@
 #include "fakeit.hpp"
 #include "jmespath/interpreter/expressionevaluator.h"
 #include "jmespath/ast/identifiernode.h"
+#include "jmespath/ast/expressionnode.h"
+#include "jmespath/ast/node.h"
+#include "jmespath/ast/rawstringnode.h"
 
 TEST_CASE("ExpressionEvaluator")
 {
     using jmespath::interpreter::ExpressionEvaluator;
     using jmespath::detail::Json;
+    using jmespath::detail::String;
     namespace ast = jmespath::ast;
     using namespace fakeit;
 
@@ -50,6 +54,16 @@ TEST_CASE("ExpressionEvaluator")
     SECTION("accepts abstract node")
     {
         Mock<ast::AbstractNode> node;
+        When(Method(node, accept).Using(&evaluator)).AlwaysReturn();
+
+        evaluator.visit(&node.get());
+
+        Verify(Method(node, accept)).Once();
+    }
+
+    SECTION("accepts node")
+    {
+        Mock<ast::Node> node;
         When(Method(node, accept).Using(&evaluator)).AlwaysReturn();
 
         evaluator.visit(&node.get());
@@ -87,5 +101,17 @@ TEST_CASE("ExpressionEvaluator")
         evaluator.visit(&node);
 
         REQUIRE(evaluator.currentContext() == Json{});
+    }
+
+    SECTION("evaluates raw string")
+    {
+        String rawString{"[baz]"};
+        ast::RawStringNode node{rawString};
+        Json expectedValue = rawString;
+        REQUIRE(expectedValue.is_string());
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == expectedValue);
     }
 }

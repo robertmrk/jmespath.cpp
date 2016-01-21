@@ -31,8 +31,10 @@
 namespace jmespath { namespace ast {
 
 class AbstractNode;
+class Node;
 class ExpressionNode;
 class IdentifierNode;
+class RawStringNode;
 }} // namespace jmespath::ast
 
 /**
@@ -54,8 +56,10 @@ public:
      * @{
      */
     virtual void visit(ast::AbstractNode* node) = 0;
+    virtual void visit(ast::Node* node) = 0;
     virtual void visit(ast::ExpressionNode* node) = 0;
     virtual void visit(ast::IdentifierNode* node) = 0;
+    virtual void visit(ast::RawStringNode* node) = 0;
     /** @}*/
 };
 }} // namespace jmespath::interpreter
