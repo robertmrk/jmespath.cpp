@@ -53,5 +53,10 @@ struct Exception : virtual boost::exception, virtual std::exception {};
  * the evaluated expression
  */
 struct SyntaxError : virtual Exception {};
+/**
+ * @brief The InvalidAgrument struct signals a function call with illegal
+ * arguments
+ */
+struct InvalidAgrument : virtual Exception {};
 }} // namespace jmespath::detail
 #endif // EXCEPTIONS_H

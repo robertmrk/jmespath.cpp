@@ -26,17 +26,16 @@
 **
 ****************************************************************************/
 #include "jmespath/ast/identifiernode.h"
-#include "jmespath/interpreter/abstractvisitor.h"
 
 namespace jmespath { namespace ast {
 
 IdentifierNode::IdentifierNode()
-    : ExpressionNode()
+    : Node()
 {
 }
 
 IdentifierNode::IdentifierNode(const detail::String &identifier)
-    : ExpressionNode(),
+    : Node(),
       identifier(identifier)
 {
 }
@@ -49,5 +48,4 @@ bool IdentifierNode::operator==(const IdentifierNode &other) const
     }
     return true;
 }
-
 }} // namespace jmespath::ast

@@ -27,21 +27,51 @@
 ****************************************************************************/
 #ifndef EXPRESSIONNODE_H
 #define EXPRESSIONNODE_H
-#include "jmespath/ast/abstractnode.h"
+#include "jmespath/ast/node.h"
+#include "jmespath/ast/variantnode.h"
+#include <boost/variant.hpp>
+#include <boost/fusion/include/adapt_struct.hpp>
 
 namespace jmespath { namespace ast {
+
+class IdentifierNode;
+class RawStringNode;
 /**
  * @brief The ExpressionNode class represents a JMESPath expression.
  */
-class ExpressionNode : public AbstractNode
+class ExpressionNode : public Node
 {
 public:
+    using Expression = VariantNode<boost::recursive_wrapper<IdentifierNode>,
+        boost::recursive_wrapper<RawStringNode> >;
+
     /**
-     * @brief Calls the visit method of the given \a visitor with the
-     * dynamic type of the node.
-     * @param visitor A visitor implementation
+     * @brief Constructs an empy ExpressionNode object
      */
+    ExpressionNode();
+    /**
+     * @brief Constructs an ExpressionNode object with its child expression
+     * initialized to \a expression
+     * @param expression The node's child expression
+     */
+    ExpressionNode(const Expression& expression);
+    /**
+     * @brief Equality compares this node to the \a other
+     * @param other The node that should be compared.
+     * @return Returns true if this object is equal to the \a other, otherwise
+     * false
+     */
+    bool operator==(const ExpressionNode& other) const;
     void accept(interpreter::AbstractVisitor* visitor) override;
+    /**
+     * @brief The node's child expression
+     */
+    Expression expression;
 };
 }} // namespace jmespath::ast
+
+BOOST_FUSION_ADAPT_STRUCT(
+    jmespath::ast::ExpressionNode,
+    (jmespath::ast::ExpressionNode::Expression, expression)
+)
 #endif // EXPRESSIONNODE_H

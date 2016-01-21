@@ -26,40 +26,26 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/ast/expressionnode.h"
-#include "jmespath/ast/identifiernode.h"
-#include "jmespath/ast/rawstringnode.h"
+#include "jmespath/ast/node.h"
 #include "jmespath/interpreter/abstractvisitor.h"
 
-TEST_CASE("ExpressionNode")
+TEST_CASE("Node")
 {
     using namespace jmespath::ast;
     using namespace jmespath::interpreter;
     using namespace fakeit;
 
-    SECTION("can be constructed")
+    SECTION("calls visitor with the dynamic type of the node")
     {
-        SECTION("without parameters")
-        {
-            REQUIRE_NOTHROW(ExpressionNode{});
-        }
+        Node node;
+        AbstractNode* abstractNode = &node;
+        Mock<AbstractVisitor> visitor;
+        When(OverloadedMethod(visitor, visit, void(Node*)))
+                .AlwaysReturn();
 
-        SECTION("with identifier")
-        {
-            IdentifierNode identifier;
+        abstractNode->accept(&visitor.get());
 
-            ExpressionNode expression{identifier};
-
-            REQUIRE(expression.expression == identifier);
-        }
-
-        SECTION("with raw string")
-        {
-            RawStringNode rawString;
-
-            ExpressionNode expression{rawString};
-
-            REQUIRE(expression.expression == rawString);
-        }
+        Verify(OverloadedMethod(visitor, visit, void(Node*))).Once();
+        VerifyNoOtherInvocations(visitor);
     }
 }

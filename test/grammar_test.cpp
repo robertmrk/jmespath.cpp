@@ -62,45 +62,51 @@ TEST_CASE("Grammar")
     {
         SECTION("unquoted string")
         {
-            REQUIRE(parseExpression(grammar, "identifierName")
+            REQUIRE(parseExpression(grammar, "identifierName").expression
                     == ast::IdentifierNode{"identifierName"});
         }
 
         SECTION("quoted string")
         {
             REQUIRE(parseExpression(grammar,
-                                    "\"identifier with space\"")
+                                    "\"identifier with space\"").expression
                     == ast::IdentifierNode{"identifier with space"});
         }
 
         SECTION("string with escaped characters")
         {
-            REQUIRE(parseExpression(grammar, "\"\\\\\\\"\\/\"")
+            REQUIRE(parseExpression(grammar, "\"\\\\\\\"\\/\"").expression
                     == ast::IdentifierNode{"\\\"/"});
         }
 
         SECTION("string with escaped symbols")
         {
-            REQUIRE(parseExpression(grammar, "\"\\t\\n\\b\"")
+            REQUIRE(parseExpression(grammar, "\"\\t\\n\\b\"").expression
                     == ast::IdentifierNode{"\t\n\b"});
         }
 
         SECTION("string with unicode escapes")
         {
-            REQUIRE(parseExpression(grammar, "\"\\u20AC\"")
+            REQUIRE(parseExpression(grammar, "\"\\u20AC\"").expression
                     == ast::IdentifierNode{"\xE2\x82\xAC"});
         }
 
         SECTION("string with encoded unicode characters")
         {
-            REQUIRE(parseExpression(grammar, u8"\"\U00103C02\"")
+            REQUIRE(parseExpression(grammar, u8"\"\U00103C02\"").expression
                     == ast::IdentifierNode{u8"\U00103C02"});
         }
 
         SECTION("string with surrogate pair unicode escapes")
         {
-            REQUIRE(parseExpression(grammar, "\"\\uD834\\uDD1E\"")
+            REQUIRE(parseExpression(grammar, "\"\\uD834\\uDD1E\"").expression
                     == ast::IdentifierNode{u8"\U0001D11E"});
+        }
+
+        SECTION("raw string")
+        {
+            REQUIRE(parseExpression(grammar, "'[ba\\'z]'").expression
+                    == ast::RawStringNode{"[ba'z]"});
         }
     }
 }

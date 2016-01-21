@@ -28,7 +28,9 @@
 #ifndef GRAMMAR_H
 #define GRAMMAR_H
 #include "jmespath/detail/types.h"
+#include "jmespath/ast/expressionnode.h"
 #include "jmespath/ast/identifiernode.h"
+#include "jmespath/ast/rawstringnode.h"
 #include <boost/spirit/include/qi.hpp>
 #include <boost/phoenix.hpp>
 
@@ -51,13 +53,13 @@ using namespace detail;
  * @sa http://jmespath.org/specification.html#grammar
  */
 template <typename Iterator, typename Skipper = encoding::space_type>
-class Grammar : public qi::grammar<Iterator, ast::IdentifierNode(), Skipper>
+class Grammar : public qi::grammar<Iterator, ast::ExpressionNode(), Skipper>
 {
 public:
     /**
      * @brief Constructs a Grammar object
      */
-    Grammar() : Grammar::base_type(m_identifierRule)
+    Grammar() : Grammar::base_type(m_expressionRule)
     {
         using encoding::char_;
         using qi::lit;
@@ -67,6 +69,28 @@ public:
         using qi::_1;
         using qi::_2;
         using qi::_pass;
+        using phx::at_c;
+
+        // match an identifier or a raw string literal
+        m_expressionRule = m_identifierRule | m_rawStringRule;
+
+        // match zero or more raw string characters enclosed in apostrophes
+        m_rawStringRule = lexeme[ lit("\'")
+                >> *m_rawStringCharRule[phx::bind(&Grammar::appendUtf8,
+                                                  this,
+                                                  at_c<0>(_val),
+                                                  _1)]
+                >> lit("\'") ];
+
+        // match a single character in the range of 0x20-0x26 or 0x28-0x5B or
+        // 0x5D-0x10FFFF or an escaped apostrophe
+        m_rawStringCharRule = (char_(U'\x20', U'\x26')
+                               | char_(U'\x28', U'\x5B')
+                               | char_(U'\x5D', U'\U0010FFFF'))
+                | m_rawStringEscapeRule;
+
+        // match escaped apostrophes
+        m_rawStringEscapeRule = m_escapeRule >> char_(U'\'');
 
         // match unquoted or quoted strings
         m_identifierRule = m_unquotedStringRule | m_quotedStringRule;
@@ -150,7 +174,11 @@ public:
     }
 
 private:
-    qi::rule<Iterator, ast::IdentifierNode(), Skipper>   m_identifierRule;
+    qi::rule<Iterator, ast::ExpressionNode(), Skipper> m_expressionRule;
+    qi::rule<Iterator, ast::IdentifierNode(), Skipper> m_identifierRule;
+    qi::rule<Iterator, ast::RawStringNode(), Skipper> m_rawStringRule;
+    qi::rule<Iterator, UnicodeChar()>       m_rawStringCharRule;
+    qi::rule<Iterator, UnicodeChar()>       m_rawStringEscapeRule;
     qi::rule<Iterator, String()>            m_quotedStringRule;
     qi::rule<Iterator, String()>            m_unquotedStringRule;
     qi::rule<Iterator, UnicodeChar()>       m_unescapedCharRule;

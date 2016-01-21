@@ -26,40 +26,54 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/ast/expressionnode.h"
+#include "jmespath/ast/variantvisitoradaptor.h"
+#include "jmespath/detail/exceptions.h"
 #include "jmespath/ast/identifiernode.h"
-#include "jmespath/ast/rawstringnode.h"
-#include "jmespath/interpreter/abstractvisitor.h"
 
-TEST_CASE("ExpressionNode")
+TEST_CASE("VariantVisitorAdaptor")
 {
     using namespace jmespath::ast;
     using namespace jmespath::interpreter;
+    using namespace jmespath::detail;
     using namespace fakeit;
 
-    SECTION("can be constructed")
+    SECTION("can be constructed with visitor")
     {
-        SECTION("without parameters")
-        {
-            REQUIRE_NOTHROW(ExpressionNode{});
-        }
+        Mock<AbstractVisitor> visitor;
 
-        SECTION("with identifier")
-        {
-            IdentifierNode identifier;
+        REQUIRE_NOTHROW(VariantVisitorAdaptor(&visitor.get()));
+    }
 
-            ExpressionNode expression{identifier};
+    SECTION("can't be constructed with nullptr")
+    {
+        REQUIRE_THROWS_AS(VariantVisitorAdaptor(nullptr), InvalidAgrument);
+    }
 
-            REQUIRE(expression.expression == identifier);
-        }
+    SECTION("calls visit method of visitor with node in variant")
+    {
+        boost::variant<boost::blank,
+                boost::recursive_wrapper<IdentifierNode> > variant;
+        variant = IdentifierNode{};
+        Mock<AbstractVisitor> visitor;
+        When(OverloadedMethod(visitor, visit, void(IdentifierNode*)))
+                .AlwaysReturn();
 
-        SECTION("with raw string")
-        {
-            RawStringNode rawString;
+        boost::apply_visitor(VariantVisitorAdaptor(&visitor.get()), variant);
 
-            ExpressionNode expression{rawString};
+        Verify(OverloadedMethod(visitor, visit, void(IdentifierNode*))).Once();
+        VerifyNoOtherInvocations(visitor);
+    }
 
-            REQUIRE(expression.expression == rawString);
-        }
+    SECTION("ignores empty variants")
+    {
+        boost::variant<boost::blank,
+                boost::recursive_wrapper<IdentifierNode> > variant;
+        Mock<AbstractVisitor> visitor;
+        When(OverloadedMethod(visitor, visit, void(IdentifierNode*)))
+                .AlwaysReturn();
+
+        boost::apply_visitor(VariantVisitorAdaptor(&visitor.get()), variant);
+
+        VerifyNoOtherInvocations(visitor);
     }
 }
