@@ -77,6 +77,7 @@ TEST_CASE("VariantNode")
         node2 = node1;
 
         REQUIRE(node1 == node2);
+        REQUIRE(node1 == node1);
     }
 
     SECTION("is null when default constructed")
