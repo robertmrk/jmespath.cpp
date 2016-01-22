@@ -118,13 +118,20 @@ TEST_CASE("ExpressionEvaluator")
 
     SECTION("evaluates literal")
     {
-        String literal{"foo"};
-        ast::LiteralNode node{"`\"" + literal + "\"`"};
-        Json expectedValue = literal;
-        REQUIRE(expectedValue.is_string());
+        String stringLiteralValue{"foo"};
+        ast::LiteralNode stringNode{"\"" + stringLiteralValue + "\""};
+        ast::LiteralNode arrayNode{"[1, 2, 3]"};
+        Json expectedStringValue = stringLiteralValue;
+        Json expectedArrayValue{1, 2, 3};
+        REQUIRE(expectedStringValue.is_string());
+        REQUIRE(expectedArrayValue.is_array());
 
-        evaluator.visit(&node);
+        evaluator.visit(&stringNode);
+        auto stringResult = evaluator.currentContext();
+        evaluator.visit(&arrayNode);
+        auto arrayResult = evaluator.currentContext();
 
-        REQUIRE(evaluator.currentContext() == expectedValue);
+        REQUIRE(stringResult == expectedStringValue);
+        REQUIRE(arrayResult == expectedArrayValue);
     }
 }
