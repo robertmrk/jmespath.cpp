@@ -70,6 +70,7 @@ public:
     void visit(ast::IdentifierNode *node) override;
     void visit(ast::RawStringNode *node) override;
     void visit(ast::LiteralNode* node) override;
+    void visit(ast::SubexpressionNode* node) override;
 
 private:
     /**

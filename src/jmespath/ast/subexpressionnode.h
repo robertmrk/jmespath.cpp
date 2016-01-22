@@ -25,55 +25,49 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef EXPRESSIONNODE_H
-#define EXPRESSIONNODE_H
+#ifndef SUBEXPRESSIONNODE_H
+#define SUBEXPRESSIONNODE_H
 #include "jmespath/ast/node.h"
-#include "jmespath/ast/variantnode.h"
-#include "jmespath/ast/identifiernode.h"
-#include "jmespath/ast/rawstringnode.h"
-#include "jmespath/ast/literalnode.h"
-#include <boost/variant.hpp>
-#include <boost/fusion/include/adapt_struct.hpp>
+#include "jmespath/ast/expressionnode.h"
 
 namespace jmespath { namespace ast {
 
 /**
- * @brief The ExpressionNode class represents a JMESPath expression.
+ * @brief The SubexpressionNode class represents a JMESPath subexpression.
  */
-class ExpressionNode : public Node
+class SubexpressionNode : public Node
 {
 public:
-    using Expression = VariantNode<boost::recursive_wrapper<IdentifierNode>,
-        boost::recursive_wrapper<RawStringNode>,
-        boost::recursive_wrapper<LiteralNode> >;
-
+    using Subexpression
+        = VariantNode<boost::recursive_wrapper<IdentifierNode> >;
     /**
-     * @brief Constructs an empy ExpressionNode object
+     * @brief Constructs and empty SubexpressionNode object.
      */
-    ExpressionNode();
+    SubexpressionNode();
     /**
-     * @brief Constructs an ExpressionNode object with its child expression
-     * initialized to \a expression
-     * @param expression The node's child expression
+     * @brief Constructs an SubexpressionNode object with the given left hand
+     * side @a expression and a right hand side @a subexpression.
+     * @param expression The node's left hand side child expression
+     * @param subexpression The node's right hand side child expression
      */
-    ExpressionNode(const Expression& expression);
+    SubexpressionNode(const ExpressionNode& expression,
+                      const Subexpression& subexpression = boost::blank{});
     /**
      * @brief Equality compares this node to the \a other
      * @param other The node that should be compared.
      * @return Returns true if this object is equal to the \a other, otherwise
      * false
      */
-    bool operator==(const ExpressionNode& other) const;
+    bool operator==(const SubexpressionNode& other) const;
     void accept(interpreter::AbstractVisitor* visitor) override;
     /**
-     * @brief The node's child expression
+     * @brief The node's left hand side child expression
      */
-    Expression expression;
+    ExpressionNode expression;
+    /**
+     * @brief The node's right hand side child expression
+     */
+    Subexpression subexpression;
 };
 }} // namespace jmespath::ast
-
-BOOST_FUSION_ADAPT_STRUCT(
-    jmespath::ast::ExpressionNode,
-    (jmespath::ast::ExpressionNode::Expression, expression)
-)
-#endif // EXPRESSIONNODE_H
+#endif // SUBEXPRESSIONNODE_H

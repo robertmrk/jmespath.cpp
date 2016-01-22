@@ -25,67 +25,36 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "jmespath/interpreter/expressionevaluator.h"
-#include "jmespath/ast/identifiernode.h"
-#include "jmespath/ast/rawstringnode.h"
-#include "jmespath/ast/expressionnode.h"
-#include "jmespath/ast/literalnode.h"
 #include "jmespath/ast/subexpressionnode.h"
 
-namespace jmespath { namespace interpreter {
+namespace jmespath { namespace ast {
 
-ExpressionEvaluator::ExpressionEvaluator()
-    : AbstractVisitor()
+SubexpressionNode::SubexpressionNode()
+    : Node()
 {
 }
 
-ExpressionEvaluator::ExpressionEvaluator(const Json &contextValue)
-    : AbstractVisitor()
+SubexpressionNode::SubexpressionNode(const ExpressionNode &expression,
+                                     const Subexpression &subexpression)
+    : Node(),
+      expression(expression),
+      subexpression(subexpression)
 {
-    setContext(contextValue);
 }
 
-void ExpressionEvaluator::setContext(const Json &value)
+bool SubexpressionNode::operator==(const SubexpressionNode &other) const
 {
-    m_context = value;
+    if (this != &other)
+    {
+        return (expression == other.expression)
+                && (subexpression == other.subexpression);
+    }
+    return true;
 }
 
-Json ExpressionEvaluator::currentContext() const
+void SubexpressionNode::accept(interpreter::AbstractVisitor *visitor)
 {
-    return m_context;
+    expression.accept(visitor);
+    subexpression.accept(visitor);
 }
-
-void ExpressionEvaluator::visit(ast::AbstractNode *node)
-{
-    node->accept(this);
-}
-
-void ExpressionEvaluator::visit(ast::Node *node)
-{
-    node->accept(this);
-}
-
-void ExpressionEvaluator::visit(ast::ExpressionNode *node)
-{
-    node->accept(this);
-}
-
-void ExpressionEvaluator::visit(ast::IdentifierNode *node)
-{
-    m_context = m_context[node->identifier];
-}
-
-void ExpressionEvaluator::visit(ast::RawStringNode *node)
-{
-    m_context = node->rawString;
-}
-
-void ExpressionEvaluator::visit(ast::LiteralNode *node)
-{
-    m_context = Json::parse(node->literal);
-}
-
-void ExpressionEvaluator::visit(ast::SubexpressionNode *node)
-{
-}
-}} // namespace jmespath::interpreter
+}} // namespace jmespath::ast

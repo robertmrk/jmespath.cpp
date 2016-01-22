@@ -25,67 +25,49 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "jmespath/interpreter/expressionevaluator.h"
-#include "jmespath/ast/identifiernode.h"
-#include "jmespath/ast/rawstringnode.h"
-#include "jmespath/ast/expressionnode.h"
-#include "jmespath/ast/literalnode.h"
+#include "fakeit.hpp"
 #include "jmespath/ast/subexpressionnode.h"
+#include "jmespath/ast/identifiernode.h"
+#include "jmespath/ast/expressionnode.h"
 
-namespace jmespath { namespace interpreter {
-
-ExpressionEvaluator::ExpressionEvaluator()
-    : AbstractVisitor()
+TEST_CASE("SubexpressionNode")
 {
-}
+    using namespace jmespath::ast;
+    using namespace jmespath::interpreter;
+    using namespace fakeit;
 
-ExpressionEvaluator::ExpressionEvaluator(const Json &contextValue)
-    : AbstractVisitor()
-{
-    setContext(contextValue);
-}
+    SECTION("can be default constructed")
+    {
+        REQUIRE_NOTHROW(SubexpressionNode{});
+    }
 
-void ExpressionEvaluator::setContext(const Json &value)
-{
-    m_context = value;
-}
+    SECTION("can be constructed with expression")
+    {
+        ExpressionNode expression{};
+        SubexpressionNode node{expression};
 
-Json ExpressionEvaluator::currentContext() const
-{
-    return m_context;
-}
+        REQUIRE(node.expression == expression);
+    }
 
-void ExpressionEvaluator::visit(ast::AbstractNode *node)
-{
-    node->accept(this);
-}
+    SECTION("can be constructed with expression and identifier")
+    {
+        ExpressionNode expression{};
+        IdentifierNode identifier{};
+        SubexpressionNode node{expression, identifier};
 
-void ExpressionEvaluator::visit(ast::Node *node)
-{
-    node->accept(this);
-}
+        REQUIRE(node.expression == expression);
+        REQUIRE(node.subexpression == identifier);
+    }
 
-void ExpressionEvaluator::visit(ast::ExpressionNode *node)
-{
-    node->accept(this);
-}
+    SECTION("can be compared for equality")
+    {
+        ExpressionNode expression{};
+        IdentifierNode identifier{"value"};
+        expression.expression = identifier;
+        SubexpressionNode node1{expression, identifier};
+        SubexpressionNode node2{expression, identifier};
 
-void ExpressionEvaluator::visit(ast::IdentifierNode *node)
-{
-    m_context = m_context[node->identifier];
+        REQUIRE(node1 == node2);
+        REQUIRE(node1 == node1);
+    }
 }
-
-void ExpressionEvaluator::visit(ast::RawStringNode *node)
-{
-    m_context = node->rawString;
-}
-
-void ExpressionEvaluator::visit(ast::LiteralNode *node)
-{
-    m_context = Json::parse(node->literal);
-}
-
-void ExpressionEvaluator::visit(ast::SubexpressionNode *node)
-{
-}
-}} // namespace jmespath::interpreter
