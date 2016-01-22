@@ -29,6 +29,7 @@
 #include "jmespath/ast/identifiernode.h"
 #include "jmespath/ast/rawstringnode.h"
 #include "jmespath/ast/expressionnode.h"
+#include "jmespath/ast/literalnode.h"
 
 namespace jmespath { namespace interpreter {
 
@@ -78,4 +79,8 @@ void ExpressionEvaluator::visit(ast::RawStringNode *node)
     m_context = node->rawString;
 }
 
+void ExpressionEvaluator::visit(ast::LiteralNode *node)
+{
+    m_context = Json::parse(node->literal);
+}
 }} // namespace jmespath::interpreter

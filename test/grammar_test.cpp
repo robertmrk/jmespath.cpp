@@ -108,5 +108,13 @@ TEST_CASE("Grammar")
             REQUIRE(parseExpression(grammar, "'[ba\\'z]'").expression
                     == ast::RawStringNode{"[ba'z]"});
         }
+
+        SECTION("literals")
+        {
+            REQUIRE(parseExpression(grammar, "`\"foo\\`bar\"`").expression
+                    == ast::LiteralNode{"\"foo`bar\""});
+            REQUIRE(parseExpression(grammar, "`[1, 2]`").expression
+                    == ast::LiteralNode{"[1, 2]"});
+        }
     }
 }

@@ -25,35 +25,35 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "jmespath/ast/expressionnode.h"
-#include "jmespath/ast/identifiernode.h"
-#include "jmespath/ast/rawstringnode.h"
+#include "fakeit.hpp"
 #include "jmespath/ast/literalnode.h"
 
-namespace jmespath { namespace ast {
-
-ExpressionNode::ExpressionNode()
-    : Node()
+TEST_CASE("LiteralNode")
 {
-}
+    using namespace jmespath::ast;
+    using namespace fakeit;
 
-ExpressionNode::ExpressionNode(const ExpressionNode::Expression &expression)
-    : Node(),
-      expression(expression)
-{
-}
-
-bool ExpressionNode::operator==(const ExpressionNode &other) const
-{
-    if (this != &other)
+    SECTION("can be default constructed")
     {
-        return expression == other.expression;
+        REQUIRE_NOTHROW(LiteralNode{});
     }
-    return true;
-}
 
-void ExpressionNode::accept(interpreter::AbstractVisitor *visitor)
-{
-    expression.accept(visitor);
+    SECTION("can be constructed with string value")
+    {
+        String value{"value"};
+
+        LiteralNode node{value};
+
+        REQUIRE(node.literal == value);
+    }
+
+    SECTION("can be compared for equality")
+    {
+        String value{"value"};
+        LiteralNode node1{value};
+        LiteralNode node2{value};
+
+        REQUIRE(node1 == node2);
+        REQUIRE(node1 == node1);
+    }
 }
-}} // namespace jmespath::ast

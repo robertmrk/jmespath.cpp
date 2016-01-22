@@ -31,6 +31,7 @@
 #include "jmespath/ast/expressionnode.h"
 #include "jmespath/ast/node.h"
 #include "jmespath/ast/rawstringnode.h"
+#include "jmespath/ast/literalnode.h"
 
 TEST_CASE("ExpressionEvaluator")
 {
@@ -113,5 +114,24 @@ TEST_CASE("ExpressionEvaluator")
         evaluator.visit(&node);
 
         REQUIRE(evaluator.currentContext() == expectedValue);
+    }
+
+    SECTION("evaluates literal")
+    {
+        String stringLiteralValue{"foo"};
+        ast::LiteralNode stringNode{"\"" + stringLiteralValue + "\""};
+        ast::LiteralNode arrayNode{"[1, 2, 3]"};
+        Json expectedStringValue = stringLiteralValue;
+        Json expectedArrayValue{1, 2, 3};
+        REQUIRE(expectedStringValue.is_string());
+        REQUIRE(expectedArrayValue.is_array());
+
+        evaluator.visit(&stringNode);
+        auto stringResult = evaluator.currentContext();
+        evaluator.visit(&arrayNode);
+        auto arrayResult = evaluator.currentContext();
+
+        REQUIRE(stringResult == expectedStringValue);
+        REQUIRE(arrayResult == expectedArrayValue);
     }
 }

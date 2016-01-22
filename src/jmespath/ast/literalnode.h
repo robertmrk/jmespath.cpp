@@ -25,35 +25,46 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "jmespath/ast/expressionnode.h"
-#include "jmespath/ast/identifiernode.h"
-#include "jmespath/ast/rawstringnode.h"
-#include "jmespath/ast/literalnode.h"
+#ifndef LITERALNODE_H
+#define LITERALNODE_H
+#include "jmespath/ast/node.h"
+#include "jmespath/detail/types.h"
+#include <boost/fusion/include/adapt_struct.hpp>
 
 namespace jmespath { namespace ast {
 
-ExpressionNode::ExpressionNode()
-    : Node()
+using jmespath::detail::String;
+/**
+ * @brief The LiteralNode class represents a JMESPath literal string
+ */
+class LiteralNode : public Node
 {
-}
-
-ExpressionNode::ExpressionNode(const ExpressionNode::Expression &expression)
-    : Node(),
-      expression(expression)
-{
-}
-
-bool ExpressionNode::operator==(const ExpressionNode &other) const
-{
-    if (this != &other)
-    {
-        return expression == other.expression;
-    }
-    return true;
-}
-
-void ExpressionNode::accept(interpreter::AbstractVisitor *visitor)
-{
-    expression.accept(visitor);
-}
+public:
+    /**
+     * @brief Constructs a LiteralNode object with empty value.
+     */
+    LiteralNode();
+    /**
+     * @brief Constructs a LiteralNode object with the given @a value.
+     * @param value The value of the literal string.
+     */
+    LiteralNode(const String& value);
+    /**
+     * @brief Equality compares this node to the \a other
+     * @param other The node that should be compared.
+     * @return Returns true if this object is equal to the \a other, otherwise
+     * false
+     */
+    bool operator==(const LiteralNode& other) const;
+    /**
+     * @brief literal The value of the literal
+     */
+    String literal;
+};
 }} // namespace jmespath::ast
+
+BOOST_FUSION_ADAPT_STRUCT(
+    jmespath::ast::LiteralNode,
+    (jmespath::detail::String, literal)
+)
+#endif // LITERALNODE_H
