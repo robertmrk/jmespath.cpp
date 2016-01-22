@@ -72,4 +72,16 @@ TEST_CASE("ExpressionNode")
             REQUIRE(expression.expression == literal);
         }
     }
+
+    SECTION("accepts visitor")
+    {
+        ExpressionNode node{IdentifierNode{}};
+        Mock<AbstractVisitor> visitor;
+        When(OverloadedMethod(visitor, visit, void(IdentifierNode*)))
+                .AlwaysReturn();
+
+        node.accept(&visitor.get());
+
+        Verify(OverloadedMethod(visitor, visit, void(IdentifierNode*))).Once();
+    }
 }

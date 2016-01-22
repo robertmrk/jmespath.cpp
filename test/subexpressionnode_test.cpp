@@ -70,4 +70,19 @@ TEST_CASE("SubexpressionNode")
         REQUIRE(node1 == node2);
         REQUIRE(node1 == node1);
     }
+
+    SECTION("accepts visitor")
+    {
+        ExpressionNode expression{IdentifierNode{}};
+        IdentifierNode identifier;
+        SubexpressionNode node{expression, identifier};
+        Mock<AbstractVisitor> visitor;
+        When(OverloadedMethod(visitor, visit, void(IdentifierNode*)))
+                .AlwaysReturn();
+
+        node.accept(&visitor.get());
+
+        Verify(OverloadedMethod(visitor, visit, void(IdentifierNode*)))
+                .Exactly(2);
+    }
 }
