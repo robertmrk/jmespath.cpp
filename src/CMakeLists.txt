@@ -26,6 +26,8 @@ list(APPEND JMESPATH_SOURCE_FILES
     ${JMESPATH_AST_SOURCE_DIR}/rawstringnode.cpp
     ${JMESPATH_AST_SOURCE_DIR}/variantvisitoradaptor.h
     ${JMESPATH_AST_SOURCE_DIR}/variantvisitoradaptor.cpp
+    ${JMESPATH_AST_SOURCE_DIR}/literalnode.h
+    ${JMESPATH_AST_SOURCE_DIR}/literalnode.cpp
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/abstractvisitor.h
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/abstractvisitor.cpp
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/expressionevaluator.h

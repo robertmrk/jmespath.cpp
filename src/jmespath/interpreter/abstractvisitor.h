@@ -35,6 +35,7 @@ class Node;
 class ExpressionNode;
 class IdentifierNode;
 class RawStringNode;
+class LiteralNode;
 }} // namespace jmespath::ast
 
 /**
@@ -60,6 +61,7 @@ public:
     virtual void visit(ast::ExpressionNode* node) = 0;
     virtual void visit(ast::IdentifierNode* node) = 0;
     virtual void visit(ast::RawStringNode* node) = 0;
+    virtual void visit(ast::LiteralNode* node) = 0;
     /** @}*/
 };
 }} // namespace jmespath::interpreter

@@ -31,6 +31,7 @@
 #include "jmespath/ast/expressionnode.h"
 #include "jmespath/ast/identifiernode.h"
 #include "jmespath/ast/rawstringnode.h"
+#include "jmespath/ast/literalnode.h"
 #include <boost/spirit/include/qi.hpp>
 #include <boost/phoenix.hpp>
 
@@ -72,8 +73,26 @@ public:
         using phx::at_c;
 
         // match an identifier or a raw string literal
-        m_expressionRule = m_identifierRule | m_rawStringRule;
-
+        m_expressionRule = m_identifierRule | m_literalRule | m_rawStringRule;
+        // match zero or more literal characters enclosed in grave accents
+        m_literalRule = lexeme[ lit('\x60')
+                >> *m_literalCharRule[phx::bind(&Grammar::appendUtf8,
+                                                this,
+                                                at_c<0>(_val),
+                                                _1)]
+                >> lit('\x60') ];
+        // match a character in the range of 0x00-0x5B or 0x5D-0x5F or
+        // 0x61-0x10FFFF or a literal escape
+        m_literalCharRule = char_(U'\x00', U'\x5B')
+                | char_(U'\x5D', U'\x5F')
+                | char_(U'\x61', U'\U0010FFFF')
+                | m_literalEscapeRule;
+        // match a grave accent preceded by an escape or match a backslash if
+        // it's not followed by a grave accent
+        m_literalEscapeRule = (m_escapeRule
+                                >> char_(U'\x60'))
+                               | (char_(U'\\')
+                                  >> & (!lit('`')));
         // match zero or more raw string characters enclosed in apostrophes
         m_rawStringRule = lexeme[ lit("\'")
                 >> *m_rawStringCharRule[phx::bind(&Grammar::appendUtf8,
@@ -177,6 +196,9 @@ private:
     qi::rule<Iterator, ast::ExpressionNode(), Skipper> m_expressionRule;
     qi::rule<Iterator, ast::IdentifierNode(), Skipper> m_identifierRule;
     qi::rule<Iterator, ast::RawStringNode(), Skipper> m_rawStringRule;
+    qi::rule<Iterator, ast::LiteralNode(), Skipper> m_literalRule;
+    qi::rule<Iterator, UnicodeChar()>       m_literalCharRule;
+    qi::rule<Iterator, UnicodeChar()>       m_literalEscapeRule;
     qi::rule<Iterator, UnicodeChar()>       m_rawStringCharRule;
     qi::rule<Iterator, UnicodeChar()>       m_rawStringEscapeRule;
     qi::rule<Iterator, String()>            m_quotedStringRule;

@@ -78,4 +78,8 @@ void ExpressionEvaluator::visit(ast::RawStringNode *node)
     m_context = node->rawString;
 }
 
+void ExpressionEvaluator::visit(ast::LiteralNode *node)
+{
+
+}
 }} // namespace jmespath::interpreter

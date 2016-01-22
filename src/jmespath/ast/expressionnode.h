@@ -36,6 +36,7 @@ namespace jmespath { namespace ast {
 
 class IdentifierNode;
 class RawStringNode;
+class LiteralNode;
 /**
  * @brief The ExpressionNode class represents a JMESPath expression.
  */
@@ -43,7 +44,8 @@ class ExpressionNode : public Node
 {
 public:
     using Expression = VariantNode<boost::recursive_wrapper<IdentifierNode>,
-        boost::recursive_wrapper<RawStringNode> >;
+        boost::recursive_wrapper<RawStringNode>,
+        boost::recursive_wrapper<LiteralNode> >;
 
     /**
      * @brief Constructs an empy ExpressionNode object

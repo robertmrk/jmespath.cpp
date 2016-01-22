@@ -31,6 +31,7 @@
 #include "jmespath/ast/expressionnode.h"
 #include "jmespath/ast/node.h"
 #include "jmespath/ast/rawstringnode.h"
+#include "jmespath/ast/literalnode.h"
 
 TEST_CASE("ExpressionEvaluator")
 {
@@ -108,6 +109,18 @@ TEST_CASE("ExpressionEvaluator")
         String rawString{"[baz]"};
         ast::RawStringNode node{rawString};
         Json expectedValue = rawString;
+        REQUIRE(expectedValue.is_string());
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == expectedValue);
+    }
+
+    SECTION("evaluates literal")
+    {
+        String literal{"foo"};
+        ast::LiteralNode node{"`\"" + literal + "\"`"};
+        Json expectedValue = literal;
         REQUIRE(expectedValue.is_string());
 
         evaluator.visit(&node);

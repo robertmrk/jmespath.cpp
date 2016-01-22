@@ -29,6 +29,7 @@
 #include "jmespath/ast/expressionnode.h"
 #include "jmespath/ast/identifiernode.h"
 #include "jmespath/ast/rawstringnode.h"
+#include "jmespath/ast/literalnode.h"
 #include "jmespath/interpreter/abstractvisitor.h"
 
 TEST_CASE("ExpressionNode")
@@ -60,6 +61,15 @@ TEST_CASE("ExpressionNode")
             ExpressionNode expression{rawString};
 
             REQUIRE(expression.expression == rawString);
+        }
+
+        SECTION("with literal")
+        {
+            LiteralNode literal;
+
+            ExpressionNode expression{literal};
+
+            REQUIRE(expression.expression == literal);
         }
     }
 }
