@@ -42,6 +42,19 @@
  */
 namespace jmespath { namespace parser {
 
+struct RotateNodeLeftAction
+{
+    template <typename T1, typename T2, typename T3>
+    void operator()(T1& node,
+                    T2& rightChild,
+                    const T3& rightGrancChild) const
+    {
+        rightChild.expression = node;
+        rightChild.subexpression = rightGrancChild;
+        node = T1{rightChild};
+    }
+};
+
 namespace qi = boost::spirit::qi;
 namespace encoding = qi::unicode;
 namespace phx = boost::phoenix;
@@ -74,6 +87,8 @@ public:
         using qi::_r1;
         using phx::at_c;
 
+        phx::function<RotateNodeLeftAction> rotateNodeLeft;
+
         // match an identifier a literal or a raw string (assign it to the first
         // item in the tuple), optionally followed by a subexpression (pass the
         // value as an inherited argument and assign the result to the first
@@ -81,11 +96,13 @@ public:
         m_expressionRule = (m_identifierRule
                             | m_literalRule
                             | m_rawStringRule)[at_c<0>(_val) = _1]
-                >> -m_subexpressionRule(phx::ref(_val))[at_c<0>(_val) = _1];
+                >> -m_subexpressionRule(_val);
         // match an identifier preceded by a dot (rotate the subexpression node
-        // left)
-        m_subexpressionRule = lit('.') >> m_identifierRule
-                [phx::bind(&Grammar::rotateNodeLeft, this, _val, _r1, _1)];
+        // left), a subexpression can also be optionally followed by another
+        // subexpression
+        m_subexpressionRule = (lit('.')
+                >> m_identifierRule[rotateNodeLeft(_r1, _val, _1)])
+                >> -m_subexpressionRule(_r1);
         // match zero or more literal characters enclosed in grave accents
         m_literalRule = lexeme[ lit('\x60')
                 >> *m_literalCharRule[phx::bind(&Grammar::appendUtf8,
@@ -253,22 +270,6 @@ private:
         unicodeChar += (highSurrogate & 0x03FF) << 10;
         unicodeChar += (lowSurrogate & 0x03FF);
         return unicodeChar;
-    }
-    /**
-     * @brief Perform a left rotation operation on @a node.
-     *
-     * Make @a parentNode the left child and assign @a rightHandChild as the
-     * right child of @a node.
-     * @param node Node that will be the root of the subtree after rotation.
-     * @param parentNode The current parent of @a node.
-     * @param rightHandChild Right hand child of @a node.
-     */
-    void rotateNodeLeft(ast::SubexpressionNode& node,
-                        ast::ExpressionNode& parentNode,
-                        ast::IdentifierNode& rightHandChild)
-    {
-        node.expression = parentNode;
-        node.subexpression = rightHandChild;
     }
 };
 }} // namespace jmespath::parser

@@ -127,5 +127,20 @@ TEST_CASE("Grammar")
             REQUIRE(parseExpression(grammar, "\"id1\".\"id2\"").expression
                     == expectedResult);
         }
+
+        SECTION("recursive subexpression")
+        {
+            auto expectedResult = ast::SubexpressionNode{
+                ast::ExpressionNode{
+                    ast::SubexpressionNode{
+                        ast::ExpressionNode{
+                            ast::IdentifierNode{"id1"}},
+                        ast::IdentifierNode{"id2"}}},
+                ast::IdentifierNode{"id3"}};
+            String expression{"\"id1\".\"id2\".\"id3\""};
+
+            REQUIRE(parseExpression(grammar, expression).expression
+                    == expectedResult);
+        }
     }
 }
