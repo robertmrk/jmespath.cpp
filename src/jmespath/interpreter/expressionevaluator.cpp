@@ -30,6 +30,7 @@
 #include "jmespath/ast/rawstringnode.h"
 #include "jmespath/ast/expressionnode.h"
 #include "jmespath/ast/literalnode.h"
+#include "jmespath/ast/subexpressionnode.h"
 
 namespace jmespath { namespace interpreter {
 
@@ -71,7 +72,12 @@ void ExpressionEvaluator::visit(ast::ExpressionNode *node)
 
 void ExpressionEvaluator::visit(ast::IdentifierNode *node)
 {
-    m_context = m_context[node->identifier];
+    Json result;
+    if (m_context.is_object())
+    {
+        result = m_context[node->identifier];
+    }
+    m_context = result;
 }
 
 void ExpressionEvaluator::visit(ast::RawStringNode *node)
@@ -82,5 +88,10 @@ void ExpressionEvaluator::visit(ast::RawStringNode *node)
 void ExpressionEvaluator::visit(ast::LiteralNode *node)
 {
     m_context = Json::parse(node->literal);
+}
+
+void ExpressionEvaluator::visit(ast::SubexpressionNode *node)
+{
+    node->accept(this);
 }
 }} // namespace jmespath::interpreter

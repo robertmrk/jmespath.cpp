@@ -25,36 +25,35 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
+#include "fakeit.hpp"
+#include "jmespath/parser/rotatenodeleftaction.h"
 #include "jmespath/ast/expressionnode.h"
+#include "jmespath/ast/subexpressionnode.h"
 #include "jmespath/ast/identifiernode.h"
 #include "jmespath/ast/rawstringnode.h"
 #include "jmespath/ast/literalnode.h"
-#include "jmespath/ast/subexpressionnode.h"
 
-namespace jmespath { namespace ast {
-
-ExpressionNode::ExpressionNode()
-    : Node()
+TEST_CASE("RotateNodeLeftAction")
 {
-}
+    using namespace jmespath::parser;
+    using namespace jmespath::ast;
+    using namespace fakeit;
 
-ExpressionNode::ExpressionNode(const ExpressionNode::Expression &expression)
-    : Node(),
-      expression(expression)
-{
-}
+    RotateNodeLeftAction action;
 
-bool ExpressionNode::operator==(const ExpressionNode &other) const
-{
-    if (this != &other)
+    SECTION("rotates subtree left")
     {
-        return expression == other.expression;
-    }
-    return true;
-}
+        ExpressionNode node{IdentifierNode{"id1"}};
+        SubexpressionNode rightChildNode;
+        IdentifierNode rightGrandChildNode{"id2"};
+        ExpressionNode expectedResult{
+            SubexpressionNode{
+                ExpressionNode{
+                    IdentifierNode{"id1"}},
+                IdentifierNode{"id2"}}};
 
-void ExpressionNode::accept(interpreter::AbstractVisitor *visitor)
-{
-    expression.accept(visitor);
+        action(node, rightChildNode, rightGrandChildNode);
+
+        REQUIRE(node == expectedResult);
+    }
 }
-}} // namespace jmespath::ast

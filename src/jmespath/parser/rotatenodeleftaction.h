@@ -25,36 +25,32 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "jmespath/ast/expressionnode.h"
-#include "jmespath/ast/identifiernode.h"
-#include "jmespath/ast/rawstringnode.h"
-#include "jmespath/ast/literalnode.h"
-#include "jmespath/ast/subexpressionnode.h"
+#ifndef ROTATENODELEFTACTION_H
+#define ROTATENODELEFTACTION_H
 
-namespace jmespath { namespace ast {
+namespace jmespath { namespace parser {
 
-ExpressionNode::ExpressionNode()
-    : Node()
+/**
+ * @brief The RotateNodeLeftAction struct is a functor that rotates an AST node
+ * left, it can be used to make a right leaning subtree left leaning.
+ */
+struct RotateNodeLeftAction
 {
-}
-
-ExpressionNode::ExpressionNode(const ExpressionNode::Expression &expression)
-    : Node(),
-      expression(expression)
-{
-}
-
-bool ExpressionNode::operator==(const ExpressionNode &other) const
-{
-    if (this != &other)
+    /**
+     * Executes the left rotation operation on @a node, by making @a node the
+     * left child of @a rightChild and making @a rightGrandChild the right
+     * child of @a rightChild node. The final value of @a rightChild will become
+     * the only child of the @a node.
+     */
+    template <typename T1, typename T2, typename T3>
+    void operator()(T1& node,
+                    T2& rightChild,
+                    const T3& rightGrancChild) const
     {
-        return expression == other.expression;
+        rightChild.expression = node;
+        rightChild.subexpression = rightGrancChild;
+        node = T1{rightChild};
     }
-    return true;
-}
-
-void ExpressionNode::accept(interpreter::AbstractVisitor *visitor)
-{
-    expression.accept(visitor);
-}
-}} // namespace jmespath::ast
+};
+}} // namespace jmespath::parser
+#endif // ROTATENODELEFTACTION_H

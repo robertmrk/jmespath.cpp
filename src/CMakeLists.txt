@@ -12,6 +12,8 @@ list(APPEND JMESPATH_SOURCE_FILES
     ${JMESPATH_DETAIL_SOURCE_DIR}/exceptions.h
     ${JMESPATH_PARSER_SOURCE_DIR}/grammar.h
     ${JMESPATH_PARSER_SOURCE_DIR}/parser.h
+    ${JMESPATH_PARSER_SOURCE_DIR}/rotatenodeleftaction.h
+    ${JMESPATH_PARSER_SOURCE_DIR}/rotatenodeleftaction.cpp
     ${JMESPATH_AST_SOURCE_DIR}/abstractnode.h
     ${JMESPATH_AST_SOURCE_DIR}/abstractnode.cpp
     ${JMESPATH_AST_SOURCE_DIR}/node.h
@@ -28,6 +30,8 @@ list(APPEND JMESPATH_SOURCE_FILES
     ${JMESPATH_AST_SOURCE_DIR}/variantvisitoradaptor.cpp
     ${JMESPATH_AST_SOURCE_DIR}/literalnode.h
     ${JMESPATH_AST_SOURCE_DIR}/literalnode.cpp
+    ${JMESPATH_AST_SOURCE_DIR}/subexpressionnode.h
+    ${JMESPATH_AST_SOURCE_DIR}/subexpressionnode.cpp
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/abstractvisitor.h
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/abstractvisitor.cpp
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/expressionevaluator.h

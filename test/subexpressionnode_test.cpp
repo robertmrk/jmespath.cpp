@@ -26,63 +26,65 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/ast/expressionnode.h"
+#include "jmespath/ast/subexpressionnode.h"
 #include "jmespath/ast/identifiernode.h"
 #include "jmespath/ast/rawstringnode.h"
 #include "jmespath/ast/literalnode.h"
-#include "jmespath/ast/subexpressionnode.h"
-#include "jmespath/interpreter/abstractvisitor.h"
+#include "jmespath/ast/expressionnode.h"
 
-TEST_CASE("ExpressionNode")
+TEST_CASE("SubexpressionNode")
 {
     using namespace jmespath::ast;
     using namespace jmespath::interpreter;
     using namespace fakeit;
 
-    SECTION("can be constructed")
+    SECTION("can be default constructed")
     {
-        SECTION("without parameters")
-        {
-            REQUIRE_NOTHROW(ExpressionNode{});
-        }
+        REQUIRE_NOTHROW(SubexpressionNode{});
+    }
 
-        SECTION("with identifier")
-        {
-            IdentifierNode identifier;
+    SECTION("can be constructed with expression")
+    {
+        ExpressionNode expression{};
+        SubexpressionNode node{expression};
 
-            ExpressionNode expression{identifier};
+        REQUIRE(node.expression == expression);
+    }
 
-            REQUIRE(expression.expression == identifier);
-        }
+    SECTION("can be constructed with expression and identifier")
+    {
+        ExpressionNode expression{};
+        IdentifierNode identifier{};
+        SubexpressionNode node{expression, identifier};
 
-        SECTION("with raw string")
-        {
-            RawStringNode rawString;
+        REQUIRE(node.expression == expression);
+        REQUIRE(node.subexpression == identifier);
+    }
 
-            ExpressionNode expression{rawString};
+    SECTION("can be compared for equality")
+    {
+        ExpressionNode expression{};
+        IdentifierNode identifier{"value"};
+        expression.expression = identifier;
+        SubexpressionNode node1{expression, identifier};
+        SubexpressionNode node2{expression, identifier};
 
-            REQUIRE(expression.expression == rawString);
-        }
-
-        SECTION("with literal")
-        {
-            LiteralNode literal;
-
-            ExpressionNode expression{literal};
-
-            REQUIRE(expression.expression == literal);
-        }
+        REQUIRE(node1 == node2);
+        REQUIRE(node1 == node1);
     }
 
     SECTION("accepts visitor")
     {
-        ExpressionNode node{IdentifierNode{}};
+        ExpressionNode expression{IdentifierNode{}};
+        IdentifierNode identifier;
+        SubexpressionNode node{expression, identifier};
         Mock<AbstractVisitor> visitor;
         When(OverloadedMethod(visitor, visit, void(IdentifierNode*)))
                 .AlwaysReturn();
 
         node.accept(&visitor.get());
 
-        Verify(OverloadedMethod(visitor, visit, void(IdentifierNode*))).Once();
+        Verify(OverloadedMethod(visitor, visit, void(IdentifierNode*)))
+                .Exactly(2);
     }
 }

@@ -25,36 +25,39 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "jmespath/ast/expressionnode.h"
+#include "jmespath/ast/subexpressionnode.h"
 #include "jmespath/ast/identifiernode.h"
 #include "jmespath/ast/rawstringnode.h"
 #include "jmespath/ast/literalnode.h"
-#include "jmespath/ast/subexpressionnode.h"
 
 namespace jmespath { namespace ast {
 
-ExpressionNode::ExpressionNode()
+SubexpressionNode::SubexpressionNode()
     : Node()
 {
 }
 
-ExpressionNode::ExpressionNode(const ExpressionNode::Expression &expression)
+SubexpressionNode::SubexpressionNode(const ExpressionNode &expression,
+                                     const Subexpression &subexpression)
     : Node(),
-      expression(expression)
+      expression(expression),
+      subexpression(subexpression)
 {
 }
 
-bool ExpressionNode::operator==(const ExpressionNode &other) const
+bool SubexpressionNode::operator==(const SubexpressionNode &other) const
 {
     if (this != &other)
     {
-        return expression == other.expression;
+        return (expression == other.expression)
+                && (subexpression == other.subexpression);
     }
     return true;
 }
 
-void ExpressionNode::accept(interpreter::AbstractVisitor *visitor)
+void SubexpressionNode::accept(interpreter::AbstractVisitor *visitor)
 {
     expression.accept(visitor);
+    subexpression.accept(visitor);
 }
 }} // namespace jmespath::ast
