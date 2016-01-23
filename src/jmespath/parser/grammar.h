@@ -33,6 +33,7 @@
 #include "jmespath/ast/rawstringnode.h"
 #include "jmespath/ast/literalnode.h"
 #include "jmespath/ast/subexpressionnode.h"
+#include "jmespath/parser/rotatenodeleftaction.h"
 #include <boost/spirit/include/qi.hpp>
 #include <boost/phoenix.hpp>
 
@@ -41,19 +42,6 @@
  * @brief Classes required for parsing JMESPath expressions
  */
 namespace jmespath { namespace parser {
-
-struct RotateNodeLeftAction
-{
-    template <typename T1, typename T2, typename T3>
-    void operator()(T1& node,
-                    T2& rightChild,
-                    const T3& rightGrancChild) const
-    {
-        rightChild.expression = node;
-        rightChild.subexpression = rightGrancChild;
-        node = T1{rightChild};
-    }
-};
 
 namespace qi = boost::spirit::qi;
 namespace encoding = qi::unicode;
