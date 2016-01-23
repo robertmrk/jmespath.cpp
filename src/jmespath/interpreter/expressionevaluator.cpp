@@ -72,7 +72,12 @@ void ExpressionEvaluator::visit(ast::ExpressionNode *node)
 
 void ExpressionEvaluator::visit(ast::IdentifierNode *node)
 {
-    m_context = m_context[node->identifier];
+    Json result;
+    if (m_context.is_object())
+    {
+        result = m_context[node->identifier];
+    }
+    m_context = result;
 }
 
 void ExpressionEvaluator::visit(ast::RawStringNode *node)

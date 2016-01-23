@@ -105,6 +105,16 @@ TEST_CASE("ExpressionEvaluator")
         REQUIRE(evaluator.currentContext() == Json{});
     }
 
+    SECTION("evaluates identifier on non object to null")
+    {
+        ast::IdentifierNode node{"identifier"};
+        evaluator.setContext(15);
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == Json{});
+    }
+
     SECTION("evaluates raw string")
     {
         String rawString{"[baz]"};
