@@ -32,6 +32,7 @@
 #include "jmespath/ast/node.h"
 #include "jmespath/ast/rawstringnode.h"
 #include "jmespath/ast/literalnode.h"
+#include "jmespath/ast/subexpressionnode.h"
 
 TEST_CASE("ExpressionEvaluator")
 {
@@ -133,5 +134,15 @@ TEST_CASE("ExpressionEvaluator")
 
         REQUIRE(stringResult == expectedStringValue);
         REQUIRE(arrayResult == expectedArrayValue);
+    }
+
+    SECTION("evaluates subexpression")
+    {
+        Mock<ast::SubexpressionNode> node;
+        When(Method(node, accept)).AlwaysReturn();
+
+        evaluator.visit(&node.get());
+
+        Verify(Method(node, accept).Using(&evaluator)).Once();
     }
 }

@@ -87,5 +87,6 @@ void ExpressionEvaluator::visit(ast::LiteralNode *node)
 
 void ExpressionEvaluator::visit(ast::SubexpressionNode *node)
 {
+    node->accept(this);
 }
 }} // namespace jmespath::interpreter
