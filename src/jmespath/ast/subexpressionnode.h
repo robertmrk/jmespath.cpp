@@ -70,4 +70,10 @@ public:
     Subexpression subexpression;
 };
 }} // namespace jmespath::ast
+
+BOOST_FUSION_ADAPT_STRUCT(
+    jmespath::ast::SubexpressionNode,
+    (jmespath::ast::ExpressionNode, expression),
+    (jmespath::ast::SubexpressionNode::Subexpression, subexpression)
+)
 #endif // SUBEXPRESSIONNODE_H

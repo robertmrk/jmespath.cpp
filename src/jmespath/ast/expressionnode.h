@@ -29,14 +29,15 @@
 #define EXPRESSIONNODE_H
 #include "jmespath/ast/node.h"
 #include "jmespath/ast/variantnode.h"
-#include "jmespath/ast/identifiernode.h"
-#include "jmespath/ast/rawstringnode.h"
-#include "jmespath/ast/literalnode.h"
 #include <boost/variant.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 
 namespace jmespath { namespace ast {
 
+class IdentifierNode;
+class RawStringNode;
+class LiteralNode;
+class SubexpressionNode;
 /**
  * @brief The ExpressionNode class represents a JMESPath expression.
  */
@@ -45,7 +46,8 @@ class ExpressionNode : public Node
 public:
     using Expression = VariantNode<boost::recursive_wrapper<IdentifierNode>,
         boost::recursive_wrapper<RawStringNode>,
-        boost::recursive_wrapper<LiteralNode> >;
+        boost::recursive_wrapper<LiteralNode>,
+        boost::recursive_wrapper<SubexpressionNode> >;
 
     /**
      * @brief Constructs an empy ExpressionNode object

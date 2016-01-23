@@ -28,6 +28,8 @@
 #include "fakeit.hpp"
 #include "jmespath/ast/subexpressionnode.h"
 #include "jmespath/ast/identifiernode.h"
+#include "jmespath/ast/rawstringnode.h"
+#include "jmespath/ast/literalnode.h"
 #include "jmespath/ast/expressionnode.h"
 
 TEST_CASE("SubexpressionNode")

@@ -116,5 +116,16 @@ TEST_CASE("Grammar")
             REQUIRE(parseExpression(grammar, "`[1, 2]`").expression
                     == ast::LiteralNode{"[1, 2]"});
         }
+
+        SECTION("subexpression")
+        {
+            auto expectedResult = ast::SubexpressionNode{
+                    ast::ExpressionNode{
+                        ast::IdentifierNode{"id1"}},
+                    ast::IdentifierNode{"id2"}};
+
+            REQUIRE(parseExpression(grammar, "\"id1\".\"id2\"").expression
+                    == expectedResult);
+        }
     }
 }

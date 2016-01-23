@@ -29,6 +29,7 @@
 #include "jmespath/ast/identifiernode.h"
 #include "jmespath/ast/rawstringnode.h"
 #include "jmespath/ast/literalnode.h"
+#include "jmespath/ast/subexpressionnode.h"
 
 namespace jmespath { namespace ast {
 

@@ -30,6 +30,7 @@
 #include "jmespath/ast/identifiernode.h"
 #include "jmespath/ast/rawstringnode.h"
 #include "jmespath/ast/literalnode.h"
+#include "jmespath/ast/subexpressionnode.h"
 #include "jmespath/interpreter/abstractvisitor.h"
 
 TEST_CASE("ExpressionNode")
