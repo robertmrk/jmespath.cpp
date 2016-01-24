@@ -38,6 +38,7 @@ class IdentifierNode;
 class RawStringNode;
 class LiteralNode;
 class SubexpressionNode;
+class IndexExpressionNode;
 /**
  * @brief The ExpressionNode class represents a JMESPath expression.
  */
@@ -47,7 +48,8 @@ public:
     using Expression = VariantNode<boost::recursive_wrapper<IdentifierNode>,
         boost::recursive_wrapper<RawStringNode>,
         boost::recursive_wrapper<LiteralNode>,
-        boost::recursive_wrapper<SubexpressionNode> >;
+        boost::recursive_wrapper<SubexpressionNode>,
+        boost::recursive_wrapper<IndexExpressionNode> >;
 
     /**
      * @brief Constructs an empy ExpressionNode object

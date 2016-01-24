@@ -25,41 +25,39 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "jmespath/ast/subexpressionnode.h"
-#include "jmespath/ast/identifiernode.h"
-#include "jmespath/ast/rawstringnode.h"
-#include "jmespath/ast/literalnode.h"
-#include "jmespath/ast/indexexpressionnode.h"
+#include "fakeit.hpp"
 #include "jmespath/ast/arrayitemnode.h"
 
-namespace jmespath { namespace ast {
-
-SubexpressionNode::SubexpressionNode()
-    : Node()
+TEST_CASE("ArrayItemNode")
 {
-}
+    using namespace jmespath::ast;
+    using namespace fakeit;
 
-SubexpressionNode::SubexpressionNode(const ExpressionNode &expression,
-                                     const Subexpression &subexpression)
-    : Node(),
-      expression(expression),
-      subexpression(subexpression)
-{
-}
-
-bool SubexpressionNode::operator==(const SubexpressionNode &other) const
-{
-    if (this != &other)
+    SECTION("can be constructed")
     {
-        return (expression == other.expression)
-                && (subexpression == other.subexpression);
-    }
-    return true;
-}
+        SECTION("without parameters")
+        {
+            ArrayItemNode node{};
 
-void SubexpressionNode::accept(interpreter::AbstractVisitor *visitor)
-{
-    expression.accept(visitor);
-    subexpression.accept(visitor);
+            REQUIRE(node.index == 0);
+        }
+
+        SECTION("with array index")
+        {
+            int index = 5;
+
+            ArrayItemNode node{index};
+
+            REQUIRE(node.index == index);
+        }
+    }
+
+    SECTION("can be compared for equality")
+    {
+        ArrayItemNode node1{3};
+        ArrayItemNode node2{3};
+
+        REQUIRE(node1 == node2);
+        REQUIRE(node1 == node1);
+    }
 }
-}} // namespace jmespath::ast

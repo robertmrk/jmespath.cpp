@@ -30,6 +30,8 @@
 #include "jmespath/ast/rawstringnode.h"
 #include "jmespath/ast/literalnode.h"
 #include "jmespath/ast/subexpressionnode.h"
+#include "jmespath/ast/indexexpressionnode.h"
+#include "jmespath/ast/arrayitemnode.h"
 
 namespace jmespath { namespace ast {
 

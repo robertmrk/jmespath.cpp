@@ -25,41 +25,40 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "jmespath/ast/subexpressionnode.h"
+#include "fakeit.hpp"
+#include "jmespath/ast/indexexpressionnode.h"
+#include "jmespath/ast/arrayitemnode.h"
 #include "jmespath/ast/identifiernode.h"
 #include "jmespath/ast/rawstringnode.h"
 #include "jmespath/ast/literalnode.h"
-#include "jmespath/ast/indexexpressionnode.h"
-#include "jmespath/ast/arrayitemnode.h"
+#include "jmespath/ast/subexpressionnode.h"
+#include "jmespath/ast/expressionnode.h"
 
-namespace jmespath { namespace ast {
-
-SubexpressionNode::SubexpressionNode()
-    : Node()
+TEST_CASE("IndexExpressionNode")
 {
-}
+    using namespace jmespath::ast;
+    using namespace fakeit;
 
-SubexpressionNode::SubexpressionNode(const ExpressionNode &expression,
-                                     const Subexpression &subexpression)
-    : Node(),
-      expression(expression),
-      subexpression(subexpression)
-{
-}
-
-bool SubexpressionNode::operator==(const SubexpressionNode &other) const
-{
-    if (this != &other)
+    SECTION("can be constructed")
     {
-        return (expression == other.expression)
-                && (subexpression == other.subexpression);
-    }
-    return true;
-}
+        SECTION("without parameters")
+        {
+            REQUIRE_NOTHROW(IndexExpressionNode{});
+        }
 
-void SubexpressionNode::accept(interpreter::AbstractVisitor *visitor)
-{
-    expression.accept(visitor);
-    subexpression.accept(visitor);
+        SECTION("with array item")
+        {
+            IndexExpressionNode node{ArrayItemNode{3}};
+
+            REQUIRE(node.subexpression == ArrayItemNode{3});
+        }
+
+        SECTION("with expression and array item")
+        {
+            IndexExpressionNode node{ExpressionNode{}, ArrayItemNode{3}};
+
+            REQUIRE(node.expression == ExpressionNode{});
+            REQUIRE(node.subexpression == ArrayItemNode{3});
+        }
+    }
 }
-}} // namespace jmespath::ast

@@ -31,6 +31,8 @@
 #include "jmespath/ast/rawstringnode.h"
 #include "jmespath/ast/literalnode.h"
 #include "jmespath/ast/subexpressionnode.h"
+#include "jmespath/ast/indexexpressionnode.h"
+#include "jmespath/ast/arrayitemnode.h"
 #include "jmespath/interpreter/abstractvisitor.h"
 
 TEST_CASE("ExpressionNode")

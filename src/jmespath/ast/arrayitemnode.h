@@ -25,41 +25,46 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "jmespath/ast/subexpressionnode.h"
-#include "jmespath/ast/identifiernode.h"
-#include "jmespath/ast/rawstringnode.h"
-#include "jmespath/ast/literalnode.h"
-#include "jmespath/ast/indexexpressionnode.h"
-#include "jmespath/ast/arrayitemnode.h"
+#ifndef ARRAYITEMNODE_H
+#define ARRAYITEMNODE_H
+#include "jmespath/ast/node.h"
+#include <boost/fusion/include/adapt_struct.hpp>
 
 namespace jmespath { namespace ast {
 
-SubexpressionNode::SubexpressionNode()
-    : Node()
+/**
+ * @brief The ArrayItemNode class represents a basic JMESPath array index
+ * expression.
+ */
+class ArrayItemNode : public Node
 {
-}
-
-SubexpressionNode::SubexpressionNode(const ExpressionNode &expression,
-                                     const Subexpression &subexpression)
-    : Node(),
-      expression(expression),
-      subexpression(subexpression)
-{
-}
-
-bool SubexpressionNode::operator==(const SubexpressionNode &other) const
-{
-    if (this != &other)
-    {
-        return (expression == other.expression)
-                && (subexpression == other.subexpression);
-    }
-    return true;
-}
-
-void SubexpressionNode::accept(interpreter::AbstractVisitor *visitor)
-{
-    expression.accept(visitor);
-    subexpression.accept(visitor);
-}
+public:
+    /**
+     * @brief Constructs an empty ArrayItemNode object.
+     */
+    ArrayItemNode();
+    /**
+     * @brief Constructs an ArrayItemNode object with the given @a index as its
+     * value.
+     * @param index The node's value.
+     */
+    ArrayItemNode(int index);
+    /**
+     * @brief Equality compares this node to the \a other
+     * @param other The node that should be compared.
+     * @return Returns true if this object is equal to the \a other, otherwise
+     * false
+     */
+    bool operator==(const ArrayItemNode& other) const;
+    /**
+     * @brief The node's value.
+     */
+    int index;
+};
 }} // namespace jmespath::ast
+
+BOOST_FUSION_ADAPT_STRUCT(
+    jmespath::ast::ArrayItemNode,
+    (int, index)
+)
+#endif // ARRAYITEMNODE_H

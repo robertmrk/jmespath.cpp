@@ -32,6 +32,10 @@ list(APPEND JMESPATH_SOURCE_FILES
     ${JMESPATH_AST_SOURCE_DIR}/literalnode.cpp
     ${JMESPATH_AST_SOURCE_DIR}/subexpressionnode.h
     ${JMESPATH_AST_SOURCE_DIR}/subexpressionnode.cpp
+    ${JMESPATH_AST_SOURCE_DIR}/indexexpressionnode.h
+    ${JMESPATH_AST_SOURCE_DIR}/indexexpressionnode.cpp
+    ${JMESPATH_AST_SOURCE_DIR}/arrayitemnode.h
+    ${JMESPATH_AST_SOURCE_DIR}/arrayitemnode.cpp
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/abstractvisitor.h
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/abstractvisitor.cpp
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/expressionevaluator.h

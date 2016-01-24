@@ -25,55 +25,64 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef SUBEXPRESSIONNODE_H
-#define SUBEXPRESSIONNODE_H
+#ifndef INDEXEXPRESSIONNODE_H
+#define INDEXEXPRESSIONNODE_H
 #include "jmespath/ast/node.h"
+#include "jmespath/ast/variantnode.h"
 #include "jmespath/ast/expressionnode.h"
+#include <boost/fusion/include/adapt_struct.hpp>
 
 namespace jmespath { namespace ast {
 
+class ArrayItemNode;
 /**
- * @brief The SubexpressionNode class represents a JMESPath subexpression.
+ * @brief The IndexExpressionNode class represents a JMESPath index expression.
  */
-class SubexpressionNode : public Node
+class IndexExpressionNode : public Node
 {
 public:
-    using Subexpression
-        = VariantNode<boost::recursive_wrapper<IdentifierNode> >;
+    using IndexExpression
+        = VariantNode<boost::recursive_wrapper<ArrayItemNode> >;
     /**
-     * @brief Constructs an empty SubexpressionNode object.
+     * @brief Construct an empty IndexExpressionNode object.
      */
-    SubexpressionNode();
+    IndexExpressionNode();
     /**
-     * @brief Constructs an SubexpressionNode object with the given left hand
-     * side @a expression and a right hand side @a subexpression.
-     * @param expression The node's left hand side child expression
-     * @param subexpression The node's right hand side child expression
+     * @brief Constructs an IndexExpressionNode object with the given
+     * @a subexpression as its right hand child.
+     * @param subexpression The right hand child of the node.
      */
-    SubexpressionNode(const ExpressionNode& expression,
-                      const Subexpression& subexpression = boost::blank{});
+    IndexExpressionNode(const IndexExpression& subexpression);
+    /**
+     * @brief Constructs an IndexExpressionNode object with the given
+     * @a expression as it left hand child and @a subexpression as its right
+     * hand child.
+     * @param expression The left hand child node.
+     * @param subexpression The right hand child node.
+     */
+    IndexExpressionNode(const ExpressionNode& expression,
+                        const IndexExpression& subexpression);
     /**
      * @brief Equality compares this node to the \a other
      * @param other The node that should be compared.
      * @return Returns true if this object is equal to the \a other, otherwise
      * false
      */
-    bool operator==(const SubexpressionNode& other) const;
-    void accept(interpreter::AbstractVisitor* visitor) override;
+    bool operator==(const IndexExpressionNode& other) const;
     /**
-     * @brief The node's left hand side child expression
+     * @brief The node's left hand child expression.
      */
     ExpressionNode expression;
     /**
-     * @brief The node's right hand side child expression
+     * @brief The node's right hand child expression.
      */
-    Subexpression subexpression;
+    IndexExpression subexpression;
 };
 }} // namespace jmespath::ast
 
 BOOST_FUSION_ADAPT_STRUCT(
-    jmespath::ast::SubexpressionNode,
+    jmespath::ast::IndexExpressionNode,
     (jmespath::ast::ExpressionNode, expression)
-    (jmespath::ast::SubexpressionNode::Subexpression, subexpression)
+    (jmespath::ast::IndexExpressionNode::IndexExpression, subexpression)
 )
-#endif // SUBEXPRESSIONNODE_H
+#endif // INDEXEXPRESSIONNODE_H

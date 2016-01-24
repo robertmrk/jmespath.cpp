@@ -25,29 +25,37 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "jmespath/ast/subexpressionnode.h"
+#include "jmespath/ast/indexexpressionnode.h"
+#include "jmespath/ast/arrayitemnode.h"
 #include "jmespath/ast/identifiernode.h"
 #include "jmespath/ast/rawstringnode.h"
 #include "jmespath/ast/literalnode.h"
-#include "jmespath/ast/indexexpressionnode.h"
-#include "jmespath/ast/arrayitemnode.h"
+#include "jmespath/ast/subexpressionnode.h"
 
 namespace jmespath { namespace ast {
 
-SubexpressionNode::SubexpressionNode()
+IndexExpressionNode::IndexExpressionNode()
     : Node()
 {
+
 }
 
-SubexpressionNode::SubexpressionNode(const ExpressionNode &expression,
-                                     const Subexpression &subexpression)
+IndexExpressionNode::IndexExpressionNode(const IndexExpression &subexpression)
     : Node(),
-      expression(expression),
       subexpression(subexpression)
 {
 }
 
-bool SubexpressionNode::operator==(const SubexpressionNode &other) const
+IndexExpressionNode::IndexExpressionNode(const ExpressionNode &expression,
+                                         const IndexExpression &subexpression)
+    : Node(),
+      expression(expression),
+      subexpression(subexpression)
+{
+
+}
+
+bool IndexExpressionNode::operator==(const IndexExpressionNode &other) const
 {
     if (this != &other)
     {
@@ -57,9 +65,4 @@ bool SubexpressionNode::operator==(const SubexpressionNode &other) const
     return true;
 }
 
-void SubexpressionNode::accept(interpreter::AbstractVisitor *visitor)
-{
-    expression.accept(visitor);
-    subexpression.accept(visitor);
-}
 }} // namespace jmespath::ast

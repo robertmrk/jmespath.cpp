@@ -142,5 +142,90 @@ TEST_CASE("Grammar")
             REQUIRE(parseExpression(grammar, expression).expression
                     == expectedResult);
         }
+
+        SECTION("index expression following an expression")
+        {
+            auto expectedResult = ast::IndexExpressionNode{
+                ast::ExpressionNode{
+                    ast::IdentifierNode{"id"}},
+                ast::ArrayItemNode{3}};
+            String expression{"\"id\"[3]"};
+
+            REQUIRE(parseExpression(grammar, expression).expression
+                    == expectedResult);
+        }
+
+        SECTION("recursive index expression following an expression")
+        {
+            auto expectedResult = ast::IndexExpressionNode{
+                ast::ExpressionNode{
+                    ast::IndexExpressionNode{
+                        ast::ExpressionNode{
+                            ast::IdentifierNode{"id"}},
+                        ast::ArrayItemNode{2}}},
+                ast::ArrayItemNode{3}};
+            String expression{"\"id\"[2][3]"};
+
+            REQUIRE(parseExpression(grammar, expression).expression
+                    == expectedResult);
+        }
+
+        SECTION("standalon index expression")
+        {
+            auto expectedResult = ast::IndexExpressionNode{
+                ast::ExpressionNode{},
+                ast::ArrayItemNode{3}};
+            String expression{"[3]"};
+
+            REQUIRE(parseExpression(grammar, expression).expression
+                    == expectedResult);
+        }
+
+        SECTION("recursive index expression following a standalon index "
+                "expresion")
+        {
+            auto expectedResult = ast::IndexExpressionNode{
+                ast::ExpressionNode{
+                    ast::IndexExpressionNode{
+                        ast::ExpressionNode{
+                            ast::IndexExpressionNode{
+                                ast::ExpressionNode{},
+                                ast::ArrayItemNode{3}}},
+                        ast::ArrayItemNode{4}}},
+                ast::ArrayItemNode{5}};
+            String expression{"[3][4][5]"};
+
+            REQUIRE(parseExpression(grammar, expression).expression
+                    == expectedResult);
+        }
+
+        SECTION("subexpression after standalone index expression")
+        {
+            auto expectedResult = ast::SubexpressionNode{
+                ast::ExpressionNode{
+                    ast::IndexExpressionNode{
+                        ast::ExpressionNode{},
+                        ast::ArrayItemNode{4}}},
+                ast::IdentifierNode{"id"}};
+            String expression{"[4].\"id\""};
+
+            REQUIRE(parseExpression(grammar, expression).expression
+                    == expectedResult);
+        }
+
+        SECTION("index expresion after subexpression")
+        {
+            auto expectedResult = ast::IndexExpressionNode{
+                ast::ExpressionNode{
+                    ast::SubexpressionNode{
+                        ast::ExpressionNode{
+                            ast::IdentifierNode{"id1"}},
+                        ast::IdentifierNode{"id2"}}},
+                ast::ArrayItemNode{4}};
+            String expression{"\"id1\".\"id2\"[4]"};
+
+            REQUIRE(parseExpression(grammar, expression).expression
+                    == expectedResult);
+        }
     }
 }

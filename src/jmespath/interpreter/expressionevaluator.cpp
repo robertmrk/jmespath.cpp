@@ -31,6 +31,7 @@
 #include "jmespath/ast/expressionnode.h"
 #include "jmespath/ast/literalnode.h"
 #include "jmespath/ast/subexpressionnode.h"
+#include "jmespath/ast/indexexpressionnode.h"
 
 namespace jmespath { namespace interpreter {
 

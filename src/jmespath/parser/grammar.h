@@ -33,6 +33,8 @@
 #include "jmespath/ast/rawstringnode.h"
 #include "jmespath/ast/literalnode.h"
 #include "jmespath/ast/subexpressionnode.h"
+#include "jmespath/ast/indexexpressionnode.h"
+#include "jmespath/ast/arrayitemnode.h"
 #include "jmespath/parser/rotatenodeleftaction.h"
 #include <boost/spirit/include/qi.hpp>
 #include <boost/phoenix.hpp>
@@ -65,6 +67,7 @@ public:
     Grammar() : Grammar::base_type(m_expressionRule)
     {
         using encoding::char_;
+        using qi::int_;
         using qi::lit;
         using qi::lexeme;
         using qi::int_parser;
@@ -73,24 +76,48 @@ public:
         using qi::_2;
         using qi::_pass;
         using qi::_r1;
+        using qi::_r2;
         using phx::at_c;
+        using phx::if_;
 
         phx::function<RotateNodeLeftAction> rotateNodeLeft;
 
-        // match an identifier a literal or a raw string (assign it to the first
-        // item in the tuple), optionally followed by a subexpression (pass the
-        // value as an inherited argument and assign the result to the first
-        // item in the tuple)
-        m_expressionRule = (m_identifierRule
-                            | m_literalRule
-                            | m_rawStringRule)[at_c<0>(_val) = _1]
-                >> -m_subexpressionRule(_val);
-        // match an identifier preceded by a dot (rotate the subexpression node
+        // match a standalone index expression or identifier, literal or a
+        // raw string (assign it to the first item in the tuple), optionally
+        // followed by a subexpression or an index expression (pass the value as
+        // an inherited argument)
+        m_expressionRule = (m_indexExpressionRule(_val, true)
+                            | m_identifierRule[at_c<0>(_val) = _1]
+                            | m_literalRule[at_c<0>(_val) = _1]
+                            | m_rawStringRule[at_c<0>(_val) = _1])
+                >> -m_subexpressionRule(_val)
+                >> -m_indexExpressionRule(_val, false);
+        // match an identifier preceded by a dot (rotate the _r1 parent node
         // left), a subexpression can also be optionally followed by another
         // subexpression
         m_subexpressionRule = (lit('.')
                 >> m_identifierRule[rotateNodeLeft(_r1, _val, _1)])
                 >> -m_subexpressionRule(_r1);
+        // match array item enclosed in square brackets (if the second inherited
+        // argument is false then rotate the _r1 parent node left, otherwise
+        // assign the _1 first attribute to the _val value and set the _r2
+        // standalone flag to false)
+        // an index expression can also be optinally followed by a subexpression
+        // or another intdex expression
+        m_indexExpressionRule = (lit("[")
+                >> m_arrayItemRule[
+                    if_(!_r2)[
+                        rotateNodeLeft(_r1, _val, _1)]
+                    .else_[
+                        at_c<1>(_val) = _1,
+                        at_c<0>(_r1) = _val,
+                        _r2 = false
+                    ] ]
+                >> lit("]"))
+                >> -m_subexpressionRule(_r1)
+                >> -m_indexExpressionRule(_r1, _r2);
+        // match an integer
+        m_arrayItemRule = int_;
         // match zero or more literal characters enclosed in grave accents
         m_literalRule = lexeme[ lit('\x60')
                 >> *m_literalCharRule[phx::bind(&Grammar::appendUtf8,
@@ -214,6 +241,10 @@ private:
     qi::rule<Iterator,
             ast::SubexpressionNode(ast::ExpressionNode&),
             Skipper> m_subexpressionRule;
+    qi::rule<Iterator,
+            ast::IndexExpressionNode(ast::ExpressionNode&, bool),
+            Skipper> m_indexExpressionRule;
+    qi::rule<Iterator, ast::ArrayItemNode(), Skipper> m_arrayItemRule;
     qi::rule<Iterator, ast::IdentifierNode(), Skipper> m_identifierRule;
     qi::rule<Iterator, ast::RawStringNode(), Skipper> m_rawStringRule;
     qi::rule<Iterator, ast::LiteralNode(), Skipper> m_literalRule;
