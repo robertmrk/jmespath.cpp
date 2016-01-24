@@ -1,7 +1,7 @@
 # jmespath.cpp
 
 [![Build Status](https://travis-ci.org/robertmrk/jmespath.cpp.svg?branch=develop)](https://travis-ci.org/robertmrk/jmespath.cpp) 
-[![Build status](https://ci.appveyor.com/api/projects/status/p4ue9sak826prft9?svg=true)](https://ci.appveyor.com/project/robertmrk/jmespath-cpp)
+[![Build status](https://ci.appveyor.com/api/projects/status/p4ue9sak826prft9/branch/develop?svg=true)](https://ci.appveyor.com/project/robertmrk/jmespath-cpp/branch/develop)
 [![Coverage Status](https://coveralls.io/repos/robertmrk/jmespath.cpp/badge.svg?branch=develop&service=github)](https://coveralls.io/github/robertmrk/jmespath.cpp?branch=develop)
 
 jmespath.cpp is a C++ implementation of JMESPath,
