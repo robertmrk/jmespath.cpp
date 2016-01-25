@@ -140,4 +140,54 @@ TEST_CASE("ExpressionEvaluator")
 
         Verify(Method(node, accept).Using(&evaluator)).Once();
     }
+
+    SECTION("evaluates index expression")
+    {
+        Mock<ast::IndexExpressionNode> node;
+        When(Method(node, accept)).AlwaysReturn();
+
+        evaluator.visit(&node.get());
+
+        Verify(Method(node, accept).Using(&evaluator)).Once();
+    }
+
+    SECTION("evaluates array item expression")
+    {
+        ast::ArrayItemNode node{2};
+        evaluator.setContext({"zero", "one", "two", "three", "four"});
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == "two");
+    }
+
+    SECTION("evaluates array item expression with negative index")
+    {
+        ast::ArrayItemNode node{-4};
+        evaluator.setContext({"zero", "one", "two", "three", "four"});
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == "one");
+    }
+
+    SECTION("evaluates array item expression on non arrays to null")
+    {
+        ast::ArrayItemNode node{2};
+        evaluator.setContext(3);
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == Json{});
+    }
+
+    SECTION("evaluates array item expression with out of bounds index to null")
+    {
+        ast::ArrayItemNode node{15};
+        evaluator.setContext({"zero", "one", "two", "three", "four"});
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == Json{});
+    }
 }

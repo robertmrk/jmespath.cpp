@@ -88,9 +88,24 @@ void ExpressionEvaluator::visit(ast::SubexpressionNode *node)
 
 void ExpressionEvaluator::visit(ast::IndexExpressionNode *node)
 {
+    node->accept(this);
 }
 
 void ExpressionEvaluator::visit(ast::ArrayItemNode *node)
 {
+    Json result;
+    if (m_context.is_array())
+    {
+        int arrayIndex = node->index;
+        if (arrayIndex < 0)
+        {
+            arrayIndex = m_context.size() + arrayIndex;
+        }
+        if ((arrayIndex >= 0 ) && (arrayIndex < m_context.size()))
+        {
+            result = m_context[arrayIndex];
+        }
+    }
+    m_context = result;
 }
 }} // namespace jmespath::interpreter
