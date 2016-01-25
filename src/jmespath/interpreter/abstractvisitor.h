@@ -37,6 +37,8 @@ class IdentifierNode;
 class RawStringNode;
 class LiteralNode;
 class SubexpressionNode;
+class IndexExpressionNode;
+class ArrayItemNode;
 }} // namespace jmespath::ast
 
 /**
@@ -64,6 +66,8 @@ public:
     virtual void visit(ast::RawStringNode* node) = 0;
     virtual void visit(ast::LiteralNode* node) = 0;
     virtual void visit(ast::SubexpressionNode* node) = 0;
+    virtual void visit(ast::IndexExpressionNode* node) = 0;
+    virtual void visit(ast::ArrayItemNode* node) = 0;
     /** @}*/
 };
 }} // namespace jmespath::interpreter

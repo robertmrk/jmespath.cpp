@@ -71,6 +71,8 @@ public:
     void visit(ast::RawStringNode *node) override;
     void visit(ast::LiteralNode* node) override;
     void visit(ast::SubexpressionNode* node) override;
+    void visit(ast::IndexExpressionNode* node) override;
+    void visit(ast::ArrayItemNode* node) override;
 
 private:
     /**

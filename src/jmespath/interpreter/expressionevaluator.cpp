@@ -95,4 +95,12 @@ void ExpressionEvaluator::visit(ast::SubexpressionNode *node)
 {
     node->accept(this);
 }
+
+void ExpressionEvaluator::visit(ast::IndexExpressionNode *node)
+{
+}
+
+void ExpressionEvaluator::visit(ast::ArrayItemNode *node)
+{
+}
 }} // namespace jmespath::interpreter
