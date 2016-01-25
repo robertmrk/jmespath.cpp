@@ -27,10 +27,12 @@
 ****************************************************************************/
 #include "fakeit.hpp"
 #include "jmespath/ast/literalnode.h"
+#include "jmespath/interpreter/abstractvisitor.h"
 
 TEST_CASE("LiteralNode")
 {
     using namespace jmespath::ast;
+    using namespace jmespath::interpreter;
     using namespace fakeit;
 
     SECTION("can be default constructed")
@@ -55,5 +57,17 @@ TEST_CASE("LiteralNode")
 
         REQUIRE(node1 == node2);
         REQUIRE(node1 == node1);
+    }
+
+    SECTION("accepts visitor")
+    {
+        LiteralNode node{};
+        Mock<AbstractVisitor> visitor;
+        When(OverloadedMethod(visitor, visit, void(LiteralNode*)))
+                .AlwaysReturn();
+
+        node.accept(&visitor.get());
+
+        Verify(OverloadedMethod(visitor, visit, void(LiteralNode*))).Once();
     }
 }

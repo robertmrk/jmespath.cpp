@@ -35,34 +35,19 @@
 namespace jmespath { namespace ast {
 
 IndexExpressionNode::IndexExpressionNode()
-    : Node()
-{
-
-}
-
-IndexExpressionNode::IndexExpressionNode(const IndexExpression &subexpression)
-    : Node(),
-      subexpression(subexpression)
+    : BinaryNode()
 {
 }
 
-IndexExpressionNode::IndexExpressionNode(const ExpressionNode &expression,
-                                         const IndexExpression &subexpression)
-    : Node(),
-      expression(expression),
-      subexpression(subexpression)
+IndexExpressionNode::IndexExpressionNode(const RightHandType &subexpression)
+    : BinaryNode(LeftHandType{}, subexpression)
+{
+}
+
+IndexExpressionNode::IndexExpressionNode(const LeftHandType &expression,
+                                         const RightHandType &subexpression)
+    : BinaryNode(expression, subexpression)
 {
 
 }
-
-bool IndexExpressionNode::operator==(const IndexExpressionNode &other) const
-{
-    if (this != &other)
-    {
-        return (expression == other.expression)
-                && (subexpression == other.subexpression);
-    }
-    return true;
-}
-
 }} // namespace jmespath::ast

@@ -27,7 +27,7 @@
 ****************************************************************************/
 #ifndef INDEXEXPRESSIONNODE_H
 #define INDEXEXPRESSIONNODE_H
-#include "jmespath/ast/node.h"
+#include "jmespath/ast/binarynode.h"
 #include "jmespath/ast/variantnode.h"
 #include "jmespath/ast/expressionnode.h"
 #include <boost/fusion/include/adapt_struct.hpp>
@@ -38,11 +38,10 @@ class ArrayItemNode;
 /**
  * @brief The IndexExpressionNode class represents a JMESPath index expression.
  */
-class IndexExpressionNode : public Node
+class IndexExpressionNode : public BinaryNode<ExpressionNode,
+        VariantNode<boost::recursive_wrapper<ArrayItemNode> > >
 {
 public:
-    using IndexExpression
-        = VariantNode<boost::recursive_wrapper<ArrayItemNode> >;
     /**
      * @brief Construct an empty IndexExpressionNode object.
      */
@@ -52,7 +51,7 @@ public:
      * @a subexpression as its right hand child.
      * @param subexpression The right hand child of the node.
      */
-    IndexExpressionNode(const IndexExpression& subexpression);
+    IndexExpressionNode(const RightHandType& subexpression);
     /**
      * @brief Constructs an IndexExpressionNode object with the given
      * @a expression as it left hand child and @a subexpression as its right
@@ -60,29 +59,14 @@ public:
      * @param expression The left hand child node.
      * @param subexpression The right hand child node.
      */
-    IndexExpressionNode(const ExpressionNode& expression,
-                        const IndexExpression& subexpression);
-    /**
-     * @brief Equality compares this node to the \a other
-     * @param other The node that should be compared.
-     * @return Returns true if this object is equal to the \a other, otherwise
-     * false
-     */
-    bool operator==(const IndexExpressionNode& other) const;
-    /**
-     * @brief The node's left hand child expression.
-     */
-    ExpressionNode expression;
-    /**
-     * @brief The node's right hand child expression.
-     */
-    IndexExpression subexpression;
+    IndexExpressionNode(const LeftHandType& expression,
+                        const RightHandType& subexpression);
 };
 }} // namespace jmespath::ast
 
 BOOST_FUSION_ADAPT_STRUCT(
     jmespath::ast::IndexExpressionNode,
-    (jmespath::ast::ExpressionNode, expression)
-    (jmespath::ast::IndexExpressionNode::IndexExpression, subexpression)
+    (jmespath::ast::IndexExpressionNode::LeftHandType, leftExpression)
+    (jmespath::ast::IndexExpressionNode::RightHandType, rightExpression)
 )
 #endif // INDEXEXPRESSIONNODE_H

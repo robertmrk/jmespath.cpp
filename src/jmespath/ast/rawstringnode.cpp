@@ -26,18 +26,24 @@
 **
 ****************************************************************************/
 #include "jmespath/ast/rawstringnode.h"
+#include "jmespath/interpreter/abstractvisitor.h"
 
 namespace jmespath { namespace ast {
 
 RawStringNode::RawStringNode()
-    : Node()
+    : AbstractNode()
 {
 }
 
 RawStringNode::RawStringNode(const detail::String &string)
-    : Node(),
+    : AbstractNode(),
       rawString(string)
 {
+}
+
+void RawStringNode::accept(interpreter::AbstractVisitor *visitor)
+{
+    visitor->visit(this);
 }
 
 bool RawStringNode::operator==(const RawStringNode &other) const

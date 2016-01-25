@@ -32,6 +32,7 @@
 #include "jmespath/ast/literalnode.h"
 #include "jmespath/ast/subexpressionnode.h"
 #include "jmespath/ast/indexexpressionnode.h"
+#include "jmespath/ast/arrayitemnode.h"
 
 namespace jmespath { namespace interpreter {
 
@@ -57,11 +58,6 @@ Json ExpressionEvaluator::currentContext() const
 }
 
 void ExpressionEvaluator::visit(ast::AbstractNode *node)
-{
-    node->accept(this);
-}
-
-void ExpressionEvaluator::visit(ast::Node *node)
 {
     node->accept(this);
 }

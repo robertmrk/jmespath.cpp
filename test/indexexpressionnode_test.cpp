@@ -50,15 +50,15 @@ TEST_CASE("IndexExpressionNode")
         {
             IndexExpressionNode node{ArrayItemNode{3}};
 
-            REQUIRE(node.subexpression == ArrayItemNode{3});
+            REQUIRE(node.rightExpression == ArrayItemNode{3});
         }
 
         SECTION("with expression and array item")
         {
             IndexExpressionNode node{ExpressionNode{}, ArrayItemNode{3}};
 
-            REQUIRE(node.expression == ExpressionNode{});
-            REQUIRE(node.subexpression == ArrayItemNode{3});
+            REQUIRE(node.leftExpression == ExpressionNode{});
+            REQUIRE(node.rightExpression == ArrayItemNode{3});
         }
     }
 }

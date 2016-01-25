@@ -26,6 +26,7 @@
 **
 ****************************************************************************/
 #include "jmespath/ast/arrayitemnode.h"
+#include "jmespath/interpreter/abstractvisitor.h"
 
 namespace jmespath { namespace ast {
 
@@ -35,9 +36,14 @@ ArrayItemNode::ArrayItemNode()
 }
 
 ArrayItemNode::ArrayItemNode(int index)
-    : Node(),
+    : AbstractNode(),
       index(index)
 {
+}
+
+void ArrayItemNode::accept(interpreter::AbstractVisitor *visitor)
+{
+    visitor->visit(this);
 }
 
 bool ArrayItemNode::operator==(const ArrayItemNode &other) const

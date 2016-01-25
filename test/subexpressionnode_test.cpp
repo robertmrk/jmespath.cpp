@@ -37,7 +37,6 @@
 TEST_CASE("SubexpressionNode")
 {
     using namespace jmespath::ast;
-    using namespace jmespath::interpreter;
     using namespace fakeit;
 
     SECTION("can be default constructed")
@@ -50,7 +49,7 @@ TEST_CASE("SubexpressionNode")
         ExpressionNode expression{};
         SubexpressionNode node{expression};
 
-        REQUIRE(node.expression == expression);
+        REQUIRE(node.leftExpression == expression);
     }
 
     SECTION("can be constructed with expression and identifier")
@@ -59,34 +58,7 @@ TEST_CASE("SubexpressionNode")
         IdentifierNode identifier{};
         SubexpressionNode node{expression, identifier};
 
-        REQUIRE(node.expression == expression);
-        REQUIRE(node.subexpression == identifier);
-    }
-
-    SECTION("can be compared for equality")
-    {
-        ExpressionNode expression{};
-        IdentifierNode identifier{"value"};
-        expression.expression = identifier;
-        SubexpressionNode node1{expression, identifier};
-        SubexpressionNode node2{expression, identifier};
-
-        REQUIRE(node1 == node2);
-        REQUIRE(node1 == node1);
-    }
-
-    SECTION("accepts visitor")
-    {
-        ExpressionNode expression{IdentifierNode{}};
-        IdentifierNode identifier;
-        SubexpressionNode node{expression, identifier};
-        Mock<AbstractVisitor> visitor;
-        When(OverloadedMethod(visitor, visit, void(IdentifierNode*)))
-                .AlwaysReturn();
-
-        node.accept(&visitor.get());
-
-        Verify(OverloadedMethod(visitor, visit, void(IdentifierNode*)))
-                .Exactly(2);
+        REQUIRE(node.leftExpression == expression);
+        REQUIRE(node.rightExpression == identifier);
     }
 }

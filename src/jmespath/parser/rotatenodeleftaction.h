@@ -47,8 +47,8 @@ struct RotateNodeLeftAction
                     T2& rightChild,
                     const T3& rightGrancChild) const
     {
-        rightChild.expression = node;
-        rightChild.subexpression = rightGrancChild;
+        rightChild.leftExpression = node;
+        rightChild.rightExpression = rightGrancChild;
         node = T1{rightChild};
     }
 };

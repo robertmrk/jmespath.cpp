@@ -65,7 +65,6 @@ public:
     Json currentContext() const;
 
     void visit(ast::AbstractNode *node) override;
-    void visit(ast::Node* node) override;
     void visit(ast::ExpressionNode *node) override;
     void visit(ast::IdentifierNode *node) override;
     void visit(ast::RawStringNode *node) override;

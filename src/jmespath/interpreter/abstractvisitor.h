@@ -60,7 +60,6 @@ public:
      * @{
      */
     virtual void visit(ast::AbstractNode* node) = 0;
-    virtual void visit(ast::Node* node) = 0;
     virtual void visit(ast::ExpressionNode* node) = 0;
     virtual void visit(ast::IdentifierNode* node) = 0;
     virtual void visit(ast::RawStringNode* node) = 0;

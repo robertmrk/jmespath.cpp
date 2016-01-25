@@ -35,31 +35,13 @@
 namespace jmespath { namespace ast {
 
 SubexpressionNode::SubexpressionNode()
-    : Node()
+    : BinaryNode()
 {
 }
 
-SubexpressionNode::SubexpressionNode(const ExpressionNode &expression,
-                                     const Subexpression &subexpression)
-    : Node(),
-      expression(expression),
-      subexpression(subexpression)
+SubexpressionNode::SubexpressionNode(const LeftHandType &expression,
+                                     const RightHandType &subexpression)
+    : BinaryNode(expression, subexpression)
 {
-}
-
-bool SubexpressionNode::operator==(const SubexpressionNode &other) const
-{
-    if (this != &other)
-    {
-        return (expression == other.expression)
-                && (subexpression == other.subexpression);
-    }
-    return true;
-}
-
-void SubexpressionNode::accept(interpreter::AbstractVisitor *visitor)
-{
-    expression.accept(visitor);
-    subexpression.accept(visitor);
 }
 }} // namespace jmespath::ast

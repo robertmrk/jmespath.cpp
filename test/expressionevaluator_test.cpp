@@ -29,7 +29,6 @@
 #include "jmespath/interpreter/expressionevaluator.h"
 #include "jmespath/ast/identifiernode.h"
 #include "jmespath/ast/expressionnode.h"
-#include "jmespath/ast/node.h"
 #include "jmespath/ast/rawstringnode.h"
 #include "jmespath/ast/literalnode.h"
 #include "jmespath/ast/subexpressionnode.h"
@@ -56,16 +55,6 @@ TEST_CASE("ExpressionEvaluator")
     SECTION("accepts abstract node")
     {
         Mock<ast::AbstractNode> node;
-        When(Method(node, accept).Using(&evaluator)).AlwaysReturn();
-
-        evaluator.visit(&node.get());
-
-        Verify(Method(node, accept)).Once();
-    }
-
-    SECTION("accepts node")
-    {
-        Mock<ast::Node> node;
         When(Method(node, accept).Using(&evaluator)).AlwaysReturn();
 
         evaluator.visit(&node.get());

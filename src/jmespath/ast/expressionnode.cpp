@@ -36,12 +36,12 @@
 namespace jmespath { namespace ast {
 
 ExpressionNode::ExpressionNode()
-    : Node()
+    : AbstractNode()
 {
 }
 
 ExpressionNode::ExpressionNode(const ExpressionNode::Expression &expression)
-    : Node(),
+    : AbstractNode(),
       expression(expression)
 {
 }

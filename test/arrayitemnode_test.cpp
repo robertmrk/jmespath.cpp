@@ -27,10 +27,12 @@
 ****************************************************************************/
 #include "fakeit.hpp"
 #include "jmespath/ast/arrayitemnode.h"
+#include "jmespath/interpreter/abstractvisitor.h"
 
 TEST_CASE("ArrayItemNode")
 {
     using namespace jmespath::ast;
+    using namespace jmespath::interpreter;
     using namespace fakeit;
 
     SECTION("can be constructed")
@@ -59,5 +61,17 @@ TEST_CASE("ArrayItemNode")
 
         REQUIRE(node1 == node2);
         REQUIRE(node1 == node1);
+    }
+
+    SECTION("accepts visitor")
+    {
+        ArrayItemNode node{};
+        Mock<AbstractVisitor> visitor;
+        When(OverloadedMethod(visitor, visit, void(ArrayItemNode*)))
+                .AlwaysReturn();
+
+        node.accept(&visitor.get());
+
+        Verify(OverloadedMethod(visitor, visit, void(ArrayItemNode*))).Once();
     }
 }

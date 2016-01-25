@@ -27,7 +27,7 @@
 ****************************************************************************/
 #ifndef EXPRESSIONNODE_H
 #define EXPRESSIONNODE_H
-#include "jmespath/ast/node.h"
+#include "jmespath/ast/abstractnode.h"
 #include "jmespath/ast/variantnode.h"
 #include <boost/variant.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
@@ -42,7 +42,7 @@ class IndexExpressionNode;
 /**
  * @brief The ExpressionNode class represents a JMESPath expression.
  */
-class ExpressionNode : public Node
+class ExpressionNode : public AbstractNode
 {
 public:
     using Expression = VariantNode<boost::recursive_wrapper<IdentifierNode>,
@@ -68,6 +68,11 @@ public:
      * false
      */
     bool operator==(const ExpressionNode& other) const;
+    /**
+     * @brief Calls the visit method of the given \a visitor with the
+     * dynamic type of the node.
+     * @param visitor A visitor implementation
+     */
     void accept(interpreter::AbstractVisitor* visitor) override;
     /**
      * @brief The node's child expression

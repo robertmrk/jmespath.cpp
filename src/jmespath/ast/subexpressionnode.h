@@ -27,7 +27,7 @@
 ****************************************************************************/
 #ifndef SUBEXPRESSIONNODE_H
 #define SUBEXPRESSIONNODE_H
-#include "jmespath/ast/node.h"
+#include "jmespath/ast/binarynode.h"
 #include "jmespath/ast/expressionnode.h"
 
 namespace jmespath { namespace ast {
@@ -35,11 +35,10 @@ namespace jmespath { namespace ast {
 /**
  * @brief The SubexpressionNode class represents a JMESPath subexpression.
  */
-class SubexpressionNode : public Node
+class SubexpressionNode : public BinaryNode<ExpressionNode,
+        VariantNode<boost::recursive_wrapper<IdentifierNode> > >
 {
 public:
-    using Subexpression
-        = VariantNode<boost::recursive_wrapper<IdentifierNode> >;
     /**
      * @brief Constructs an empty SubexpressionNode object.
      */
@@ -50,30 +49,14 @@ public:
      * @param expression The node's left hand side child expression
      * @param subexpression The node's right hand side child expression
      */
-    SubexpressionNode(const ExpressionNode& expression,
-                      const Subexpression& subexpression = boost::blank{});
-    /**
-     * @brief Equality compares this node to the \a other
-     * @param other The node that should be compared.
-     * @return Returns true if this object is equal to the \a other, otherwise
-     * false
-     */
-    bool operator==(const SubexpressionNode& other) const;
-    void accept(interpreter::AbstractVisitor* visitor) override;
-    /**
-     * @brief The node's left hand side child expression
-     */
-    ExpressionNode expression;
-    /**
-     * @brief The node's right hand side child expression
-     */
-    Subexpression subexpression;
+    SubexpressionNode(const LeftHandType& expression,
+                      const RightHandType& subexpression = boost::blank{});
 };
 }} // namespace jmespath::ast
 
 BOOST_FUSION_ADAPT_STRUCT(
     jmespath::ast::SubexpressionNode,
-    (jmespath::ast::ExpressionNode, expression)
-    (jmespath::ast::SubexpressionNode::Subexpression, subexpression)
+    (jmespath::ast::SubexpressionNode::LeftHandType, leftExpression)
+    (jmespath::ast::SubexpressionNode::RightHandType, rightExpression)
 )
 #endif // SUBEXPRESSIONNODE_H

@@ -25,13 +25,58 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "jmespath/ast/node.h"
+#include "fakeit.hpp"
+#include "jmespath/ast/binarynode.h"
+#include "jmespath/ast/identifiernode.h"
 #include "jmespath/interpreter/abstractvisitor.h"
+#include "jmespath/interpreter/expressionevaluator.h"
 
-namespace jmespath { namespace ast {
-
-void Node::accept(interpreter::AbstractVisitor *visitor)
+TEST_CASE("BinaryNode")
 {
-    visitor->visit(this);
+    using namespace jmespath::ast;
+    using namespace fakeit;
+    using jmespath::interpreter::AbstractVisitor;
+    using BinaryNodeType = BinaryNode<IdentifierNode, IdentifierNode>;
+
+    SECTION("can be default constructed")
+    {
+        REQUIRE_NOTHROW(BinaryNodeType{});
+    }
+
+    SECTION("can be constructed with left and right expression")
+    {
+        IdentifierNode id1{"id1"};
+        IdentifierNode id2{"id2"};
+
+        BinaryNodeType node{id1, id2};
+
+        REQUIRE(node.leftExpression == id1);
+        REQUIRE(node.rightExpression == id2);
+    }
+
+    SECTION("can be compared for equality")
+    {
+        BinaryNodeType node1{IdentifierNode{"id1"},
+                             IdentifierNode{"id2"}};
+        BinaryNodeType node2;
+        node2 = node1;
+
+        REQUIRE(node1 == node2);
+        REQUIRE(node1 == node1);
+    }
+
+    SECTION("accepts visitor")
+    {
+        IdentifierNode id1;
+        IdentifierNode id2;
+        BinaryNodeType node{id1, id2};
+        Mock<AbstractVisitor> visitor;
+        When(OverloadedMethod(visitor, visit, void(IdentifierNode*)))
+                .AlwaysReturn();
+
+        node.accept(&visitor.get());
+
+        Verify(OverloadedMethod(visitor, visit, void(IdentifierNode*)))
+                .Exactly(2);
+    }
 }
-}} // namespace jmespath::ast

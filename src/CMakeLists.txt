@@ -16,8 +16,8 @@ list(APPEND JMESPATH_SOURCE_FILES
     ${JMESPATH_PARSER_SOURCE_DIR}/rotatenodeleftaction.cpp
     ${JMESPATH_AST_SOURCE_DIR}/abstractnode.h
     ${JMESPATH_AST_SOURCE_DIR}/abstractnode.cpp
-    ${JMESPATH_AST_SOURCE_DIR}/node.h
-    ${JMESPATH_AST_SOURCE_DIR}/node.cpp
+    ${JMESPATH_AST_SOURCE_DIR}/binarynode.h
+    ${JMESPATH_AST_SOURCE_DIR}/binarynode.cpp
     ${JMESPATH_AST_SOURCE_DIR}/variantnode.h
     ${JMESPATH_AST_SOURCE_DIR}/variantnode.cpp
     ${JMESPATH_AST_SOURCE_DIR}/expressionnode.h

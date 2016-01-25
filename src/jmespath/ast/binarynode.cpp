@@ -25,25 +25,4 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef NODE_H
-#define NODE_H
-#include "jmespath/ast/abstractnode.h"
-
-namespace jmespath { namespace ast {
-
-/**
- * @brief The Node class is the common base class for all node types which
- * provides default implementations for the methods declared in AbstractNode.
- */
-class Node : public AbstractNode
-{
-public:
-    /**
-     * @brief Calls the visit method of the given \a visitor with the
-     * dynamic type of the node.
-     * @param visitor A visitor implementation
-     */
-    void accept(interpreter::AbstractVisitor* visitor) override;
-};
-}} // namespace jmespath::ast
-#endif // NODE_H
+#include "jmespath/ast/binarynode.h"
