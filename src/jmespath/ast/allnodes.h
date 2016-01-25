@@ -25,34 +25,16 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "fakeit.hpp"
-#include "jmespath/ast/allnodes.h"
-
-TEST_CASE("IndexExpressionNode")
-{
-    using namespace jmespath::ast;
-    using namespace fakeit;
-
-    SECTION("can be constructed")
-    {
-        SECTION("without parameters")
-        {
-            REQUIRE_NOTHROW(IndexExpressionNode{});
-        }
-
-        SECTION("with array item")
-        {
-            IndexExpressionNode node{ArrayItemNode{3}};
-
-            REQUIRE(node.rightExpression == ArrayItemNode{3});
-        }
-
-        SECTION("with expression and array item")
-        {
-            IndexExpressionNode node{ExpressionNode{}, ArrayItemNode{3}};
-
-            REQUIRE(node.leftExpression == ExpressionNode{});
-            REQUIRE(node.rightExpression == ArrayItemNode{3});
-        }
-    }
-}
+#ifndef ALLNODES_H
+#define ALLNODES_H
+#include "jmespath/ast/abstractnode.h"
+#include "jmespath/ast/expressionnode.h"
+#include "jmespath/ast/identifiernode.h"
+#include "jmespath/ast/rawstringnode.h"
+#include "jmespath/ast/literalnode.h"
+#include "jmespath/ast/subexpressionnode.h"
+#include "jmespath/ast/indexexpressionnode.h"
+#include "jmespath/ast/arrayitemnode.h"
+#include "jmespath/ast/variantnode.h"
+#include "jmespath/ast/binarynode.h"
+#endif // ALLNODES_H

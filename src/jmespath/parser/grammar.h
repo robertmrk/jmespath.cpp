@@ -28,13 +28,7 @@
 #ifndef GRAMMAR_H
 #define GRAMMAR_H
 #include "jmespath/detail/types.h"
-#include "jmespath/ast/expressionnode.h"
-#include "jmespath/ast/identifiernode.h"
-#include "jmespath/ast/rawstringnode.h"
-#include "jmespath/ast/literalnode.h"
-#include "jmespath/ast/subexpressionnode.h"
-#include "jmespath/ast/indexexpressionnode.h"
-#include "jmespath/ast/arrayitemnode.h"
+#include "jmespath/ast/allnodes.h"
 #include "jmespath/parser/rotatenodeleftaction.h"
 #include <boost/spirit/include/qi.hpp>
 #include <boost/phoenix.hpp>
