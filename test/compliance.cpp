@@ -83,7 +83,7 @@ TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Literals",
 }
 
 TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Basic expressions",
-                 "[!hide][basic]")
+                 "[basic]")
 {
     executeFeatureTest("basic");
 }
@@ -98,6 +98,12 @@ TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Current node",
                  "[!hide][current]")
 {
     executeFeatureTest("current");
+}
+
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Escapes",
+                 "[escape]")
+{
+    executeFeatureTest("escape");
 }
 
 TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Filters",
