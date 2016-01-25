@@ -13,14 +13,10 @@ list(APPEND JMESPATH_SOURCE_FILES
     ${JMESPATH_PARSER_SOURCE_DIR}/grammar.h
     ${JMESPATH_PARSER_SOURCE_DIR}/parser.h
     ${JMESPATH_PARSER_SOURCE_DIR}/rotatenodeleftaction.h
-    ${JMESPATH_PARSER_SOURCE_DIR}/rotatenodeleftaction.cpp
     ${JMESPATH_AST_SOURCE_DIR}/allnodes.h
     ${JMESPATH_AST_SOURCE_DIR}/abstractnode.h
-    ${JMESPATH_AST_SOURCE_DIR}/abstractnode.cpp
     ${JMESPATH_AST_SOURCE_DIR}/binarynode.h
-    ${JMESPATH_AST_SOURCE_DIR}/binarynode.cpp
     ${JMESPATH_AST_SOURCE_DIR}/variantnode.h
-    ${JMESPATH_AST_SOURCE_DIR}/variantnode.cpp
     ${JMESPATH_AST_SOURCE_DIR}/expressionnode.h
     ${JMESPATH_AST_SOURCE_DIR}/expressionnode.cpp
     ${JMESPATH_AST_SOURCE_DIR}/identifiernode.h
@@ -38,7 +34,6 @@ list(APPEND JMESPATH_SOURCE_FILES
     ${JMESPATH_AST_SOURCE_DIR}/arrayitemnode.h
     ${JMESPATH_AST_SOURCE_DIR}/arrayitemnode.cpp
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/abstractvisitor.h
-    ${JMESPATH_INTERPRETER_SOURCE_DIR}/abstractvisitor.cpp
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/expressionevaluator.h
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/expressionevaluator.cpp)
 set(JMESPATH_SOURCE_FILES ${JMESPATH_SOURCE_FILES} PARENT_SCOPE)
