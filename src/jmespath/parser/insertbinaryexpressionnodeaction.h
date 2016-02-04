@@ -61,7 +61,7 @@ struct InsertBinaryExpressionNodeAction
         // node
         if (!rootBinaryNode)
         {
-            rootNode.expression = currentNode;
+            rootNode.value = currentNode;
         }
         else
         {
@@ -121,7 +121,7 @@ struct InsertBinaryExpressionNodeAction
     ast::BinaryExpressionNode* toBinaryNode(ast::ExpressionNode* node) const
     {
         return boost::polymorphic_get<ast::BinaryExpressionNode>(
-                    &node->expression.variant);
+                    &node->value);
     }
     /**
      * @brief Finds the leftmost binary node under the given @a node whose rank

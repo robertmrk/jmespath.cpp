@@ -42,15 +42,14 @@ class IndexExpressionNode;
 /**
  * @brief The ExpressionNode class represents a JMESPath expression.
  */
-class ExpressionNode : public AbstractNode
-{
-public:
-    using Expression = VariantNode<boost::recursive_wrapper<IdentifierNode>,
+class ExpressionNode : public VariantNode<
+        boost::recursive_wrapper<IdentifierNode>,
         boost::recursive_wrapper<RawStringNode>,
         boost::recursive_wrapper<LiteralNode>,
         boost::recursive_wrapper<SubexpressionNode>,
-        boost::recursive_wrapper<IndexExpressionNode> >;
-
+        boost::recursive_wrapper<IndexExpressionNode> >
+{
+public:
     /**
      * @brief Constructs an empty ExpressionNode object
      */
@@ -60,7 +59,7 @@ public:
      * initialized to \a expression
      * @param expression The node's child expression
      */
-    ExpressionNode(const Expression& expression);
+    ExpressionNode(const ValueType& expression);
     /**
      * @brief Assigns the @a other object to this object.
      * @param other An ExpressionNode object.
@@ -72,29 +71,12 @@ public:
      * @param expression An Expression object.
      * @return Returns a reference to this object.
      */
-    ExpressionNode& operator=(const Expression& expression);
-    /**
-     * @brief Equality compares this node to the \a other
-     * @param other The node that should be compared.
-     * @return Returns true if this object is equal to the \a other, otherwise
-     * false
-     */
-    bool operator==(const ExpressionNode& other) const;
-    /**
-     * @brief Calls the visit method of the given \a visitor with the
-     * dynamic type of the node.
-     * @param visitor A visitor implementation
-     */
-    void accept(interpreter::AbstractVisitor* visitor) override;
-    /**
-     * @brief The node's child expression
-     */
-    Expression expression;
+    ExpressionNode& operator=(const ValueType& expression);
 };
 }} // namespace jmespath::ast
 
 BOOST_FUSION_ADAPT_STRUCT(
     jmespath::ast::ExpressionNode,
-    (jmespath::ast::ExpressionNode::Expression, expression)
+    (jmespath::ast::ExpressionNode::ValueType, value)
 )
 #endif // EXPRESSIONNODE_H

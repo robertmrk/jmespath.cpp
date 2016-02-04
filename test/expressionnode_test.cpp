@@ -48,7 +48,7 @@ TEST_CASE("ExpressionNode")
 
             ExpressionNode expression{identifier};
 
-            REQUIRE(expression.expression == identifier);
+            REQUIRE(expression == identifier);
         }
 
         SECTION("with raw string")
@@ -57,7 +57,7 @@ TEST_CASE("ExpressionNode")
 
             ExpressionNode expression{rawString};
 
-            REQUIRE(expression.expression == rawString);
+            REQUIRE(expression == rawString);
         }
 
         SECTION("with literal")
@@ -66,7 +66,7 @@ TEST_CASE("ExpressionNode")
 
             ExpressionNode expression{literal};
 
-            REQUIRE(expression.expression == literal);
+            REQUIRE(expression == literal);
         }
     }
 
@@ -87,7 +87,7 @@ TEST_CASE("ExpressionNode")
 
         node1 = node2;
 
-        REQUIRE(node1.expression == node2);
+        REQUIRE(node1 == node2);
     }
 
     SECTION("accepts visitor")

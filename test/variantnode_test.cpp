@@ -65,7 +65,7 @@ TEST_CASE("VariantNode")
 
         node2 = node1;
 
-        bool result = node1.variant == node2.variant;
+        bool result = node1.value == node2.value;
         REQUIRE(result);
     }
 

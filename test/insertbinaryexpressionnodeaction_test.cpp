@@ -84,9 +84,8 @@ TEST_CASE("InsertBinaryExpressionNodeAction")
                 BracketSpecifierNode{
                     FlattenOperatorNode{}},
                 ExpressionNode{}}};
-        auto index = boost::get<IndexExpressionNode>(&node.expression.variant);
-        auto sub = boost::get<SubexpressionNode>(
-                    &index->leftExpression.expression.variant);
+        auto index = boost::get<IndexExpressionNode>(&node.value);
+        auto sub = boost::get<SubexpressionNode>(&index->leftExpression.value);
 
         auto result = action.leftmostBinaryNode(&node,
                                                 nodeRank(SubexpressionNode{}));

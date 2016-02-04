@@ -67,7 +67,7 @@ struct NodeRankVisitor : public boost::static_visitor<>
 };
 
 template <>
-int nodeRank(const ast::ExpressionNode::Expression& node)
+int nodeRank(const ast::ExpressionNode& node)
 {
     if(node.isNull())
     {
@@ -75,14 +75,8 @@ int nodeRank(const ast::ExpressionNode::Expression& node)
     }
     else
     {
-        return boost::apply_visitor(NodeRankVisitor{}, node.variant);
+        return boost::apply_visitor(NodeRankVisitor{}, node.value);
     }
-}
-
-template <>
-int nodeRank(const ast::ExpressionNode& node)
-{
-    return nodeRank(node.expression);
 }
 
 template <>
@@ -94,7 +88,7 @@ int nodeRank(const ast::SubexpressionNode&)
 template <>
 int nodeRank(const ast::BracketSpecifierNode& node)
 {
-    return boost::apply_visitor(NodeRankVisitor{}, node.expression.variant);
+    return boost::apply_visitor(NodeRankVisitor{}, node.expression.value);
 }
 
 template <>

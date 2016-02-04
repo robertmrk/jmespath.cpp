@@ -30,13 +30,12 @@
 namespace jmespath { namespace ast {
 
 ExpressionNode::ExpressionNode()
-    : AbstractNode()
+    : VariantNode()
 {
 }
 
-ExpressionNode::ExpressionNode(const ExpressionNode::Expression &expression)
-    : AbstractNode(),
-      expression(expression)
+ExpressionNode::ExpressionNode(const ValueType &expression)
+    : VariantNode(expression)
 {
 }
 
@@ -44,31 +43,14 @@ ExpressionNode &ExpressionNode::operator=(const ExpressionNode &other)
 {
     if (this != &other)
     {
-        expression = other.expression;
+        value = other.value;
     }
     return *this;
 }
 
-ExpressionNode &ExpressionNode::operator=(const Expression &expression)
+ExpressionNode &ExpressionNode::operator=(const ValueType &expression)
 {
-    if (&this->expression != &expression)
-    {
-        this->expression = expression;
-    }
+    value = expression;
     return *this;
-}
-
-bool ExpressionNode::operator==(const ExpressionNode &other) const
-{
-    if (this != &other)
-    {
-        return expression == other.expression;
-    }
-    return true;
-}
-
-void ExpressionNode::accept(interpreter::AbstractVisitor *visitor)
-{
-    expression.accept(visitor);
 }
 }} // namespace jmespath::ast

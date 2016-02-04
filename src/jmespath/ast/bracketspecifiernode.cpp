@@ -58,6 +58,6 @@ bool BracketSpecifierNode::operator==(const BracketSpecifierNode &other) const
 
 bool BracketSpecifierNode::isProjection() const
 {
-    return (boost::get<ArrayItemNode>(&expression.variant) == nullptr);
+    return (boost::get<ArrayItemNode>(&expression.value) == nullptr);
 }
 }} // namespace jmespath::ast
