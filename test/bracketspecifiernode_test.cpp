@@ -26,39 +26,46 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/ast/binarynode.h"
-#include "jmespath/ast/identifiernode.h"
+#include "jmespath/ast/allnodes.h"
 #include "jmespath/interpreter/abstractvisitor.h"
-#include "jmespath/interpreter/expressionevaluator.h"
 
-TEST_CASE("BinaryNode")
+TEST_CASE("BracketSpecifierNode")
 {
     using namespace jmespath::ast;
+    using namespace jmespath::interpreter;
     using namespace fakeit;
-    using jmespath::interpreter::AbstractVisitor;
-    using BinaryNodeType = BinaryNode<IdentifierNode, IdentifierNode>;
 
-    SECTION("can be default constructed")
+    SECTION("can be constructed")
     {
-        REQUIRE_NOTHROW(BinaryNodeType{});
-    }
+        SECTION("without arguments")
+        {
+            REQUIRE_NOTHROW(BracketSpecifierNode{});
+        }
 
-    SECTION("can be constructed with left and right expression")
-    {
-        IdentifierNode id1{"id1"};
-        IdentifierNode id2{"id2"};
+        SECTION("with array item")
+        {
+            ArrayItemNode arrayItem{3};
 
-        BinaryNodeType node{id1, id2};
+            BracketSpecifierNode node{arrayItem};
 
-        REQUIRE(node.leftExpression == id1);
-        REQUIRE(node.rightExpression == id2);
+            REQUIRE(node.expression == arrayItem);
+        }
+
+        SECTION("with flatten operator")
+        {
+            FlattenOperatorNode flattenNode;
+
+            BracketSpecifierNode node{flattenNode};
+
+            REQUIRE(node.expression == flattenNode);
+        }
     }
 
     SECTION("can be compared for equality")
     {
-        BinaryNodeType node1{IdentifierNode{"id1"},
-                             IdentifierNode{"id2"}};
-        BinaryNodeType node2;
+        ArrayItemNode arrayItem{3};
+        BracketSpecifierNode node1{arrayItem};
+        BracketSpecifierNode node2;
         node2 = node1;
 
         REQUIRE(node1 == node2);
@@ -67,16 +74,30 @@ TEST_CASE("BinaryNode")
 
     SECTION("accepts visitor")
     {
-        IdentifierNode id1;
-        IdentifierNode id2;
-        BinaryNodeType node{id1, id2};
+        BracketSpecifierNode node{ArrayItemNode{}};
         Mock<AbstractVisitor> visitor;
-        When(OverloadedMethod(visitor, visit, void(IdentifierNode*)))
+        When(OverloadedMethod(visitor, visit, void(ArrayItemNode*)))
                 .AlwaysReturn();
 
         node.accept(&visitor.get());
 
-        Verify(OverloadedMethod(visitor, visit, void(IdentifierNode*)))
-                .Exactly(2);
+        Verify(OverloadedMethod(visitor, visit, void(ArrayItemNode*)))
+                .Once();
+    }
+
+    SECTION("returns true for isProjected if actual expression should be "
+            "projected")
+    {
+        BracketSpecifierNode node{FlattenOperatorNode{}};
+
+        REQUIRE(node.isProjection());
+    }
+
+    SECTION("returns false for isProjected if actual expression should not be "
+            "projected")
+    {
+        BracketSpecifierNode node{ArrayItemNode{}};
+
+        REQUIRE_FALSE(node.isProjection());
     }
 }

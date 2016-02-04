@@ -27,16 +27,14 @@
 ****************************************************************************/
 #ifndef SUBEXPRESSIONNODE_H
 #define SUBEXPRESSIONNODE_H
-#include "jmespath/ast/binarynode.h"
-#include "jmespath/ast/expressionnode.h"
+#include "jmespath/ast/binaryexpressionnode.h"
 
 namespace jmespath { namespace ast {
 
 /**
  * @brief The SubexpressionNode class represents a JMESPath subexpression.
  */
-class SubexpressionNode : public BinaryNode<ExpressionNode,
-        VariantNode<boost::recursive_wrapper<IdentifierNode> > >
+class SubexpressionNode : public BinaryExpressionNode
 {
 public:
     /**
@@ -49,14 +47,20 @@ public:
      * @param expression The node's left hand side child expression
      * @param subexpression The node's right hand side child expression
      */
-    SubexpressionNode(const LeftHandType& expression,
-                      const RightHandType& subexpression = boost::blank{});
+    SubexpressionNode(const ExpressionNode& expression,
+                      const ExpressionNode& subexpression = {});
+    /**
+     * @brief Returns whather this expression requires the projection of
+     * subsequent expressions.
+     * @return Returns true if projection is required, otherwise returns false.
+     */
+    bool isProjection() const override;
 };
 }} // namespace jmespath::ast
 
 BOOST_FUSION_ADAPT_STRUCT(
     jmespath::ast::SubexpressionNode,
-    (jmespath::ast::SubexpressionNode::LeftHandType, leftExpression)
-    (jmespath::ast::SubexpressionNode::RightHandType, rightExpression)
+    (jmespath::ast::ExpressionNode, leftExpression)
+    (jmespath::ast::ExpressionNode, rightExpression)
 )
 #endif // SUBEXPRESSIONNODE_H

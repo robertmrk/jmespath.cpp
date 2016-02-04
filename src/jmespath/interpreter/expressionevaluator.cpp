@@ -88,7 +88,8 @@ void ExpressionEvaluator::visit(ast::SubexpressionNode *node)
 
 void ExpressionEvaluator::visit(ast::IndexExpressionNode *node)
 {
-    node->accept(this);
+    visit(&node->leftExpression);
+    visit(&node->bracketSpecifier);
 }
 
 void ExpressionEvaluator::visit(ast::ArrayItemNode *node)
@@ -107,5 +108,14 @@ void ExpressionEvaluator::visit(ast::ArrayItemNode *node)
         }
     }
     m_context = result;
+}
+
+void ExpressionEvaluator::visit(ast::FlattenOperatorNode *node)
+{
+}
+
+void ExpressionEvaluator::visit(ast::BracketSpecifierNode *node)
+{
+    node->accept(this);
 }
 }} // namespace jmespath::interpreter

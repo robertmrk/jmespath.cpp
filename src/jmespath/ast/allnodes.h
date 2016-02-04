@@ -36,5 +36,7 @@
 #include "jmespath/ast/indexexpressionnode.h"
 #include "jmespath/ast/arrayitemnode.h"
 #include "jmespath/ast/variantnode.h"
-#include "jmespath/ast/binarynode.h"
+#include "jmespath/ast/binaryexpressionnode.h"
+#include "jmespath/ast/flattenoperatornode.h"
+#include "jmespath/ast/bracketspecifiernode.h"
 #endif // ALLNODES_H

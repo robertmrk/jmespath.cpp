@@ -39,6 +39,8 @@ class LiteralNode;
 class SubexpressionNode;
 class IndexExpressionNode;
 class ArrayItemNode;
+class FlattenOperatorNode;
+class BracketSpecifierNode;
 }} // namespace jmespath::ast
 
 /**
@@ -67,6 +69,8 @@ public:
     virtual void visit(ast::SubexpressionNode* node) = 0;
     virtual void visit(ast::IndexExpressionNode* node) = 0;
     virtual void visit(ast::ArrayItemNode* node) = 0;
+    virtual void visit(ast::FlattenOperatorNode* node) = 0;
+    virtual void visit(ast::BracketSpecifierNode* node) = 0;
     /** @}*/
 };
 }} // namespace jmespath::interpreter

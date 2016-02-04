@@ -25,50 +25,42 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
+#include "fakeit.hpp"
 #include "jmespath/ast/allnodes.h"
 
-namespace jmespath { namespace ast {
-
-ExpressionNode::ExpressionNode()
-    : AbstractNode()
+TEST_CASE("FlattenOperatorNode")
 {
-}
+    using namespace jmespath::ast;
+    using namespace jmespath::interpreter;
+    using namespace fakeit;
 
-ExpressionNode::ExpressionNode(const ExpressionNode::Expression &expression)
-    : AbstractNode(),
-      expression(expression)
-{
-}
-
-ExpressionNode &ExpressionNode::operator=(const ExpressionNode &other)
-{
-    if (this != &other)
+    SECTION("can be constructed")
     {
-        expression = other.expression;
+        SECTION("without parameters")
+        {
+            REQUIRE_NOTHROW(FlattenOperatorNode{});
+        }
     }
-    return *this;
-}
 
-ExpressionNode &ExpressionNode::operator=(const Expression &expression)
-{
-    if (&this->expression != &expression)
+    SECTION("can be compared for equality")
     {
-        this->expression = expression;
-    }
-    return *this;
-}
+        FlattenOperatorNode node1{};
+        FlattenOperatorNode node2{};
 
-bool ExpressionNode::operator==(const ExpressionNode &other) const
-{
-    if (this != &other)
+        REQUIRE(node1 == node2);
+        REQUIRE(node1 == node1);
+    }
+
+    SECTION("accepts visitor")
     {
-        return expression == other.expression;
-    }
-    return true;
-}
+        FlattenOperatorNode node{};
+        Mock<AbstractVisitor> visitor;
+        When(OverloadedMethod(visitor, visit, void(FlattenOperatorNode*)))
+                .AlwaysReturn();
 
-void ExpressionNode::accept(interpreter::AbstractVisitor *visitor)
-{
-    expression.accept(visitor);
+        node.accept(&visitor.get());
+
+        Verify(OverloadedMethod(visitor, visit, void(FlattenOperatorNode*)))
+                .Once();
+    }
 }
-}} // namespace jmespath::ast

@@ -52,7 +52,7 @@ public:
         boost::recursive_wrapper<IndexExpressionNode> >;
 
     /**
-     * @brief Constructs an empy ExpressionNode object
+     * @brief Constructs an empty ExpressionNode object
      */
     ExpressionNode();
     /**
@@ -61,6 +61,18 @@ public:
      * @param expression The node's child expression
      */
     ExpressionNode(const Expression& expression);
+    /**
+     * @brief Assigns the @a other object to this object.
+     * @param other An ExpressionNode object.
+     * @return Returns a reference to this object.
+     */
+    ExpressionNode& operator=(const ExpressionNode& other);
+    /**
+     * @brief Assigns the @a other Expression to this object's expression.
+     * @param expression An Expression object.
+     * @return Returns a reference to this object.
+     */
+    ExpressionNode& operator=(const Expression& expression);
     /**
      * @brief Equality compares this node to the \a other
      * @param other The node that should be compared.

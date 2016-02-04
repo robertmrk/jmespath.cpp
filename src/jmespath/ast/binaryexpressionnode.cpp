@@ -29,46 +29,32 @@
 
 namespace jmespath { namespace ast {
 
-ExpressionNode::ExpressionNode()
+BinaryExpressionNode::BinaryExpressionNode()
     : AbstractNode()
 {
 }
 
-ExpressionNode::ExpressionNode(const ExpressionNode::Expression &expression)
+BinaryExpressionNode::BinaryExpressionNode(const ExpressionNode &leftExpression,
+                                          const ExpressionNode &rightExpression)
     : AbstractNode(),
-      expression(expression)
+      leftExpression(leftExpression),
+      rightExpression(rightExpression)
 {
 }
 
-ExpressionNode &ExpressionNode::operator=(const ExpressionNode &other)
+bool BinaryExpressionNode::operator==(const BinaryExpressionNode &other) const
 {
     if (this != &other)
     {
-        expression = other.expression;
-    }
-    return *this;
-}
-
-ExpressionNode &ExpressionNode::operator=(const Expression &expression)
-{
-    if (&this->expression != &expression)
-    {
-        this->expression = expression;
-    }
-    return *this;
-}
-
-bool ExpressionNode::operator==(const ExpressionNode &other) const
-{
-    if (this != &other)
-    {
-        return expression == other.expression;
+        return (leftExpression == other.leftExpression)
+                && (rightExpression == other.rightExpression);
     }
     return true;
 }
 
-void ExpressionNode::accept(interpreter::AbstractVisitor *visitor)
+void BinaryExpressionNode::accept(interpreter::AbstractVisitor *visitor)
 {
-    expression.accept(visitor);
+    leftExpression.accept(visitor);
+    rightExpression.accept(visitor);
 }
 }} // namespace jmespath::ast

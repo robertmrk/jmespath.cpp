@@ -27,10 +27,12 @@
 ****************************************************************************/
 #include "fakeit.hpp"
 #include "jmespath/ast/allnodes.h"
+#include "jmespath/interpreter/abstractvisitor.h"
 
 TEST_CASE("IndexExpressionNode")
 {
     using namespace jmespath::ast;
+    using namespace jmespath::interpreter;
     using namespace fakeit;
 
     SECTION("can be constructed")
@@ -40,19 +42,69 @@ TEST_CASE("IndexExpressionNode")
             REQUIRE_NOTHROW(IndexExpressionNode{});
         }
 
-        SECTION("with array item")
+        SECTION("with bracket specifier")
         {
-            IndexExpressionNode node{ArrayItemNode{3}};
+            BracketSpecifierNode bracketNode{ArrayItemNode{3}};
 
-            REQUIRE(node.rightExpression == ArrayItemNode{3});
+            IndexExpressionNode node{bracketNode};
+
+            REQUIRE(node.bracketSpecifier == bracketNode);
         }
 
-        SECTION("with expression and array item")
+        SECTION("with left and right expression and bracket specifier")
         {
-            IndexExpressionNode node{ExpressionNode{}, ArrayItemNode{3}};
+            BracketSpecifierNode bracketNode{ArrayItemNode{3}};
+            ExpressionNode leftNode{IdentifierNode{"id1"}};
+            ExpressionNode rightNode{IdentifierNode{"id2"}};
 
-            REQUIRE(node.leftExpression == ExpressionNode{});
-            REQUIRE(node.rightExpression == ArrayItemNode{3});
+            IndexExpressionNode node{leftNode, bracketNode, rightNode};
+
+            REQUIRE(node.leftExpression == leftNode);
+            REQUIRE(node.bracketSpecifier == bracketNode);
+            REQUIRE(node.rightExpression == rightNode);
         }
+    }
+
+    SECTION("can be compared for equality")
+    {
+        BracketSpecifierNode bracketNode{ArrayItemNode{3}};
+        ExpressionNode leftNode{IdentifierNode{"id1"}};
+        ExpressionNode rightNode{IdentifierNode{"id2"}};
+        IndexExpressionNode node1{leftNode, bracketNode, rightNode};
+        IndexExpressionNode node2;
+        node2 = node1;
+
+        REQUIRE(node1 == node2);
+        REQUIRE(node1 == node1);
+    }
+
+    SECTION("returns true for isProjection if bracket specifier is projected")
+    {
+        BracketSpecifierNode bracketNode{FlattenOperatorNode{}};
+        IndexExpressionNode node{bracketNode};
+
+        REQUIRE(node.isProjection());
+    }
+
+    SECTION("returns false for isProjection if bracket specifier is not "
+            "projected")
+    {
+        IndexExpressionNode node{BracketSpecifierNode{ArrayItemNode{3}}};
+
+
+        REQUIRE_FALSE(node.isProjection());
+    }
+
+    SECTION("accepts visitor")
+    {
+        IndexExpressionNode node{};
+        Mock<AbstractVisitor> visitor;
+        When(OverloadedMethod(visitor, visit, void(IndexExpressionNode*)))
+                .AlwaysReturn();
+
+        node.accept(&visitor.get());
+
+        Verify(OverloadedMethod(visitor, visit, void(IndexExpressionNode*)))
+                .Once();
     }
 }

@@ -30,13 +30,18 @@
 namespace jmespath { namespace ast {
 
 SubexpressionNode::SubexpressionNode()
-    : BinaryNode()
+    : BinaryExpressionNode()
 {
 }
 
-SubexpressionNode::SubexpressionNode(const LeftHandType &expression,
-                                     const RightHandType &subexpression)
-    : BinaryNode(expression, subexpression)
+SubexpressionNode::SubexpressionNode(const ExpressionNode &expression,
+                                     const ExpressionNode &subexpression)
+    : BinaryExpressionNode(expression, subexpression)
 {
+}
+
+bool SubexpressionNode::isProjection() const
+{
+    return false;
 }
 }} // namespace jmespath::ast

@@ -25,50 +25,21 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "jmespath/ast/allnodes.h"
+#include "jmespath/ast/flattenoperatornode.h"
 
 namespace jmespath { namespace ast {
 
-ExpressionNode::ExpressionNode()
+FlattenOperatorNode::FlattenOperatorNode()
     : AbstractNode()
+{    
+}
+void FlattenOperatorNode::accept(interpreter::AbstractVisitor *visitor)
 {
+    visitor->visit(this);
 }
 
-ExpressionNode::ExpressionNode(const ExpressionNode::Expression &expression)
-    : AbstractNode(),
-      expression(expression)
+bool FlattenOperatorNode::operator==(const FlattenOperatorNode &other) const
 {
-}
-
-ExpressionNode &ExpressionNode::operator=(const ExpressionNode &other)
-{
-    if (this != &other)
-    {
-        expression = other.expression;
-    }
-    return *this;
-}
-
-ExpressionNode &ExpressionNode::operator=(const Expression &expression)
-{
-    if (&this->expression != &expression)
-    {
-        this->expression = expression;
-    }
-    return *this;
-}
-
-bool ExpressionNode::operator==(const ExpressionNode &other) const
-{
-    if (this != &other)
-    {
-        return expression == other.expression;
-    }
     return true;
-}
-
-void ExpressionNode::accept(interpreter::AbstractVisitor *visitor)
-{
-    expression.accept(visitor);
 }
 }} // namespace jmespath::ast

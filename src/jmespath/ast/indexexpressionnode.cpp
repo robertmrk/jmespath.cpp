@@ -30,19 +30,43 @@
 namespace jmespath { namespace ast {
 
 IndexExpressionNode::IndexExpressionNode()
-    : BinaryNode()
+    : BinaryExpressionNode()
 {
 }
 
-IndexExpressionNode::IndexExpressionNode(const RightHandType &subexpression)
-    : BinaryNode(LeftHandType{}, subexpression)
+IndexExpressionNode::IndexExpressionNode(const BracketSpecifierNode
+                                            &bracketSpecifier)
+    : BinaryExpressionNode(),
+      bracketSpecifier(bracketSpecifier)
 {
 }
 
-IndexExpressionNode::IndexExpressionNode(const LeftHandType &expression,
-                                         const RightHandType &subexpression)
-    : BinaryNode(expression, subexpression)
+IndexExpressionNode::IndexExpressionNode(const ExpressionNode &expression,
+                                         const BracketSpecifierNode
+                                            &bracketSpecifier,
+                                         const ExpressionNode &subexpression)
+    : BinaryExpressionNode(expression, subexpression),
+      bracketSpecifier(bracketSpecifier)
 {
+}
 
+bool IndexExpressionNode::operator ==(const IndexExpressionNode &other) const
+{
+    if (this != &other)
+    {
+        return BinaryExpressionNode::operator ==(other)
+                && (bracketSpecifier == other.bracketSpecifier);
+    }
+    return true;
+}
+
+bool IndexExpressionNode::isProjection() const
+{
+    return bracketSpecifier.isProjection();
+}
+
+void IndexExpressionNode::accept(interpreter::AbstractVisitor *visitor)
+{
+    visitor->visit(this);
 }
 }} // namespace jmespath::ast

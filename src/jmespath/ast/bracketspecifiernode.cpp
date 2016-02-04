@@ -25,32 +25,39 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef ROTATENODELEFTACTION_H
-#define ROTATENODELEFTACTION_H
+#include "jmespath/ast/bracketspecifiernode.h"
+#include "jmespath/ast/allnodes.h"
 
-namespace jmespath { namespace parser {
+namespace jmespath { namespace ast {
 
-/**
- * @brief The RotateNodeLeftAction struct is a functor that rotates an AST node
- * left, it can be used to make a right leaning subtree left leaning.
- */
-struct RotateNodeLeftAction
+BracketSpecifierNode::BracketSpecifierNode()
+    : AbstractNode()
 {
-    /**
-     * Executes the left rotation operation on @a node, by making @a node the
-     * left child of @a rightChild and making @a rightGrandChild the right
-     * child of @a rightChild node. The final value of @a rightChild will become
-     * the only child of the @a node.
-     */
-    template <typename T1, typename T2, typename T3>
-    void operator()(T1& node,
-                    T2& rightChild,
-                    const T3& rightGrancChild) const
+
+}
+
+BracketSpecifierNode::BracketSpecifierNode(const Expression &expression)
+    : AbstractNode(),
+      expression(expression)
+{
+}
+
+void BracketSpecifierNode::accept(interpreter::AbstractVisitor *visitor)
+{
+    expression.accept(visitor);
+}
+
+bool BracketSpecifierNode::operator==(const BracketSpecifierNode &other) const
+{
+    if (this != &other)
     {
-        rightChild.leftExpression = node;
-        rightChild.rightExpression = rightGrancChild;
-        node = T1{rightChild};
+        return expression == other.expression;
     }
-};
-}} // namespace jmespath::parser
-#endif // ROTATENODELEFTACTION_H
+    return true;
+}
+
+bool BracketSpecifierNode::isProjection() const
+{
+    return (boost::get<ArrayItemNode>(&expression.variant) == nullptr);
+}
+}} // namespace jmespath::ast

@@ -18,10 +18,13 @@ add_executable(${JMESPATH_UNITTEST_TARGET_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/variantvisitoradaptor_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/subexpressionnode_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/literalnode_test.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rotatenodeleftaction_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/indexexpressionnode_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/arrayitemnode_test.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/binarynode_test.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/flattenoperatornode_test.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/noderank_test.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/binaryexpressionnode_test.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/bracketspecifiernode_test.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/insertbinaryexpressionnodeaction_test.cpp)
 target_link_libraries(${JMESPATH_UNITTEST_TARGET_NAME} ${JMESPATH_TARGET_NAME})
 set_target_properties(${JMESPATH_UNITTEST_TARGET_NAME} PROPERTIES
     COMPILE_DEFINITIONS "BOOST_SPIRIT_UNICODE=1")

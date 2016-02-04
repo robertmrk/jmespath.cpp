@@ -26,30 +26,63 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/parser/rotatenodeleftaction.h"
+#include "jmespath/parser/noderank.h"
 #include "jmespath/ast/allnodes.h"
 
-TEST_CASE("RotateNodeLeftAction")
+TEST_CASE("nodeRank")
 {
     using namespace jmespath::parser;
     using namespace jmespath::ast;
     using namespace fakeit;
 
-    RotateNodeLeftAction action;
-
-    SECTION("rotates subtree left")
+    SECTION("ranks basic nodes at 0")
     {
-        ExpressionNode node{IdentifierNode{"id1"}};
-        SubexpressionNode rightChildNode;
-        IdentifierNode rightGrandChildNode{"id2"};
-        ExpressionNode expectedResult{
-            SubexpressionNode{
-                ExpressionNode{
-                    IdentifierNode{"id1"}},
-                IdentifierNode{"id2"}}};
+        REQUIRE(nodeRank(IdentifierNode{}) == 0);
+        REQUIRE(nodeRank(RawStringNode{}) == 0);
+        REQUIRE(nodeRank(LiteralNode{}) == 0);
+    }
 
-        action(node, rightChildNode, rightGrandChildNode);
+    SECTION("ranks empty expression node at -1")
+    {
+        REQUIRE(nodeRank(ExpressionNode{}) == -1);
+    }
 
-        REQUIRE(node == expectedResult);
+    SECTION("ranks non empty expression node with contained expression rank")
+    {
+        REQUIRE(nodeRank(ExpressionNode{IdentifierNode{}}) == 0);
+    }
+
+    SECTION("ranks subexpression node at 1")
+    {
+        REQUIRE(nodeRank(SubexpressionNode{}) == 1);
+    }
+
+    SECTION("ranks array item node at 1")
+    {
+        REQUIRE(nodeRank(ArrayItemNode{}) == 1);
+    }
+
+    SECTION("ranks flatten operator node at 2")
+    {
+        REQUIRE(nodeRank(FlattenOperatorNode{}) == 2);
+    }
+
+    SECTION("ranks bracket specifier node as its expression")
+    {
+        REQUIRE(nodeRank(BracketSpecifierNode{ArrayItemNode{}}) == 1);
+        REQUIRE(nodeRank(BracketSpecifierNode{FlattenOperatorNode{}}) == 2);
+    }
+
+    SECTION("ranks index expression node as its bracket specifier")
+    {
+        IndexExpressionNode node1{
+            BracketSpecifierNode{
+                ArrayItemNode{}}};
+        IndexExpressionNode node2{
+            BracketSpecifierNode{
+                FlattenOperatorNode{}}};
+
+        REQUIRE(nodeRank(node1) == 1);
+        REQUIRE(nodeRank(node2) == 2);
     }
 }

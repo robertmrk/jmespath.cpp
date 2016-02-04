@@ -25,50 +25,37 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "jmespath/ast/allnodes.h"
+#ifndef FLATTENOPERATORNODE_H
+#define FLATTENOPERATORNODE_H
+#include "jmespath/ast/abstractnode.h"
+#include "jmespath/ast/variantnode.h"
+#include <boost/fusion/include/adapt_struct.hpp>
 
 namespace jmespath { namespace ast {
 
-ExpressionNode::ExpressionNode()
-    : AbstractNode()
+/**
+ * @brief The FlattenOperatorNode class represents a JMESPath flatten operator.
+ */
+class FlattenOperatorNode : public AbstractNode
 {
-}
-
-ExpressionNode::ExpressionNode(const ExpressionNode::Expression &expression)
-    : AbstractNode(),
-      expression(expression)
-{
-}
-
-ExpressionNode &ExpressionNode::operator=(const ExpressionNode &other)
-{
-    if (this != &other)
-    {
-        expression = other.expression;
-    }
-    return *this;
-}
-
-ExpressionNode &ExpressionNode::operator=(const Expression &expression)
-{
-    if (&this->expression != &expression)
-    {
-        this->expression = expression;
-    }
-    return *this;
-}
-
-bool ExpressionNode::operator==(const ExpressionNode &other) const
-{
-    if (this != &other)
-    {
-        return expression == other.expression;
-    }
-    return true;
-}
-
-void ExpressionNode::accept(interpreter::AbstractVisitor *visitor)
-{
-    expression.accept(visitor);
-}
+public:
+    /**
+     * @brief Constructs a FlattenOperatorNode object.
+     */
+    FlattenOperatorNode();
+    /**
+     * @brief Calls the visit method of the given \a visitor with the
+     * dynamic type of the node.
+     * @param visitor A visitor implementation
+     */
+    void accept(interpreter::AbstractVisitor* visitor) override;
+    /**
+     * @brief Equality compares this node to the \a other
+     * @param other The node that should be compared.
+     * @return Returns true if this object is equal to the \a other, otherwise
+     * false
+     */
+    bool operator==(const FlattenOperatorNode& other) const;
+};
 }} // namespace jmespath::ast
+#endif // FLATTENOPERATORNODE_H

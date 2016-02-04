@@ -27,19 +27,16 @@
 ****************************************************************************/
 #ifndef INDEXEXPRESSIONNODE_H
 #define INDEXEXPRESSIONNODE_H
-#include "jmespath/ast/binarynode.h"
-#include "jmespath/ast/variantnode.h"
-#include "jmespath/ast/expressionnode.h"
+#include "jmespath/ast/binaryexpressionnode.h"
+#include "jmespath/ast/bracketspecifiernode.h"
 #include <boost/fusion/include/adapt_struct.hpp>
 
 namespace jmespath { namespace ast {
 
-class ArrayItemNode;
 /**
  * @brief The IndexExpressionNode class represents a JMESPath index expression.
  */
-class IndexExpressionNode : public BinaryNode<ExpressionNode,
-        VariantNode<boost::recursive_wrapper<ArrayItemNode> > >
+class IndexExpressionNode : public BinaryExpressionNode
 {
 public:
     /**
@@ -48,25 +45,51 @@ public:
     IndexExpressionNode();
     /**
      * @brief Constructs an IndexExpressionNode object with the given
-     * @a subexpression as its right hand child.
-     * @param subexpression The right hand child of the node.
+     * @a bracketSpecifier and empty left and right expressions.
+     * @param bracketSpecifier The bracket specifier node.
      */
-    IndexExpressionNode(const RightHandType& subexpression);
+    IndexExpressionNode(const BracketSpecifierNode& bracketSpecifier);
     /**
-     * @brief Constructs an IndexExpressionNode object with the given
-     * @a expression as it left hand child and @a subexpression as its right
-     * hand child.
-     * @param expression The left hand child node.
-     * @param subexpression The right hand child node.
+     * @brief Constructs an IndexExpressionNode with given @a expression as its
+     * left hand expression, @a subexpression as its right hand expression and
+     * with the given @a bracketSpecifier.
+     * @param expression The left hand expression of the node.
+     * @param bracketSpecifier The index expression's bracket specifier.
+     * @param subexpression The right hand expression of the node.
      */
-    IndexExpressionNode(const LeftHandType& expression,
-                        const RightHandType& subexpression);
+    IndexExpressionNode(const ExpressionNode& expression,
+                        const BracketSpecifierNode& bracketSpecifier,
+                        const ExpressionNode& subexpression = {});
+    /**
+     * @brief Equality compares this node to the \a other
+     * @param other The node that should be compared.
+     * @return Returns true if this object is equal to the \a other, otherwise
+     * false
+     */
+    bool operator ==(const IndexExpressionNode& other) const;
+    /**
+     * @brief Returns whather this expression requires the projection of
+     * subsequent expressions.
+     * @return Returns true if projection is required, otherwise returns false.
+     */
+    bool isProjection() const override;
+    /**
+     * @brief Calls the visit method of the given \a visitor with the
+     * dynamic type of the node.
+     * @param visitor A visitor implementation
+     */
+    void accept(interpreter::AbstractVisitor* visitor) override;
+    /**
+     * @brief The bracket specifier in an index expression.
+     */
+    BracketSpecifierNode bracketSpecifier;
 };
 }} // namespace jmespath::ast
 
 BOOST_FUSION_ADAPT_STRUCT(
     jmespath::ast::IndexExpressionNode,
-    (jmespath::ast::IndexExpressionNode::LeftHandType, leftExpression)
-    (jmespath::ast::IndexExpressionNode::RightHandType, rightExpression)
+    (jmespath::ast::ExpressionNode, leftExpression)
+    (jmespath::ast::BracketSpecifierNode, bracketSpecifier)
+    (jmespath::ast::ExpressionNode, rightExpression)
 )
 #endif // INDEXEXPRESSIONNODE_H

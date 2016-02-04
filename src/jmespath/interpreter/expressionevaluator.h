@@ -72,6 +72,8 @@ public:
     void visit(ast::SubexpressionNode* node) override;
     void visit(ast::IndexExpressionNode* node) override;
     void visit(ast::ArrayItemNode* node) override;
+    void visit(ast::FlattenOperatorNode* node) override;
+    void visit(ast::BracketSpecifierNode* node) override;
 
 private:
     /**

@@ -139,16 +139,39 @@ TEST_CASE("ExpressionEvaluator")
         evaluator.visit(&node.get());
 
         Verify(Method(node, accept).Using(&evaluator)).Once();
-    }
+    }    
 
-    SECTION("evaluates index expression")
+    SECTION("evaluates bracket specifier")
     {
-        Mock<ast::IndexExpressionNode> node;
+        Mock<ast::BracketSpecifierNode> node;
         When(Method(node, accept)).AlwaysReturn();
 
         evaluator.visit(&node.get());
 
         Verify(Method(node, accept).Using(&evaluator)).Once();
+    }
+
+    SECTION("evaluates index expression")
+    {
+        ast::IndexExpressionNode node;
+        Mock<ExpressionEvaluator> evaluatorMock(evaluator);
+        When(OverloadedMethod(evaluatorMock, visit,
+                              void(ast::ExpressionNode*)))
+                .AlwaysReturn();
+        When(OverloadedMethod(evaluatorMock, visit,
+                              void(ast::BracketSpecifierNode*)))
+                .AlwaysReturn();
+
+        evaluatorMock.get().visit(&node);
+
+        Verify(OverloadedMethod(evaluatorMock, visit,
+                                void(ast::ExpressionNode*))
+                    .Using(&node.leftExpression)
+               + OverloadedMethod(evaluatorMock, visit,
+                                  void(ast::BracketSpecifierNode*))
+                    .Using(&node.bracketSpecifier))
+                .Once();
+        VerifyNoOtherInvocations(evaluatorMock);
     }
 
     SECTION("evaluates array item expression")

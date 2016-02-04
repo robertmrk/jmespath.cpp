@@ -122,7 +122,8 @@ TEST_CASE("Grammar")
             auto expectedResult = ast::SubexpressionNode{
                     ast::ExpressionNode{
                         ast::IdentifierNode{"id1"}},
-                    ast::IdentifierNode{"id2"}};
+                    ast::ExpressionNode{
+                        ast::IdentifierNode{"id2"}}};
 
             REQUIRE(parseExpression(grammar, "\"id1\".\"id2\"").expression
                     == expectedResult);
@@ -133,11 +134,17 @@ TEST_CASE("Grammar")
             auto expectedResult = ast::SubexpressionNode{
                 ast::ExpressionNode{
                     ast::SubexpressionNode{
+                    ast::ExpressionNode{
+                        ast::SubexpressionNode{
                         ast::ExpressionNode{
                             ast::IdentifierNode{"id1"}},
-                        ast::IdentifierNode{"id2"}}},
-                ast::IdentifierNode{"id3"}};
-            String expression{"\"id1\".\"id2\".\"id3\""};
+                        ast::ExpressionNode{
+                            ast::IdentifierNode{"id2"}}}},
+                    ast::ExpressionNode{
+                        ast::IdentifierNode{"id3"}}}},
+                ast::ExpressionNode{
+                    ast::IdentifierNode{"id4"}}};
+            String expression{"\"id1\".\"id2\".\"id3\".\"id4\""};
 
             REQUIRE(parseExpression(grammar, expression).expression
                     == expectedResult);
@@ -148,7 +155,7 @@ TEST_CASE("Grammar")
             auto expectedResult = ast::IndexExpressionNode{
                 ast::ExpressionNode{
                     ast::IdentifierNode{"id"}},
-                ast::ArrayItemNode{3}};
+                ast::BracketSpecifierNode{ast::ArrayItemNode{3}}};
             String expression{"\"id\"[3]"};
 
             REQUIRE(parseExpression(grammar, expression).expression
@@ -162,8 +169,10 @@ TEST_CASE("Grammar")
                     ast::IndexExpressionNode{
                         ast::ExpressionNode{
                             ast::IdentifierNode{"id"}},
-                        ast::ArrayItemNode{2}}},
-                ast::ArrayItemNode{3}};
+                    ast::BracketSpecifierNode{
+                        ast::ArrayItemNode{2}}}},
+                ast::BracketSpecifierNode{
+                    ast::ArrayItemNode{3}}};
             String expression{"\"id\"[2][3]"};
 
             REQUIRE(parseExpression(grammar, expression).expression
@@ -174,7 +183,8 @@ TEST_CASE("Grammar")
         {
             auto expectedResult = ast::IndexExpressionNode{
                 ast::ExpressionNode{},
-                ast::ArrayItemNode{3}};
+                ast::BracketSpecifierNode{
+                    ast::ArrayItemNode{3}}};
             String expression{"[3]"};
 
             REQUIRE(parseExpression(grammar, expression).expression
@@ -190,9 +200,12 @@ TEST_CASE("Grammar")
                         ast::ExpressionNode{
                             ast::IndexExpressionNode{
                                 ast::ExpressionNode{},
-                                ast::ArrayItemNode{3}}},
-                        ast::ArrayItemNode{4}}},
-                ast::ArrayItemNode{5}};
+                                ast::BracketSpecifierNode{
+                                    ast::ArrayItemNode{3}}}},
+                        ast::BracketSpecifierNode{
+                            ast::ArrayItemNode{4}}}},
+                ast::BracketSpecifierNode{
+                    ast::ArrayItemNode{5}}};
             String expression{"[3][4][5]"};
 
             REQUIRE(parseExpression(grammar, expression).expression
@@ -205,8 +218,10 @@ TEST_CASE("Grammar")
                 ast::ExpressionNode{
                     ast::IndexExpressionNode{
                         ast::ExpressionNode{},
-                        ast::ArrayItemNode{4}}},
-                ast::IdentifierNode{"id"}};
+                        ast::BracketSpecifierNode{
+                            ast::ArrayItemNode{4}}}},
+                ast::ExpressionNode{
+                    ast::IdentifierNode{"id"}}};
             String expression{"[4].\"id\""};
 
             REQUIRE(parseExpression(grammar, expression).expression
@@ -220,9 +235,117 @@ TEST_CASE("Grammar")
                     ast::SubexpressionNode{
                         ast::ExpressionNode{
                             ast::IdentifierNode{"id1"}},
-                        ast::IdentifierNode{"id2"}}},
-                ast::ArrayItemNode{4}};
+                        ast::ExpressionNode{
+                            ast::IdentifierNode{"id2"}}}},
+                ast::BracketSpecifierNode{
+                    ast::ArrayItemNode{4}}};
             String expression{"\"id1\".\"id2\"[4]"};
+
+            REQUIRE(parseExpression(grammar, expression).expression
+                    == expectedResult);
+        }
+
+        SECTION("standalone flatten operator")
+        {
+            auto expectedResult = ast::IndexExpressionNode{
+                    ast::ExpressionNode{},
+                    ast::BracketSpecifierNode{
+                        ast::FlattenOperatorNode{}}};
+            String expression{"[]"};
+
+            REQUIRE(parseExpression(grammar, expression).expression
+                    == expectedResult);
+        }
+
+        SECTION("recursive standalone flatten operator")
+        {
+            auto expectedResult = ast::IndexExpressionNode{
+                    ast::ExpressionNode{
+                        ast::IndexExpressionNode{
+                            ast::ExpressionNode{},
+                            ast::BracketSpecifierNode{
+                                ast::FlattenOperatorNode{}}}},
+                    ast::BracketSpecifierNode{
+                        ast::FlattenOperatorNode{}}};
+            String expression{"[][]"};
+
+            REQUIRE(parseExpression(grammar, expression).expression
+                    == expectedResult);
+        }
+
+        SECTION("standalone flatten operator with subexpression")
+        {
+            auto expectedResult = ast::IndexExpressionNode{
+                    ast::ExpressionNode{},
+                    ast::BracketSpecifierNode{
+                        ast::FlattenOperatorNode{}},
+                    ast::ExpressionNode{
+                        ast::SubexpressionNode{
+                            ast::ExpressionNode{},
+                            ast::ExpressionNode{
+                                ast::IdentifierNode{"id"}}}}};
+            String expression{"[].id"};
+
+            REQUIRE(parseExpression(grammar, expression).expression
+                    == expectedResult);
+        }
+
+        SECTION("standalone flatten operator with recursive subexpression")
+        {
+            auto expectedResult = ast::IndexExpressionNode{
+                    ast::ExpressionNode{},
+                    ast::BracketSpecifierNode{
+                        ast::FlattenOperatorNode{}},
+                    ast::ExpressionNode{
+                        ast::SubexpressionNode{
+                            ast::ExpressionNode{
+                                ast::SubexpressionNode{
+                                    ast::ExpressionNode{
+                                        ast::SubexpressionNode{
+                                            ast::ExpressionNode{},
+                                            ast::ExpressionNode{
+                                                ast::IdentifierNode{"id1"}}}},
+                                    ast::ExpressionNode{
+                                        ast::IdentifierNode{"id2"}}}},
+                            ast::ExpressionNode{
+                                ast::IdentifierNode{"id3"}}}}};
+            String expression{"[].id1.id2.id3"};
+
+            REQUIRE(parseExpression(grammar, expression).expression
+                    == expectedResult);
+        }
+
+        SECTION("recursive flatten operators with recursive subexpressions")
+        {
+            auto expectedResult = ast::IndexExpressionNode{
+                ast::ExpressionNode{
+                    ast::IndexExpressionNode{
+                        ast::ExpressionNode{
+                            ast::IdentifierNode{"id1"}},
+                        ast::BracketSpecifierNode{
+                            ast::FlattenOperatorNode{}},
+                        ast::ExpressionNode{
+                            ast::SubexpressionNode{
+                                ast::ExpressionNode{
+                                    ast::SubexpressionNode{
+                                        ast::ExpressionNode{},
+                                        ast::ExpressionNode{
+                                            ast::IdentifierNode{"id2"}}}},
+                                ast::ExpressionNode{
+                                    ast::IdentifierNode{"id3"}}}}}},
+                ast::BracketSpecifierNode{
+                    ast::FlattenOperatorNode{}},
+                ast::ExpressionNode{
+                    ast::SubexpressionNode{
+                        ast::ExpressionNode{
+                            ast::SubexpressionNode{
+                                ast::ExpressionNode{},
+                                ast::ExpressionNode{
+                                    ast::IdentifierNode{"id4"}}}},
+                        ast::ExpressionNode{
+                            ast::ExpressionNode{
+                                ast::IdentifierNode{"id5"}}}}}};
+            String expression{"id1[].id2.id3[].id4.id5"};
 
             REQUIRE(parseExpression(grammar, expression).expression
                     == expectedResult);

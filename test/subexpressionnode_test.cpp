@@ -40,19 +40,19 @@ TEST_CASE("SubexpressionNode")
 
     SECTION("can be constructed with expression")
     {
-        ExpressionNode expression{};
+        ExpressionNode expression{IdentifierNode{"id"}};
         SubexpressionNode node{expression};
 
         REQUIRE(node.leftExpression == expression);
     }
 
-    SECTION("can be constructed with expression and identifier")
+    SECTION("can be constructed with left and right expression")
     {
-        ExpressionNode expression{};
-        IdentifierNode identifier{};
-        SubexpressionNode node{expression, identifier};
+        ExpressionNode leftExpression{IdentifierNode{"id1"}};
+        ExpressionNode rightExpression{IdentifierNode{"id2"}};
+        SubexpressionNode node{leftExpression, rightExpression};
 
-        REQUIRE(node.leftExpression == expression);
-        REQUIRE(node.rightExpression == identifier);
+        REQUIRE(node.leftExpression == leftExpression);
+        REQUIRE(node.rightExpression == rightExpression);
     }
 }
