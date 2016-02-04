@@ -63,6 +63,12 @@ public:
      * @return JSON document used as the context.
      */
     Json currentContext() const;
+    /**
+     * @brief Evaluates the projection of the given @a expression on the current
+     * context.
+     * @param expression The expression that gets projected.
+     */
+    virtual void evaluateProjection(ast::ExpressionNode* expression);
 
     void visit(ast::AbstractNode *node) override;
     void visit(ast::ExpressionNode *node) override;

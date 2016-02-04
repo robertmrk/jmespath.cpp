@@ -174,6 +174,37 @@ TEST_CASE("ExpressionEvaluator")
         VerifyNoOtherInvocations(evaluatorMock);
     }
 
+    SECTION("evaluates projected index expression")
+    {
+        ast::IndexExpressionNode node{
+            ast::ExpressionNode{},
+            ast::BracketSpecifierNode{
+                ast::FlattenOperatorNode{}},
+            ast::ExpressionNode{}};
+        Mock<ExpressionEvaluator> evaluatorMock(evaluator);
+        When(OverloadedMethod(evaluatorMock, visit,
+                              void(ast::ExpressionNode*)))
+                .AlwaysReturn();
+        When(OverloadedMethod(evaluatorMock, visit,
+                              void(ast::BracketSpecifierNode*)))
+                .AlwaysReturn();
+        When(Method(evaluatorMock, evaluateProjection))
+                .AlwaysReturn();
+
+        evaluatorMock.get().visit(&node);
+
+        Verify(OverloadedMethod(evaluatorMock, visit,
+                                void(ast::ExpressionNode*))
+                    .Using(&node.leftExpression)
+               + OverloadedMethod(evaluatorMock, visit,
+                                  void(ast::BracketSpecifierNode*))
+                    .Using(&node.bracketSpecifier)
+               + Method(evaluatorMock, evaluateProjection)
+                    .Using(&node.rightExpression))
+                .Once();
+        VerifyNoOtherInvocations(evaluatorMock);
+    }
+
     SECTION("evaluates array item expression")
     {
         ast::ArrayItemNode node{2};
@@ -210,6 +241,59 @@ TEST_CASE("ExpressionEvaluator")
         evaluator.setContext({"zero", "one", "two", "three", "four"});
 
         evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == Json{});
+    }
+
+    SECTION("evaluates projection")
+    {
+        Json context = {{{"id", 1}}, {{"id", 2}}, {{"id2", 3}}, {{"id", 4}}};
+        REQUIRE(context.is_array());
+        evaluator.setContext(context);
+        ast::ExpressionNode expression{
+            ast::IdentifierNode{"id"}};
+        evaluator.setContext(context);
+        Json expectedResult = {1, 2, 4};
+        REQUIRE(expectedResult.is_array());
+
+        evaluator.evaluateProjection(&expression);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates projection on non arrays to null")
+    {
+        Json context = "string";
+        REQUIRE(context.is_string());
+        ast::ExpressionNode expression{
+            ast::IdentifierNode{"id"}};
+        evaluator.setContext(context);
+
+        evaluator.evaluateProjection(&expression);
+
+        REQUIRE(evaluator.currentContext() == Json{});
+    }
+
+    SECTION("evaluates flatten operator")
+    {
+        Json context = "[1, 2, [3], [4, [5, 6, 7], 8], [9, 10] ]"_json;
+        evaluator.setContext(context);
+        Json expectedResult = "[1, 2, 3, 4, [5, 6, 7], 8, 9, 10]"_json;
+        ast::FlattenOperatorNode flattenNode;
+
+        evaluator.visit(&flattenNode);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates flatten operator on non array to null")
+    {
+        Json context = {{"id", "value"}};
+        REQUIRE(context.is_object());
+        evaluator.setContext(context);
+        ast::FlattenOperatorNode flattenNode;
+
+        evaluator.visit(&flattenNode);
 
         REQUIRE(evaluator.currentContext() == Json{});
     }
