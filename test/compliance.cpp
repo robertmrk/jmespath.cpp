@@ -48,8 +48,22 @@ protected:
             {
                 String expression = testCase["expression"];
                 Json expectedResult = testCase["result"];
+                Json expectedError = testCase["error"];
 
-                REQUIRE(search(expression, document) == expectedResult);
+                if (expectedError == "syntax")
+                {
+                    REQUIRE_THROWS_AS(search(expression, document),
+                                      SyntaxError);
+                }
+                else if (expectedError == "invalid-value")
+                {
+                    REQUIRE_THROWS_AS(search(expression, document),
+                                      InvalidValue);
+                }
+                else
+                {
+                    REQUIRE(search(expression, document) == expectedResult);
+                }
             }
         }
     }
@@ -100,8 +114,7 @@ TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Current node",
     executeFeatureTest("current");
 }
 
-TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Escapes",
-                 "[escape]")
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Escapes", "[escape]")
 {
     executeFeatureTest("escape");
 }
@@ -137,7 +150,7 @@ TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Pipe expressions",
 }
 
 TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Slice expressions",
-                 "[!hide][slice]")
+                 "[slice]")
 {
     executeFeatureTest("slice");
 }

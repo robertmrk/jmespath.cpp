@@ -29,6 +29,7 @@
 #define JMESPATH_H
 #include <string>
 #include "jmespath/detail/types.h"
+#include "jmespath/detail/exceptions.h"
 #include "json.hpp"
 
 /**
@@ -37,8 +38,7 @@
  */
 namespace jmespath {
 
-using detail::Json;
-using detail::String;
+using namespace detail;
 /**
  * @brief Finds or creates the results for the \a searchExpression
  * evaluated on the given \a document.
