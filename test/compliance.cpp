@@ -119,7 +119,7 @@ TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Functions",
 }
 
 TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Index expressions",
-                 "[!hide][indices]")
+                 "[indices]")
 {
     executeFeatureTest("indices");
 }
