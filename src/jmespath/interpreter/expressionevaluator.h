@@ -87,6 +87,15 @@ private:
      * @brief Stores the evaluation context.
      */
     Json m_context;
+    /**
+     * @brief Adjust the value of the slice endpoint to make sure it's within
+     * the array's bounds and points to the correct item.
+     * @param length The length of the array that should be sliced.
+     * @param endpoint The current value of the endpoint.
+     * @param step The slice's step variable value.
+     * @return Returns the endpoint's new value.
+     */
+    int adjustSliceEndpoint(int length, int endpoint, int step) const;
 };
 }} // namespace jmespath::interpreter
 #endif // EXPRESSIONEVALUATOR_H

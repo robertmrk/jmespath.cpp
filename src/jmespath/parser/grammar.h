@@ -131,7 +131,7 @@ public:
         m_sliceExpressionRule = -int_[at_c<0>(_val) = _1]
                 >> lit(':')
                 >> -int_[at_c<1>(_val) = _1]
-                >> -(lit(':') >> -(int_ - int_(0))[at_c<2>(_val) = _1]);
+                >> -(lit(':') >> -int_[at_c<2>(_val) = _1]);
         // match zero or more literal characters enclosed in grave accents
         m_literalRule = lexeme[ lit('\x60')
                 >> *m_literalCharRule[phx::bind(&Grammar::appendUtf8,

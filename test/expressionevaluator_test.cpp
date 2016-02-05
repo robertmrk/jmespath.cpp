@@ -28,12 +28,14 @@
 #include "fakeit.hpp"
 #include "jmespath/interpreter/expressionevaluator.h"
 #include "jmespath/ast/allnodes.h"
+#include "jmespath/detail/exceptions.h"
 
 TEST_CASE("ExpressionEvaluator")
 {
     using jmespath::interpreter::ExpressionEvaluator;
     using jmespath::detail::Json;
     using jmespath::detail::String;
+    using jmespath::detail::InvalidValue;
     namespace ast = jmespath::ast;
     using namespace fakeit;
 
@@ -296,5 +298,71 @@ TEST_CASE("ExpressionEvaluator")
         evaluator.visit(&flattenNode);
 
         REQUIRE(evaluator.currentContext() == Json{});
+    }
+
+
+    SECTION("evaluates slice expression on non array to null")
+    {
+        ast::SliceExpressionNode sliceNode{2, 5};
+
+        evaluator.visit(&sliceNode);
+
+        REQUIRE(evaluator.currentContext() == Json{});
+    }
+
+    SECTION("throws InvalidValue exception when slice expression"
+            "step equals to zero")
+    {
+        evaluator.setContext("[]"_json);
+        ast::SliceExpressionNode sliceNode{2, 5, 0};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&sliceNode), InvalidValue);
+    }
+
+    SECTION("evaluates slice expression")
+    {
+        Json context = "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]"_json;
+        evaluator.setContext(context);
+        ast::SliceExpressionNode sliceNode{2, 5};
+        Json expectedResult = "[2, 3, 4]"_json;
+
+        evaluator.visit(&sliceNode);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates slice expression with step index")
+    {
+        Json context = "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]"_json;
+        evaluator.setContext(context);
+        ast::SliceExpressionNode sliceNode{2, 5, 2};
+        Json expectedResult = "[2, 4]"_json;
+
+        evaluator.visit(&sliceNode);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates slice expression with negative step index")
+    {
+        Json context = "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]"_json;
+        evaluator.setContext(context);
+        ast::SliceExpressionNode sliceNode{5, 2, -1};
+        Json expectedResult = "[5, 4, 3]"_json;
+
+        evaluator.visit(&sliceNode);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates empty slice expression")
+    {
+        Json context = "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]"_json;
+        evaluator.setContext(context);
+        ast::SliceExpressionNode sliceNode;
+
+        evaluator.visit(&sliceNode);
+
+        REQUIRE(evaluator.currentContext() == context);
     }
 }

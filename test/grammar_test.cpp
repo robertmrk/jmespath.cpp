@@ -402,15 +402,4 @@ TEST_CASE("Grammar")
             REQUIRE(parseExpression(grammar, expression) == expectedResult);
         }
     }
-
-    SECTION("can not be used to parse")
-    {
-        SECTION("slice expression with step index equal to zero")
-        {
-            auto expectedResult = ast::ExpressionNode{};
-            String expression{"[1:3:0]"};
-
-            REQUIRE(parseExpression(grammar, expression) == expectedResult);
-        }
-    }
 }

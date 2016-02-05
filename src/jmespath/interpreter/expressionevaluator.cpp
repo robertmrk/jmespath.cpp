@@ -27,6 +27,7 @@
 ****************************************************************************/
 #include "jmespath/interpreter/expressionevaluator.h"
 #include "jmespath/ast/allnodes.h"
+#include "jmespath/detail/exceptions.h"
 #include <boost/range.hpp>
 #include <boost/range/algorithm.hpp>
 
@@ -168,5 +169,71 @@ void ExpressionEvaluator::visit(ast::BracketSpecifierNode *node)
 
 void ExpressionEvaluator::visit(ast::SliceExpressionNode *node)
 {
+    Json result;
+    Json contextArray = m_context;
+    if (contextArray.is_array())
+    {
+        int startIndex = 0;
+        int endIndex = 0;
+        int step = 1;
+        int length = contextArray.size();
+
+        if (node->step)
+        {
+            if (*node->step == 0)
+            {
+                BOOST_THROW_EXCEPTION(detail::InvalidValue{});
+            }
+            step = *node->step;
+        }
+        if (!node->start)
+        {
+            startIndex = step < 0 ? length - 1: 0;
+        }
+        else
+        {
+            startIndex = adjustSliceEndpoint(length, *node->start, step);
+        }
+        if (!node->stop)
+        {
+            endIndex = step < 0 ? -1 : length;
+        }
+        else
+        {
+            endIndex = adjustSliceEndpoint(length, *node->stop, step);
+        }
+
+        result = Json(Json::value_t::array);
+        auto beginIt = std::begin(contextArray);
+        auto it = beginIt + startIndex;
+        auto stopIt = beginIt + endIndex;
+
+        while (((step > 0) && (it < stopIt))
+               || ((step < 0) && (it > stopIt)))
+        {
+            result.push_back(*it);
+            it += step;
+        }
+    }
+    m_context = result;
+}
+
+int ExpressionEvaluator::adjustSliceEndpoint(int length,
+                                             int endpoint,
+                                             int step) const
+{
+    if (endpoint < 0)
+    {
+        endpoint += length;
+        if (endpoint < 0)
+        {
+            endpoint = step < 0 ? -1 : 0;
+        }
+    }
+    else if (endpoint >= length)
+    {
+        endpoint = step < 0 ? length - 1: length;
+    }
+    return endpoint;
 }
 }} // namespace jmespath::interpreter
