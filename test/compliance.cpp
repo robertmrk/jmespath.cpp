@@ -161,8 +161,7 @@ TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Syntax",
     executeFeatureTest("syntax");
 }
 
-TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Unicode",
-                 "[!hide][unicode]")
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Unicode", "[unicode]")
 {
     executeFeatureTest("unicode");
 }
