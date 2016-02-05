@@ -25,64 +25,64 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef BRACKETSPECIFIERNODE_H
-#define BRACKETSPECIFIERNODE_H
-#include "jmespath/ast/variantnode.h"
+#ifndef SLICEEXPRESSIONNODE_H
+#define SLICEEXPRESSIONNODE_H
+#include "jmespath/ast/abstractnode.h"
+#include "jmespath/interpreter/abstractvisitor.h"
 #include <boost/fusion/include/adapt_struct.hpp>
+#include <boost/optional.hpp>
 
 namespace jmespath { namespace ast {
 
-class ArrayItemNode;
-class FlattenOperatorNode;
-class SliceExpressionNode;
 /**
- * @brief The BracketSpecifierNode class represents a JMESPath bracket
- * specifier.
+ * @brief The SliceExpressionNode class represents a JMESPath slice expression.
  */
-class BracketSpecifierNode : public AbstractNode
+class SliceExpressionNode : public AbstractNode
 {
 public:
-    using Expression = VariantNode<boost::recursive_wrapper<ArrayItemNode>,
-        boost::recursive_wrapper<FlattenOperatorNode>,
-        boost::recursive_wrapper<SliceExpressionNode> >;
+    using IndexType = boost::optional<int>;
     /**
-     * @brief Constructs an empty BracketSpecifierNode object.
+     * @brief Constructs a SliceExpressionNode object with the given index
+     * values.
+     * @param start Inclusive start index of slice.
+     * @param stop Exclusive end index of slice.
+     * @param step Step index of slice.
      */
-    BracketSpecifierNode();
-    /**
-     * @brief Constructs a BracketSpecifierNode object with the given
-     * @a expression as its value.
-     * @param expression The node's child expression.
-     */
-    BracketSpecifierNode(const Expression& expression);
+    SliceExpressionNode(const IndexType& start = boost::none,
+                        const IndexType& stop = boost::none,
+                        const IndexType& step = boost::none);
     /**
      * @brief Calls the visit method of the given \a visitor with the
      * dynamic type of the node.
      * @param visitor A visitor implementation
      */
-    void accept(interpreter::AbstractVisitor *visitor) override;
+    void accept(interpreter::AbstractVisitor* visitor) override;
     /**
      * @brief Equality compares this node to the \a other
      * @param other The node that should be compared.
      * @return Returns true if this object is equal to the \a other, otherwise
      * false
      */
-    bool operator==(const BracketSpecifierNode& other) const;
+    bool operator==(const SliceExpressionNode& other) const;
     /**
-     * @brief Returns whather this expression requires the projection of
-     * subsequent expressions.
-     * @return Returns true if projection is required, otherwise returns false.
+     * @brief Inclusive start index.
      */
-    bool isProjection() const;
+    IndexType start;
     /**
-     * @brief The node's child expression
+     * @brief Exclusive end index.
      */
-    Expression expression;
+    IndexType stop;
+    /**
+     * @brief Step index.
+     */
+    IndexType step;
 };
 }} // namespace jmespath::ast
 
 BOOST_FUSION_ADAPT_STRUCT(
-    jmespath::ast::BracketSpecifierNode,
-    (jmespath::ast::BracketSpecifierNode::Expression, expression)
+    jmespath::ast::SliceExpressionNode,
+    (jmespath::ast::SliceExpressionNode::IndexType, start)
+    (jmespath::ast::SliceExpressionNode::IndexType, stop)
+    (jmespath::ast::SliceExpressionNode::IndexType, step)
 )
-#endif // BRACKETSPECIFIERNODE_H
+#endif // SLICEEXPRESSIONNODE_H

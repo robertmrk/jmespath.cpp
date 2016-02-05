@@ -39,6 +39,8 @@ list(APPEND JMESPATH_SOURCE_FILES
     ${JMESPATH_AST_SOURCE_DIR}/flattenoperatornode.cpp
     ${JMESPATH_AST_SOURCE_DIR}/bracketspecifiernode.h
     ${JMESPATH_AST_SOURCE_DIR}/bracketspecifiernode.cpp
+    ${JMESPATH_AST_SOURCE_DIR}/sliceexpressionnode.h
+    ${JMESPATH_AST_SOURCE_DIR}/sliceexpressionnode.cpp
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/abstractvisitor.h
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/expressionevaluator.h
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/expressionevaluator.cpp)

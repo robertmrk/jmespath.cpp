@@ -25,19 +25,34 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef ALLNODES_H
-#define ALLNODES_H
-#include "jmespath/ast/abstractnode.h"
-#include "jmespath/ast/expressionnode.h"
-#include "jmespath/ast/identifiernode.h"
-#include "jmespath/ast/rawstringnode.h"
-#include "jmespath/ast/literalnode.h"
-#include "jmespath/ast/subexpressionnode.h"
-#include "jmespath/ast/indexexpressionnode.h"
-#include "jmespath/ast/arrayitemnode.h"
-#include "jmespath/ast/variantnode.h"
-#include "jmespath/ast/binaryexpressionnode.h"
-#include "jmespath/ast/flattenoperatornode.h"
-#include "jmespath/ast/bracketspecifiernode.h"
 #include "jmespath/ast/sliceexpressionnode.h"
-#endif // ALLNODES_H
+#include "jmespath/interpreter/abstractvisitor.h"
+
+namespace jmespath { namespace ast {
+
+SliceExpressionNode::SliceExpressionNode(const IndexType &start,
+                                         const IndexType &stop,
+                                         const IndexType &step)
+    : AbstractNode(),
+      start(start),
+      stop(stop),
+      step(step)
+{
+}
+
+void SliceExpressionNode::accept(interpreter::AbstractVisitor *visitor)
+{
+    visitor->visit(this);
+}
+
+bool SliceExpressionNode::operator==(const SliceExpressionNode &other) const
+{
+    if (this != &other)
+    {
+        return (start == other.start)
+                && (stop == other.stop)
+                && (step == other.step);
+    }
+    return true;
+}
+}} // namespace jmespath::ast

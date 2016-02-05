@@ -165,4 +165,8 @@ void ExpressionEvaluator::visit(ast::BracketSpecifierNode *node)
 {
     node->accept(this);
 }
+
+void ExpressionEvaluator::visit(ast::SliceExpressionNode *node)
+{
+}
 }} // namespace jmespath::interpreter

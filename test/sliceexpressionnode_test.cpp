@@ -26,10 +26,10 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/ast/allnodes.h"
-#include "jmespath/interpreter/abstractvisitor.h"
+#include "jmespath/ast/sliceexpressionnode.h"
+#include <boost/optional/optional_io.hpp>
 
-TEST_CASE("BracketSpecifierNode")
+TEST_CASE("SliceExpressionNode")
 {
     using namespace jmespath::ast;
     using namespace jmespath::interpreter;
@@ -37,44 +37,47 @@ TEST_CASE("BracketSpecifierNode")
 
     SECTION("can be constructed")
     {
-        SECTION("without arguments")
+        SECTION("without parameters")
         {
-            REQUIRE_NOTHROW(BracketSpecifierNode{});
+            SliceExpressionNode node{};
+
+            REQUIRE_FALSE(node.start);
+            REQUIRE_FALSE(node.stop);
+            REQUIRE_FALSE(node.step);
         }
 
-        SECTION("with array item")
+        SECTION("with start index")
         {
-            ArrayItemNode arrayItem{3};
+            SliceExpressionNode node{3};
 
-            BracketSpecifierNode node{arrayItem};
-
-            REQUIRE(node.expression == arrayItem);
+            REQUIRE(node.start == 3);
+            REQUIRE_FALSE(node.stop);
+            REQUIRE_FALSE(node.step);
         }
 
-        SECTION("with flatten operator")
+        SECTION("with start and stop index")
         {
-            FlattenOperatorNode flattenNode;
+            SliceExpressionNode node{3, 5};
 
-            BracketSpecifierNode node{flattenNode};
-
-            REQUIRE(node.expression == flattenNode);
+            REQUIRE(node.start == 3);
+            REQUIRE(node.stop == 5);
+            REQUIRE_FALSE(node.step);
         }
 
-        SECTION("with slice expression")
+        SECTION("with start, stop and step index")
         {
-            SliceExpressionNode sliceNode;
+            SliceExpressionNode node{3, 5, -1};
 
-            BracketSpecifierNode node{sliceNode};
-
-            REQUIRE(node.expression == sliceNode);
+            REQUIRE(node.start == 3);
+            REQUIRE(node.stop == 5);
+            REQUIRE(node.step == -1);
         }
     }
 
     SECTION("can be compared for equality")
     {
-        ArrayItemNode arrayItem{3};
-        BracketSpecifierNode node1{arrayItem};
-        BracketSpecifierNode node2;
+        SliceExpressionNode node1{3, 5, -1};
+        SliceExpressionNode node2;
         node2 = node1;
 
         REQUIRE(node1 == node2);
@@ -83,30 +86,14 @@ TEST_CASE("BracketSpecifierNode")
 
     SECTION("accepts visitor")
     {
-        BracketSpecifierNode node{ArrayItemNode{}};
+        SliceExpressionNode node{};
         Mock<AbstractVisitor> visitor;
-        When(OverloadedMethod(visitor, visit, void(ArrayItemNode*)))
+        When(OverloadedMethod(visitor, visit, void(SliceExpressionNode*)))
                 .AlwaysReturn();
 
         node.accept(&visitor.get());
 
-        Verify(OverloadedMethod(visitor, visit, void(ArrayItemNode*)))
+        Verify(OverloadedMethod(visitor, visit, void(SliceExpressionNode*)))
                 .Once();
-    }
-
-    SECTION("returns true for isProjected if actual expression should be "
-            "projected")
-    {
-        BracketSpecifierNode node{FlattenOperatorNode{}};
-
-        REQUIRE(node.isProjection());
-    }
-
-    SECTION("returns false for isProjected if actual expression should not be "
-            "projected")
-    {
-        BracketSpecifierNode node{ArrayItemNode{}};
-
-        REQUIRE_FALSE(node.isProjection());
     }
 }

@@ -29,6 +29,7 @@
 #include "jmespath/parser/grammar.h"
 #include "jmespath/detail/types.h"
 #include <boost/spirit/include/qi.hpp>
+#include <boost/optional/optional_io.hpp>
 
 using namespace jmespath::parser;
 using namespace jmespath::detail;
@@ -349,6 +350,67 @@ TEST_CASE("Grammar")
 
             REQUIRE(parseExpression(grammar, expression)
                     == expectedResult);
+        }
+
+        SECTION("slice expression")
+        {
+            auto expectedResult = ast::IndexExpressionNode{
+                    ast::BracketSpecifierNode{
+                        ast::SliceExpressionNode{1, 3}}};
+            String expression{"[1:3]"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
+
+        SECTION("slice expression with implicit start and stop indices")
+        {
+            auto expectedResult = ast::IndexExpressionNode{
+                    ast::BracketSpecifierNode{
+                        ast::SliceExpressionNode{}}};
+            String expression{"[:]"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
+
+        SECTION("slice expression with implicit start, stop and step indices")
+        {
+            auto expectedResult = ast::IndexExpressionNode{
+                    ast::BracketSpecifierNode{
+                        ast::SliceExpressionNode{}}};
+            String expression{"[::]"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
+
+        SECTION("slice expression with step index")
+        {
+            auto expectedResult = ast::IndexExpressionNode{
+                    ast::BracketSpecifierNode{
+                        ast::SliceExpressionNode{1, 3, 2}}};
+            String expression{"[1:3:2]"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
+
+        SECTION("slice expression with negateive indices")
+        {
+            auto expectedResult = ast::IndexExpressionNode{
+                    ast::BracketSpecifierNode{
+                        ast::SliceExpressionNode{-1, -3, -1}}};
+            String expression{"[-1:-3:-1]"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
+    }
+
+    SECTION("can not be used to parse")
+    {
+        SECTION("slice expression with step index equal to zero")
+        {
+            auto expectedResult = ast::ExpressionNode{};
+            String expression{"[1:3:0]"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
         }
     }
 }

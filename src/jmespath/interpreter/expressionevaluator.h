@@ -80,6 +80,7 @@ public:
     void visit(ast::ArrayItemNode* node) override;
     void visit(ast::FlattenOperatorNode* node) override;
     void visit(ast::BracketSpecifierNode* node) override;
+    void visit(ast::SliceExpressionNode* node) override;
 
 private:
     /**
