@@ -26,18 +26,24 @@
 **
 ****************************************************************************/
 #include "jmespath/ast/identifiernode.h"
+#include "jmespath/interpreter/abstractvisitor.h"
 
 namespace jmespath { namespace ast {
 
 IdentifierNode::IdentifierNode()
-    : Node()
+    : AbstractNode()
 {
 }
 
 IdentifierNode::IdentifierNode(const detail::String &identifier)
-    : Node(),
+    : AbstractNode(),
       identifier(identifier)
 {
+}
+
+void IdentifierNode::accept(interpreter::AbstractVisitor *visitor)
+{
+    visitor->visit(this);
 }
 
 bool IdentifierNode::operator==(const IdentifierNode &other) const

@@ -25,32 +25,52 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef ROTATENODELEFTACTION_H
-#define ROTATENODELEFTACTION_H
+#ifndef ARRAYITEMNODE_H
+#define ARRAYITEMNODE_H
+#include "jmespath/ast/abstractnode.h"
+#include <boost/fusion/include/adapt_struct.hpp>
 
-namespace jmespath { namespace parser {
+namespace jmespath { namespace ast {
 
 /**
- * @brief The RotateNodeLeftAction struct is a functor that rotates an AST node
- * left, it can be used to make a right leaning subtree left leaning.
+ * @brief The ArrayItemNode class represents a JMESPath array index
+ * expression.
  */
-struct RotateNodeLeftAction
+class ArrayItemNode : public AbstractNode
 {
+public:
     /**
-     * Executes the left rotation operation on @a node, by making @a node the
-     * left child of @a rightChild and making @a rightGrandChild the right
-     * child of @a rightChild node. The final value of @a rightChild will become
-     * the only child of the @a node.
+     * @brief Constructs an empty ArrayItemNode object.
      */
-    template <typename T1, typename T2, typename T3>
-    void operator()(T1& node,
-                    T2& rightChild,
-                    const T3& rightGrancChild) const
-    {
-        rightChild.expression = node;
-        rightChild.subexpression = rightGrancChild;
-        node = T1{rightChild};
-    }
+    ArrayItemNode();
+    /**
+     * @brief Constructs an ArrayItemNode object with the given @a index as its
+     * value.
+     * @param index The node's value.
+     */
+    ArrayItemNode(int index);
+    /**
+     * @brief Calls the visit method of the given \a visitor with the
+     * dynamic type of the node.
+     * @param visitor A visitor implementation
+     */
+    void accept(interpreter::AbstractVisitor* visitor) override;
+    /**
+     * @brief Equality compares this node to the \a other
+     * @param other The node that should be compared.
+     * @return Returns true if this object is equal to the \a other, otherwise
+     * false
+     */
+    bool operator==(const ArrayItemNode& other) const;
+    /**
+     * @brief The node's value.
+     */
+    int index;
 };
-}} // namespace jmespath::parser
-#endif // ROTATENODELEFTACTION_H
+}} // namespace jmespath::ast
+
+BOOST_FUSION_ADAPT_STRUCT(
+    jmespath::ast::ArrayItemNode,
+    (int, index)
+)
+#endif // ARRAYITEMNODE_H

@@ -25,4 +25,21 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "jmespath/parser/rotatenodeleftaction.h"
+#include "jmespath/ast/flattenoperatornode.h"
+
+namespace jmespath { namespace ast {
+
+FlattenOperatorNode::FlattenOperatorNode()
+    : AbstractNode()
+{    
+}
+void FlattenOperatorNode::accept(interpreter::AbstractVisitor *visitor)
+{
+    visitor->visit(this);
+}
+
+bool FlattenOperatorNode::operator==(const FlattenOperatorNode &other) const
+{
+    return true;
+}
+}} // namespace jmespath::ast

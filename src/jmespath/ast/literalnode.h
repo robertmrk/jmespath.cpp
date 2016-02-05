@@ -27,7 +27,7 @@
 ****************************************************************************/
 #ifndef LITERALNODE_H
 #define LITERALNODE_H
-#include "jmespath/ast/node.h"
+#include "jmespath/ast/abstractnode.h"
 #include "jmespath/detail/types.h"
 #include <boost/fusion/include/adapt_struct.hpp>
 
@@ -37,7 +37,7 @@ using jmespath::detail::String;
 /**
  * @brief The LiteralNode class represents a JMESPath literal string
  */
-class LiteralNode : public Node
+class LiteralNode : public AbstractNode
 {
 public:
     /**
@@ -49,6 +49,12 @@ public:
      * @param value The value of the literal string.
      */
     LiteralNode(const String& value);
+    /**
+     * @brief Calls the visit method of the given \a visitor with the
+     * dynamic type of the node.
+     * @param visitor A visitor implementation
+     */
+    void accept(interpreter::AbstractVisitor* visitor) override;
     /**
      * @brief Equality compares this node to the \a other
      * @param other The node that should be compared.

@@ -26,79 +26,63 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
+#include "jmespath/parser/noderank.h"
 #include "jmespath/ast/allnodes.h"
-#include "jmespath/interpreter/abstractvisitor.h"
 
-TEST_CASE("ExpressionNode")
+TEST_CASE("nodeRank")
 {
+    using namespace jmespath::parser;
     using namespace jmespath::ast;
-    using namespace jmespath::interpreter;
     using namespace fakeit;
 
-    SECTION("can be constructed")
+    SECTION("ranks basic nodes at 0")
     {
-        SECTION("without parameters")
-        {
-            REQUIRE_NOTHROW(ExpressionNode{});
-        }
-
-        SECTION("with identifier")
-        {
-            IdentifierNode identifier;
-
-            ExpressionNode expression{identifier};
-
-            REQUIRE(expression == identifier);
-        }
-
-        SECTION("with raw string")
-        {
-            RawStringNode rawString;
-
-            ExpressionNode expression{rawString};
-
-            REQUIRE(expression == rawString);
-        }
-
-        SECTION("with literal")
-        {
-            LiteralNode literal;
-
-            ExpressionNode expression{literal};
-
-            REQUIRE(expression == literal);
-        }
+        REQUIRE(nodeRank(IdentifierNode{}) == 0);
+        REQUIRE(nodeRank(RawStringNode{}) == 0);
+        REQUIRE(nodeRank(LiteralNode{}) == 0);
     }
 
-    SECTION("accepts assignment of another ExpressionNode")
+    SECTION("ranks empty expression node at -1")
     {
-        ExpressionNode node1;
-        ExpressionNode node2{IdentifierNode{}};
-
-        node1 = node2;
-
-        REQUIRE(node1 == node2);
+        REQUIRE(nodeRank(ExpressionNode{}) == -1);
     }
 
-    SECTION("accepts assignment of an ExpressionNode::Expression")
+    SECTION("ranks non empty expression node with contained expression rank")
     {
-        ExpressionNode node1;
-        IdentifierNode node2;
-
-        node1 = node2;
-
-        REQUIRE(node1 == node2);
+        REQUIRE(nodeRank(ExpressionNode{IdentifierNode{}}) == 0);
     }
 
-    SECTION("accepts visitor")
+    SECTION("ranks subexpression node at 1")
     {
-        ExpressionNode node{IdentifierNode{}};
-        Mock<AbstractVisitor> visitor;
-        When(OverloadedMethod(visitor, visit, void(IdentifierNode*)))
-                .AlwaysReturn();
+        REQUIRE(nodeRank(SubexpressionNode{}) == 1);
+    }
 
-        node.accept(&visitor.get());
+    SECTION("ranks array item node at 1")
+    {
+        REQUIRE(nodeRank(ArrayItemNode{}) == 1);
+    }
 
-        Verify(OverloadedMethod(visitor, visit, void(IdentifierNode*))).Once();
+    SECTION("ranks flatten operator node at 2")
+    {
+        REQUIRE(nodeRank(FlattenOperatorNode{}) == 2);
+    }
+
+    SECTION("ranks bracket specifier node as its expression")
+    {
+        REQUIRE(nodeRank(BracketSpecifierNode{ArrayItemNode{}}) == 1);
+        REQUIRE(nodeRank(BracketSpecifierNode{FlattenOperatorNode{}}) == 2);
+    }
+
+    SECTION("ranks index expression node as its bracket specifier")
+    {
+        IndexExpressionNode node1{
+            BracketSpecifierNode{
+                ArrayItemNode{}}};
+        IndexExpressionNode node2{
+            BracketSpecifierNode{
+                FlattenOperatorNode{}}};
+
+        REQUIRE(nodeRank(node1) == 1);
+        REQUIRE(nodeRank(node2) == 2);
     }
 }

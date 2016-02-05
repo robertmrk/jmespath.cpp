@@ -25,25 +25,62 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef NODE_H
-#define NODE_H
-#include "jmespath/ast/abstractnode.h"
+#ifndef BRACKETSPECIFIERNODE_H
+#define BRACKETSPECIFIERNODE_H
+#include "jmespath/ast/variantnode.h"
+#include <boost/fusion/include/adapt_struct.hpp>
 
 namespace jmespath { namespace ast {
 
+class ArrayItemNode;
+class FlattenOperatorNode;
 /**
- * @brief The Node class is the common base class for all node types which
- * provides default implementations for the methods declared in AbstractNode.
+ * @brief The BracketSpecifierNode class represents a JMESPath bracket
+ * specifier.
  */
-class Node : public AbstractNode
+class BracketSpecifierNode : public AbstractNode
 {
 public:
+    using Expression = VariantNode<boost::recursive_wrapper<ArrayItemNode>,
+        boost::recursive_wrapper<FlattenOperatorNode> >;
+    /**
+     * @brief Constructs an empty BracketSpecifierNode object.
+     */
+    BracketSpecifierNode();
+    /**
+     * @brief Constructs a BracketSpecifierNode object with the given
+     * @a expression as its value.
+     * @param expression The node's child expression.
+     */
+    BracketSpecifierNode(const Expression& expression);
     /**
      * @brief Calls the visit method of the given \a visitor with the
      * dynamic type of the node.
      * @param visitor A visitor implementation
      */
-    void accept(interpreter::AbstractVisitor* visitor) override;
+    void accept(interpreter::AbstractVisitor *visitor) override;
+    /**
+     * @brief Equality compares this node to the \a other
+     * @param other The node that should be compared.
+     * @return Returns true if this object is equal to the \a other, otherwise
+     * false
+     */
+    bool operator==(const BracketSpecifierNode& other) const;
+    /**
+     * @brief Returns whather this expression requires the projection of
+     * subsequent expressions.
+     * @return Returns true if projection is required, otherwise returns false.
+     */
+    bool isProjection() const;
+    /**
+     * @brief The node's child expression
+     */
+    Expression expression;
 };
 }} // namespace jmespath::ast
-#endif // NODE_H
+
+BOOST_FUSION_ADAPT_STRUCT(
+    jmespath::ast::BracketSpecifierNode,
+    (jmespath::ast::BracketSpecifierNode::Expression, expression)
+)
+#endif // BRACKETSPECIFIERNODE_H

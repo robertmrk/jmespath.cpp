@@ -25,32 +25,39 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
+#include "jmespath/ast/bracketspecifiernode.h"
 #include "jmespath/ast/allnodes.h"
 
 namespace jmespath { namespace ast {
 
-ExpressionNode::ExpressionNode()
-    : VariantNode()
+BracketSpecifierNode::BracketSpecifierNode()
+    : AbstractNode()
+{
+
+}
+
+BracketSpecifierNode::BracketSpecifierNode(const Expression &expression)
+    : AbstractNode(),
+      expression(expression)
 {
 }
 
-ExpressionNode::ExpressionNode(const ValueType &expression)
-    : VariantNode(expression)
+void BracketSpecifierNode::accept(interpreter::AbstractVisitor *visitor)
 {
+    expression.accept(visitor);
 }
 
-ExpressionNode &ExpressionNode::operator=(const ExpressionNode &other)
+bool BracketSpecifierNode::operator==(const BracketSpecifierNode &other) const
 {
     if (this != &other)
     {
-        value = other.value;
+        return expression == other.expression;
     }
-    return *this;
+    return true;
 }
 
-ExpressionNode &ExpressionNode::operator=(const ValueType &expression)
+bool BracketSpecifierNode::isProjection() const
 {
-    value = expression;
-    return *this;
+    return (boost::get<ArrayItemNode>(&expression.value) == nullptr);
 }
 }} // namespace jmespath::ast

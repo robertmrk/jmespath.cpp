@@ -26,26 +26,78 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/ast/node.h"
+#include "jmespath/ast/allnodes.h"
 #include "jmespath/interpreter/abstractvisitor.h"
 
-TEST_CASE("Node")
+TEST_CASE("BracketSpecifierNode")
 {
     using namespace jmespath::ast;
     using namespace jmespath::interpreter;
     using namespace fakeit;
 
-    SECTION("calls visitor with the dynamic type of the node")
+    SECTION("can be constructed")
     {
-        Node node;
-        AbstractNode* abstractNode = &node;
+        SECTION("without arguments")
+        {
+            REQUIRE_NOTHROW(BracketSpecifierNode{});
+        }
+
+        SECTION("with array item")
+        {
+            ArrayItemNode arrayItem{3};
+
+            BracketSpecifierNode node{arrayItem};
+
+            REQUIRE(node.expression == arrayItem);
+        }
+
+        SECTION("with flatten operator")
+        {
+            FlattenOperatorNode flattenNode;
+
+            BracketSpecifierNode node{flattenNode};
+
+            REQUIRE(node.expression == flattenNode);
+        }
+    }
+
+    SECTION("can be compared for equality")
+    {
+        ArrayItemNode arrayItem{3};
+        BracketSpecifierNode node1{arrayItem};
+        BracketSpecifierNode node2;
+        node2 = node1;
+
+        REQUIRE(node1 == node2);
+        REQUIRE(node1 == node1);
+    }
+
+    SECTION("accepts visitor")
+    {
+        BracketSpecifierNode node{ArrayItemNode{}};
         Mock<AbstractVisitor> visitor;
-        When(OverloadedMethod(visitor, visit, void(Node*)))
+        When(OverloadedMethod(visitor, visit, void(ArrayItemNode*)))
                 .AlwaysReturn();
 
-        abstractNode->accept(&visitor.get());
+        node.accept(&visitor.get());
 
-        Verify(OverloadedMethod(visitor, visit, void(Node*))).Once();
-        VerifyNoOtherInvocations(visitor);
+        Verify(OverloadedMethod(visitor, visit, void(ArrayItemNode*)))
+                .Once();
+    }
+
+    SECTION("returns true for isProjected if actual expression should be "
+            "projected")
+    {
+        BracketSpecifierNode node{FlattenOperatorNode{}};
+
+        REQUIRE(node.isProjection());
+    }
+
+    SECTION("returns false for isProjected if actual expression should not be "
+            "projected")
+    {
+        BracketSpecifierNode node{ArrayItemNode{}};
+
+        REQUIRE_FALSE(node.isProjection());
     }
 }

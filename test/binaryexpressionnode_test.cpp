@@ -28,77 +28,78 @@
 #include "fakeit.hpp"
 #include "jmespath/ast/allnodes.h"
 #include "jmespath/interpreter/abstractvisitor.h"
+#include "jmespath/interpreter/expressionevaluator.h"
 
-TEST_CASE("ExpressionNode")
+using namespace jmespath::ast;
+
+class BinaryExpressionNodeStub : public BinaryExpressionNode
 {
-    using namespace jmespath::ast;
-    using namespace jmespath::interpreter;
+public:
+    BinaryExpressionNodeStub() : BinaryExpressionNode()
+    {
+    }
+
+    BinaryExpressionNodeStub(const ExpressionNode& leftExpression,
+                             const ExpressionNode& rightExpression)
+        : BinaryExpressionNode(leftExpression, rightExpression)
+    {
+    }
+
+    void accept(jmespath::interpreter::AbstractVisitor* visitor) override
+    {
+        BinaryExpressionNode::accept(visitor);
+    }
+
+    bool isProjection() const override
+    {
+        return false;
+    }
+};
+
+TEST_CASE("BinaryExpressionNode")
+{
     using namespace fakeit;
+    using jmespath::interpreter::AbstractVisitor;
 
-    SECTION("can be constructed")
+    SECTION("can be default constructed")
     {
-        SECTION("without parameters")
-        {
-            REQUIRE_NOTHROW(ExpressionNode{});
-        }
-
-        SECTION("with identifier")
-        {
-            IdentifierNode identifier;
-
-            ExpressionNode expression{identifier};
-
-            REQUIRE(expression == identifier);
-        }
-
-        SECTION("with raw string")
-        {
-            RawStringNode rawString;
-
-            ExpressionNode expression{rawString};
-
-            REQUIRE(expression == rawString);
-        }
-
-        SECTION("with literal")
-        {
-            LiteralNode literal;
-
-            ExpressionNode expression{literal};
-
-            REQUIRE(expression == literal);
-        }
+        REQUIRE_NOTHROW(BinaryExpressionNodeStub{});
     }
 
-    SECTION("accepts assignment of another ExpressionNode")
+    SECTION("can be constructed with left and right expression")
     {
-        ExpressionNode node1;
-        ExpressionNode node2{IdentifierNode{}};
+        ExpressionNode leftNode{IdentifierNode{"id1"}};
+        ExpressionNode rightNode{IdentifierNode{"id2"}};
 
-        node1 = node2;
+        BinaryExpressionNodeStub node{leftNode, rightNode};
 
-        REQUIRE(node1 == node2);
+        REQUIRE(node.leftExpression == leftNode);
+        REQUIRE(node.rightExpression == rightNode);
     }
 
-    SECTION("accepts assignment of an ExpressionNode::Expression")
+    SECTION("can be compared for equality")
     {
-        ExpressionNode node1;
-        IdentifierNode node2;
-
-        node1 = node2;
+        BinaryExpressionNodeStub node1{ExpressionNode{IdentifierNode{"id1"}},
+                                       ExpressionNode{IdentifierNode{"id2"}}};
+        BinaryExpressionNodeStub node2;
+        node2 = node1;
 
         REQUIRE(node1 == node2);
+        REQUIRE(node1 == node1);
     }
 
     SECTION("accepts visitor")
     {
-        ExpressionNode node{IdentifierNode{}};
+        ExpressionNode leftNode{IdentifierNode{"id1"}};
+        ExpressionNode rightNode{IdentifierNode{"id2"}};
+        BinaryExpressionNodeStub node{leftNode, rightNode};
         Mock<AbstractVisitor> visitor;
         When(OverloadedMethod(visitor, visit, void(IdentifierNode*)))
                 .AlwaysReturn();
 
         node.accept(&visitor.get());
 
-        Verify(OverloadedMethod(visitor, visit, void(IdentifierNode*))).Once();
+        Verify(OverloadedMethod(visitor, visit, void(IdentifierNode*)))
+                .Exactly(2);
     }
 }

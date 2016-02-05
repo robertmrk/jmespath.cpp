@@ -25,32 +25,33 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "jmespath/ast/allnodes.h"
+#include "jmespath/ast/arrayitemnode.h"
+#include "jmespath/interpreter/abstractvisitor.h"
 
 namespace jmespath { namespace ast {
 
-ExpressionNode::ExpressionNode()
-    : VariantNode()
+ArrayItemNode::ArrayItemNode()
+    : ArrayItemNode(0)
 {
 }
 
-ExpressionNode::ExpressionNode(const ValueType &expression)
-    : VariantNode(expression)
+ArrayItemNode::ArrayItemNode(int index)
+    : AbstractNode(),
+      index(index)
 {
 }
 
-ExpressionNode &ExpressionNode::operator=(const ExpressionNode &other)
+void ArrayItemNode::accept(interpreter::AbstractVisitor *visitor)
+{
+    visitor->visit(this);
+}
+
+bool ArrayItemNode::operator==(const ArrayItemNode &other) const
 {
     if (this != &other)
     {
-        value = other.value;
+        return index == other.index;
     }
-    return *this;
-}
-
-ExpressionNode &ExpressionNode::operator=(const ValueType &expression)
-{
-    value = expression;
-    return *this;
+    return true;
 }
 }} // namespace jmespath::ast

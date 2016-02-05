@@ -25,4 +25,36 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "jmespath/ast/abstractnode.h"
+#include "jmespath/ast/allnodes.h"
+
+namespace jmespath { namespace ast {
+
+BinaryExpressionNode::BinaryExpressionNode()
+    : AbstractNode()
+{
+}
+
+BinaryExpressionNode::BinaryExpressionNode(const ExpressionNode &leftExpression,
+                                          const ExpressionNode &rightExpression)
+    : AbstractNode(),
+      leftExpression(leftExpression),
+      rightExpression(rightExpression)
+{
+}
+
+bool BinaryExpressionNode::operator==(const BinaryExpressionNode &other) const
+{
+    if (this != &other)
+    {
+        return (leftExpression == other.leftExpression)
+                && (rightExpression == other.rightExpression);
+    }
+    return true;
+}
+
+void BinaryExpressionNode::accept(interpreter::AbstractVisitor *visitor)
+{
+    leftExpression.accept(visitor);
+    rightExpression.accept(visitor);
+}
+}} // namespace jmespath::ast

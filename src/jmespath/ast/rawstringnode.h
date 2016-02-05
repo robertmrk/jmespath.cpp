@@ -27,7 +27,7 @@
 ****************************************************************************/
 #ifndef RAWSTRINGNODE_H
 #define RAWSTRINGNODE_H
-#include "jmespath/ast/node.h"
+#include "jmespath/ast/abstractnode.h"
 #include "jmespath/detail/types.h"
 #include <boost/fusion/include/adapt_struct.hpp>
 
@@ -35,9 +35,9 @@ namespace jmespath { namespace ast {
 
 using jmespath::detail::String;
 /**
- * @brief The RawStringNode class represents raw string literals.
+ * @brief The RawStringNode class represents a JMESPath raw string literal.
  */
-class RawStringNode : public Node
+class RawStringNode : public AbstractNode
 {
 public:
     /**
@@ -50,6 +50,12 @@ public:
      * @param string The raw string value.
      */
     RawStringNode(const String& string);
+    /**
+     * @brief Calls the visit method of the given \a visitor with the
+     * dynamic type of the node.
+     * @param visitor A visitor implementation
+     */
+    void accept(interpreter::AbstractVisitor* visitor) override;
     /**
      * @brief Equality compares this node to the \a other
      * @param other The node that should be compared.

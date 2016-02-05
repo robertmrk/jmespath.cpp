@@ -28,7 +28,6 @@
 #include "fakeit.hpp"
 #include "jmespath/ast/variantnode.h"
 #include "jmespath/ast/identifiernode.h"
-#include "jmespath/ast/node.h"
 
 TEST_CASE("VariantNode")
 {
@@ -37,26 +36,26 @@ TEST_CASE("VariantNode")
 
     SECTION("is default constructible")
     {
-        REQUIRE_NOTHROW(VariantNode<Node>{});
+        REQUIRE_NOTHROW(VariantNode<IdentifierNode>{});
     }
 
     SECTION("can be constructed with acceptable variant value")
     {
-        REQUIRE_NOTHROW(VariantNode<Node>(Node{}));
+        REQUIRE_NOTHROW(VariantNode<IdentifierNode>IdentifierNode);
     }
 
     SECTION("accepts variant value assignments")
     {
-        VariantNode<Node> variantNode;
+        VariantNode<IdentifierNode> variantNode;
 
-        REQUIRE_NOTHROW(variantNode = Node{});
+        REQUIRE_NOTHROW(variantNode = IdentifierNode{});
     }
 
     SECTION("can be copy constructed")
     {
-        VariantNode<Node> node;
+        VariantNode<IdentifierNode> node;
 
-        REQUIRE_NOTHROW(VariantNode<Node>(node));
+        REQUIRE_NOTHROW(VariantNode<IdentifierNode>(node));
     }
 
     SECTION("is copy assignable")
@@ -66,7 +65,7 @@ TEST_CASE("VariantNode")
 
         node2 = node1;
 
-        bool result = node1.variant == node2.variant;
+        bool result = node1.value == node2.value;
         REQUIRE(result);
     }
 
@@ -82,7 +81,7 @@ TEST_CASE("VariantNode")
 
     SECTION("is null when default constructed")
     {
-        VariantNode<Node> node;
+        VariantNode<IdentifierNode> node;
 
         REQUIRE(node.isNull());
     }
@@ -90,13 +89,14 @@ TEST_CASE("VariantNode")
     SECTION("calls visit method of visitor on accept")
     {
         using jmespath::interpreter::AbstractVisitor;
-        VariantNode<Node> node = Node{};
+        VariantNode<IdentifierNode> node = IdentifierNode{};
         Mock<AbstractVisitor> visitor;
-        When(OverloadedMethod(visitor, visit, void(Node*))).AlwaysReturn();
+        When(OverloadedMethod(visitor, visit, void(IdentifierNode*)))
+                .AlwaysReturn();
 
         node.accept(&visitor.get());
 
-        Verify(OverloadedMethod(visitor, visit, void(Node*))).Once();
+        Verify(OverloadedMethod(visitor, visit, void(IdentifierNode*))).Once();
         VerifyNoOtherInvocations(visitor);
     }
 }

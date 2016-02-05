@@ -83,7 +83,7 @@ TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Literals",
 }
 
 TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Basic expressions",
-                 "[!hide][basic]")
+                 "[basic]")
 {
     executeFeatureTest("basic");
 }
@@ -100,6 +100,12 @@ TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Current node",
     executeFeatureTest("current");
 }
 
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Escapes",
+                 "[escape]")
+{
+    executeFeatureTest("escape");
+}
+
 TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Filters",
                  "[!hide][filters]")
 {
@@ -113,7 +119,7 @@ TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Functions",
 }
 
 TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Index expressions",
-                 "[!hide][indices]")
+                 "[indices]")
 {
     executeFeatureTest("indices");
 }

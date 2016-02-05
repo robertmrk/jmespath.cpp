@@ -26,18 +26,24 @@
 **
 ****************************************************************************/
 #include "jmespath/ast/literalnode.h"
+#include "jmespath/interpreter/abstractvisitor.h"
 
 namespace jmespath { namespace ast {
 
 LiteralNode::LiteralNode()
-    : Node()
+    : AbstractNode()
 {
 }
 
 LiteralNode::LiteralNode(const detail::String &value)
-    : Node(),
+    : AbstractNode(),
       literal(value)
 {
+}
+
+void LiteralNode::accept(interpreter::AbstractVisitor *visitor)
+{
+    visitor->visit(this);
 }
 
 bool LiteralNode::operator==(const LiteralNode &other) const

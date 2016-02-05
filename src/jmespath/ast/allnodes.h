@@ -25,32 +25,18 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "jmespath/ast/allnodes.h"
-
-namespace jmespath { namespace ast {
-
-ExpressionNode::ExpressionNode()
-    : VariantNode()
-{
-}
-
-ExpressionNode::ExpressionNode(const ValueType &expression)
-    : VariantNode(expression)
-{
-}
-
-ExpressionNode &ExpressionNode::operator=(const ExpressionNode &other)
-{
-    if (this != &other)
-    {
-        value = other.value;
-    }
-    return *this;
-}
-
-ExpressionNode &ExpressionNode::operator=(const ValueType &expression)
-{
-    value = expression;
-    return *this;
-}
-}} // namespace jmespath::ast
+#ifndef ALLNODES_H
+#define ALLNODES_H
+#include "jmespath/ast/abstractnode.h"
+#include "jmespath/ast/expressionnode.h"
+#include "jmespath/ast/identifiernode.h"
+#include "jmespath/ast/rawstringnode.h"
+#include "jmespath/ast/literalnode.h"
+#include "jmespath/ast/subexpressionnode.h"
+#include "jmespath/ast/indexexpressionnode.h"
+#include "jmespath/ast/arrayitemnode.h"
+#include "jmespath/ast/variantnode.h"
+#include "jmespath/ast/binaryexpressionnode.h"
+#include "jmespath/ast/flattenoperatornode.h"
+#include "jmespath/ast/bracketspecifiernode.h"
+#endif // ALLNODES_H

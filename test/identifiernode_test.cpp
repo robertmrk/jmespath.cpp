@@ -27,10 +27,12 @@
 ****************************************************************************/
 #include "fakeit.hpp"
 #include "jmespath/ast/identifiernode.h"
+#include "jmespath/interpreter/abstractvisitor.h"
 
 TEST_CASE("IdentifierNode")
 {
     using namespace jmespath::ast;
+    using namespace jmespath::interpreter;
     using namespace fakeit;
 
     SECTION("can be default constructed")
@@ -54,5 +56,17 @@ TEST_CASE("IdentifierNode")
         IdentifierNode node2{identifierName};
 
         REQUIRE(node1 == node2);
+    }
+
+    SECTION("accepts visitor")
+    {
+        IdentifierNode node{};
+        Mock<AbstractVisitor> visitor;
+        When(OverloadedMethod(visitor, visit, void(IdentifierNode*)))
+                .AlwaysReturn();
+
+        node.accept(&visitor.get());
+
+        Verify(OverloadedMethod(visitor, visit, void(IdentifierNode*))).Once();
     }
 }

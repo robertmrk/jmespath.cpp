@@ -29,7 +29,7 @@
 #include "jmespath/ast/allnodes.h"
 #include "jmespath/interpreter/abstractvisitor.h"
 
-TEST_CASE("ExpressionNode")
+TEST_CASE("IndexExpressionNode")
 {
     using namespace jmespath::ast;
     using namespace jmespath::interpreter;
@@ -39,66 +39,72 @@ TEST_CASE("ExpressionNode")
     {
         SECTION("without parameters")
         {
-            REQUIRE_NOTHROW(ExpressionNode{});
+            REQUIRE_NOTHROW(IndexExpressionNode{});
         }
 
-        SECTION("with identifier")
+        SECTION("with bracket specifier")
         {
-            IdentifierNode identifier;
+            BracketSpecifierNode bracketNode{ArrayItemNode{3}};
 
-            ExpressionNode expression{identifier};
+            IndexExpressionNode node{bracketNode};
 
-            REQUIRE(expression == identifier);
+            REQUIRE(node.bracketSpecifier == bracketNode);
         }
 
-        SECTION("with raw string")
+        SECTION("with left and right expression and bracket specifier")
         {
-            RawStringNode rawString;
+            BracketSpecifierNode bracketNode{ArrayItemNode{3}};
+            ExpressionNode leftNode{IdentifierNode{"id1"}};
+            ExpressionNode rightNode{IdentifierNode{"id2"}};
 
-            ExpressionNode expression{rawString};
+            IndexExpressionNode node{leftNode, bracketNode, rightNode};
 
-            REQUIRE(expression == rawString);
-        }
-
-        SECTION("with literal")
-        {
-            LiteralNode literal;
-
-            ExpressionNode expression{literal};
-
-            REQUIRE(expression == literal);
+            REQUIRE(node.leftExpression == leftNode);
+            REQUIRE(node.bracketSpecifier == bracketNode);
+            REQUIRE(node.rightExpression == rightNode);
         }
     }
 
-    SECTION("accepts assignment of another ExpressionNode")
+    SECTION("can be compared for equality")
     {
-        ExpressionNode node1;
-        ExpressionNode node2{IdentifierNode{}};
-
-        node1 = node2;
+        BracketSpecifierNode bracketNode{ArrayItemNode{3}};
+        ExpressionNode leftNode{IdentifierNode{"id1"}};
+        ExpressionNode rightNode{IdentifierNode{"id2"}};
+        IndexExpressionNode node1{leftNode, bracketNode, rightNode};
+        IndexExpressionNode node2;
+        node2 = node1;
 
         REQUIRE(node1 == node2);
+        REQUIRE(node1 == node1);
     }
 
-    SECTION("accepts assignment of an ExpressionNode::Expression")
+    SECTION("returns true for isProjection if bracket specifier is projected")
     {
-        ExpressionNode node1;
-        IdentifierNode node2;
+        BracketSpecifierNode bracketNode{FlattenOperatorNode{}};
+        IndexExpressionNode node{bracketNode};
 
-        node1 = node2;
+        REQUIRE(node.isProjection());
+    }
 
-        REQUIRE(node1 == node2);
+    SECTION("returns false for isProjection if bracket specifier is not "
+            "projected")
+    {
+        IndexExpressionNode node{BracketSpecifierNode{ArrayItemNode{3}}};
+
+
+        REQUIRE_FALSE(node.isProjection());
     }
 
     SECTION("accepts visitor")
     {
-        ExpressionNode node{IdentifierNode{}};
+        IndexExpressionNode node{};
         Mock<AbstractVisitor> visitor;
-        When(OverloadedMethod(visitor, visit, void(IdentifierNode*)))
+        When(OverloadedMethod(visitor, visit, void(IndexExpressionNode*)))
                 .AlwaysReturn();
 
         node.accept(&visitor.get());
 
-        Verify(OverloadedMethod(visitor, visit, void(IdentifierNode*))).Once();
+        Verify(OverloadedMethod(visitor, visit, void(IndexExpressionNode*)))
+                .Once();
     }
 }

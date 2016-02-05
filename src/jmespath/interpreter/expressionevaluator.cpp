@@ -26,13 +26,13 @@
 **
 ****************************************************************************/
 #include "jmespath/interpreter/expressionevaluator.h"
-#include "jmespath/ast/identifiernode.h"
-#include "jmespath/ast/rawstringnode.h"
-#include "jmespath/ast/expressionnode.h"
-#include "jmespath/ast/literalnode.h"
-#include "jmespath/ast/subexpressionnode.h"
+#include "jmespath/ast/allnodes.h"
+#include <boost/range.hpp>
+#include <boost/range/algorithm.hpp>
 
 namespace jmespath { namespace interpreter {
+
+namespace rng = boost::range;
 
 ExpressionEvaluator::ExpressionEvaluator()
     : AbstractVisitor()
@@ -55,12 +55,27 @@ Json ExpressionEvaluator::currentContext() const
     return m_context;
 }
 
-void ExpressionEvaluator::visit(ast::AbstractNode *node)
+void ExpressionEvaluator::evaluateProjection(ast::ExpressionNode *expression)
 {
-    node->accept(this);
+    Json contextArray = m_context;
+    Json result;
+    if (contextArray.is_array())
+    {
+        result = Json(Json::value_t::array);
+        for (auto item: contextArray)
+        {
+            m_context = item;
+            visit(expression);
+            if (!m_context.is_null())
+            {
+                result.push_back(m_context);
+            }
+        }
+    }
+    m_context = result;
 }
 
-void ExpressionEvaluator::visit(ast::Node *node)
+void ExpressionEvaluator::visit(ast::AbstractNode *node)
 {
     node->accept(this);
 }
@@ -91,6 +106,62 @@ void ExpressionEvaluator::visit(ast::LiteralNode *node)
 }
 
 void ExpressionEvaluator::visit(ast::SubexpressionNode *node)
+{
+    node->accept(this);
+}
+
+void ExpressionEvaluator::visit(ast::IndexExpressionNode *node)
+{
+    visit(&node->leftExpression);
+    visit(&node->bracketSpecifier);
+    if (node->isProjection())
+    {
+        evaluateProjection(&node->rightExpression);
+    }
+}
+
+void ExpressionEvaluator::visit(ast::ArrayItemNode *node)
+{
+    Json result;
+    if (m_context.is_array())
+    {
+        int arrayIndex = node->index;
+        if (arrayIndex < 0)
+        {
+            arrayIndex = m_context.size() + arrayIndex;
+        }
+        if ((arrayIndex >= 0 ) && (arrayIndex < m_context.size()))
+        {
+            result = m_context[arrayIndex];
+        }
+    }
+    m_context = result;
+}
+
+void ExpressionEvaluator::visit(ast::FlattenOperatorNode *node)
+{
+    Json result;
+    Json contextArray = m_context;
+    if (contextArray.is_array())
+    {
+        Json arrayValue(Json::value_t::array);
+        for (auto const& item: contextArray)
+        {
+            if (item.is_array())
+            {
+                rng::copy(item, std::back_inserter(arrayValue));
+            }
+            else
+            {
+                arrayValue.push_back(item);
+            }
+        }
+        result = arrayValue;
+    }
+    m_context = result;
+}
+
+void ExpressionEvaluator::visit(ast::BracketSpecifierNode *node)
 {
     node->accept(this);
 }

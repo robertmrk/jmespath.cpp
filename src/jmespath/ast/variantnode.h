@@ -46,7 +46,7 @@ public:
      * The internal variant type which stores the nodes defined in VariantT or
      * boost::blank if it's empty.
      */
-    using VariantType = boost::variant<boost::blank, VariantT...>;
+    using ValueType = boost::variant<boost::blank, VariantT...>;
     /**
      * @brief Constructs an empty VariantNode object.
      */
@@ -74,7 +74,7 @@ public:
     {
         if (this != &other)
         {
-            variant = other.variant;
+            value = other.value;
         }
         return *this;
     }
@@ -85,7 +85,7 @@ public:
     template <typename T>
     VariantNode<VariantT...>& operator=(const T& other)
     {
-        variant = other;
+        value = other;
         return *this;
     }
     /**
@@ -98,7 +98,7 @@ public:
     {
         if (this != &other)
         {
-            return variant == other.variant;
+            return value == other.value;
         }
         return true;
     }
@@ -109,17 +109,17 @@ public:
      */
     bool isNull() const
     {
-        return variant.type() == typeid(boost::blank);
+        return value.type() == typeid(boost::blank);
     }
 
     void accept(interpreter::AbstractVisitor *visitor) override
     {
-        boost::apply_visitor(VariantVisitorAdaptor(visitor), variant);
+        boost::apply_visitor(VariantVisitorAdaptor(visitor), value);
     }
     /**
      * @brief The variable which stores the node that this object represents.
      */
-    VariantType variant;
+    ValueType value;
 };
 }} // namespace jmespath::ast
 #endif // VARIANTNODE_H

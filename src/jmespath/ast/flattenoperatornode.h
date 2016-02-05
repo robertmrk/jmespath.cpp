@@ -25,4 +25,37 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
+#ifndef FLATTENOPERATORNODE_H
+#define FLATTENOPERATORNODE_H
+#include "jmespath/ast/abstractnode.h"
 #include "jmespath/ast/variantnode.h"
+#include <boost/fusion/include/adapt_struct.hpp>
+
+namespace jmespath { namespace ast {
+
+/**
+ * @brief The FlattenOperatorNode class represents a JMESPath flatten operator.
+ */
+class FlattenOperatorNode : public AbstractNode
+{
+public:
+    /**
+     * @brief Constructs a FlattenOperatorNode object.
+     */
+    FlattenOperatorNode();
+    /**
+     * @brief Calls the visit method of the given \a visitor with the
+     * dynamic type of the node.
+     * @param visitor A visitor implementation
+     */
+    void accept(interpreter::AbstractVisitor* visitor) override;
+    /**
+     * @brief Equality compares this node to the \a other
+     * @param other The node that should be compared.
+     * @return Returns true if this object is equal to the \a other, otherwise
+     * false
+     */
+    bool operator==(const FlattenOperatorNode& other) const;
+};
+}} // namespace jmespath::ast
+#endif // FLATTENOPERATORNODE_H

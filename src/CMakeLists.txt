@@ -12,14 +12,13 @@ list(APPEND JMESPATH_SOURCE_FILES
     ${JMESPATH_DETAIL_SOURCE_DIR}/exceptions.h
     ${JMESPATH_PARSER_SOURCE_DIR}/grammar.h
     ${JMESPATH_PARSER_SOURCE_DIR}/parser.h
-    ${JMESPATH_PARSER_SOURCE_DIR}/rotatenodeleftaction.h
-    ${JMESPATH_PARSER_SOURCE_DIR}/rotatenodeleftaction.cpp
+    ${JMESPATH_PARSER_SOURCE_DIR}/noderank.h
+    ${JMESPATH_PARSER_SOURCE_DIR}/insertbinaryexpressionnodeaction.h
+    ${JMESPATH_AST_SOURCE_DIR}/allnodes.h
     ${JMESPATH_AST_SOURCE_DIR}/abstractnode.h
-    ${JMESPATH_AST_SOURCE_DIR}/abstractnode.cpp
-    ${JMESPATH_AST_SOURCE_DIR}/node.h
-    ${JMESPATH_AST_SOURCE_DIR}/node.cpp
+    ${JMESPATH_AST_SOURCE_DIR}/binaryexpressionnode.h
+    ${JMESPATH_AST_SOURCE_DIR}/binaryexpressionnode.cpp
     ${JMESPATH_AST_SOURCE_DIR}/variantnode.h
-    ${JMESPATH_AST_SOURCE_DIR}/variantnode.cpp
     ${JMESPATH_AST_SOURCE_DIR}/expressionnode.h
     ${JMESPATH_AST_SOURCE_DIR}/expressionnode.cpp
     ${JMESPATH_AST_SOURCE_DIR}/identifiernode.h
@@ -32,8 +31,15 @@ list(APPEND JMESPATH_SOURCE_FILES
     ${JMESPATH_AST_SOURCE_DIR}/literalnode.cpp
     ${JMESPATH_AST_SOURCE_DIR}/subexpressionnode.h
     ${JMESPATH_AST_SOURCE_DIR}/subexpressionnode.cpp
+    ${JMESPATH_AST_SOURCE_DIR}/indexexpressionnode.h
+    ${JMESPATH_AST_SOURCE_DIR}/indexexpressionnode.cpp
+    ${JMESPATH_AST_SOURCE_DIR}/arrayitemnode.h
+    ${JMESPATH_AST_SOURCE_DIR}/arrayitemnode.cpp
+    ${JMESPATH_AST_SOURCE_DIR}/flattenoperatornode.h
+    ${JMESPATH_AST_SOURCE_DIR}/flattenoperatornode.cpp
+    ${JMESPATH_AST_SOURCE_DIR}/bracketspecifiernode.h
+    ${JMESPATH_AST_SOURCE_DIR}/bracketspecifiernode.cpp
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/abstractvisitor.h
-    ${JMESPATH_INTERPRETER_SOURCE_DIR}/abstractvisitor.cpp
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/expressionevaluator.h
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/expressionevaluator.cpp)
 set(JMESPATH_SOURCE_FILES ${JMESPATH_SOURCE_FILES} PARENT_SCOPE)

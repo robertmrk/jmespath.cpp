@@ -25,13 +25,42 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "jmespath/ast/node.h"
-#include "jmespath/interpreter/abstractvisitor.h"
+#include "fakeit.hpp"
+#include "jmespath/ast/allnodes.h"
 
-namespace jmespath { namespace ast {
-
-void Node::accept(interpreter::AbstractVisitor *visitor)
+TEST_CASE("FlattenOperatorNode")
 {
-    visitor->visit(this);
+    using namespace jmespath::ast;
+    using namespace jmespath::interpreter;
+    using namespace fakeit;
+
+    SECTION("can be constructed")
+    {
+        SECTION("without parameters")
+        {
+            REQUIRE_NOTHROW(FlattenOperatorNode{});
+        }
+    }
+
+    SECTION("can be compared for equality")
+    {
+        FlattenOperatorNode node1{};
+        FlattenOperatorNode node2{};
+
+        REQUIRE(node1 == node2);
+        REQUIRE(node1 == node1);
+    }
+
+    SECTION("accepts visitor")
+    {
+        FlattenOperatorNode node{};
+        Mock<AbstractVisitor> visitor;
+        When(OverloadedMethod(visitor, visit, void(FlattenOperatorNode*)))
+                .AlwaysReturn();
+
+        node.accept(&visitor.get());
+
+        Verify(OverloadedMethod(visitor, visit, void(FlattenOperatorNode*)))
+                .Once();
+    }
 }
-}} // namespace jmespath::ast

@@ -28,12 +28,9 @@
 #ifndef GRAMMAR_H
 #define GRAMMAR_H
 #include "jmespath/detail/types.h"
-#include "jmespath/ast/expressionnode.h"
-#include "jmespath/ast/identifiernode.h"
-#include "jmespath/ast/rawstringnode.h"
-#include "jmespath/ast/literalnode.h"
-#include "jmespath/ast/subexpressionnode.h"
-#include "jmespath/parser/rotatenodeleftaction.h"
+#include "jmespath/ast/allnodes.h"
+#include "jmespath/parser/noderank.h"
+#include "jmespath/parser/insertbinaryexpressionnodeaction.h"
 #include <boost/spirit/include/qi.hpp>
 #include <boost/phoenix.hpp>
 
@@ -51,12 +48,18 @@ using namespace detail;
 /**
  * @brief The Grammar class contains the PEG rule definition based
  * on the EBNF specifications of JMESPath.
+ *
+ * The actual grammar is slightly modified compared to the specifications to
+ * eliminate left recursion.
  * @tparam Iterator String iterator type
  * @tparam Skipper Character skipper parser type
  * @sa http://jmespath.org/specification.html#grammar
  */
 template <typename Iterator, typename Skipper = encoding::space_type>
-class Grammar : public qi::grammar<Iterator, ast::ExpressionNode(), Skipper>
+class Grammar : public qi::grammar<Iterator,
+                                   ast::ExpressionNode(),
+                                   qi::locals<ast::ExpressionNode>,
+                                   Skipper>
 {
 public:
     /**
@@ -65,6 +68,7 @@ public:
     Grammar() : Grammar::base_type(m_expressionRule)
     {
         using encoding::char_;
+        using qi::int_;
         using qi::lit;
         using qi::lexeme;
         using qi::int_parser;
@@ -73,24 +77,52 @@ public:
         using qi::_2;
         using qi::_pass;
         using qi::_r1;
+        using qi::_r2;
+        using qi::eps;
+        using qi::_a;
         using phx::at_c;
 
-        phx::function<RotateNodeLeftAction> rotateNodeLeft;
+        // Since boost spirit doesn't support left recursive grammars, some of
+        // the rules are converted into tail expressions. When a tail expression
+        // is parsed and the parser returns from a recursion the
+        // InsertBinaryExpressionNodeAction functor is used to compensate for
+        // tail expressions. It inserts the binary expression nodes into the
+        // appropriate position in the AST which leads to an easy to interpret
+        // AST.
 
-        // match an identifier a literal or a raw string (assign it to the first
-        // item in the tuple), optionally followed by a subexpression (pass the
-        // value as an inherited argument and assign the result to the first
-        // item in the tuple)
-        m_expressionRule = (m_identifierRule
-                            | m_literalRule
-                            | m_rawStringRule)[at_c<0>(_val) = _1]
-                >> -m_subexpressionRule(_val);
-        // match an identifier preceded by a dot (rotate the subexpression node
-        // left), a subexpression can also be optionally followed by another
+        // lazy function for inserting binary nodes to the appropriate position
+        phx::function<InsertBinaryExpressionNodeAction> insertNode;
+
+        // match a standalone index expression or identifier or literal or a
+        // raw string, optionally followed by a subexpression or an
+        // index expression
+        m_expressionRule = (m_indexExpressionRule(_val)[insertNode(_val, _1)]
+                            | (m_identifierRule
+                              | m_literalRule
+                              | m_rawStringRule)[at_c<0>(_val) = _1, _a = _val])
+                >> -m_subexpressionRule(_val)[insertNode(_val, _1, _a)]
+                >> -m_indexExpressionRule(_val)[insertNode(_val, _1, _a)];
+        // match an identifier preceded by a dot, a subexpression can also be
+        // optionally followed by an index expression and by another
         // subexpression
         m_subexpressionRule = (lit('.')
-                >> m_identifierRule[rotateNodeLeft(_r1, _val, _1)])
-                >> -m_subexpressionRule(_r1);
+                >> m_identifierRule[at_c<1>(_val) = _1])
+                >> -m_indexExpressionRule(_r1)[insertNode(_r1, _1)]
+                >> -m_subexpressionRule(_r1)[insertNode(_r1, _1)];
+        // match a bracket specifier which can be optionally followed by a
+        // subexpression and an index expression
+        m_indexExpressionRule = m_bracketSpecifierRule[at_c<1>(_val) = _1]
+                    >> -m_subexpressionRule(_r1)[insertNode(_r1, _1)]
+                    >> -m_indexExpressionRule(_r1)[insertNode(_r1, _1)];
+        // match an array item or a flatten operator
+        m_bracketSpecifierRule = (lit("[")
+                                  >> m_arrayItemRule
+                                  >> lit("]"))
+                | m_flattenOperatorRule;
+        // match an integer
+        m_arrayItemRule = int_;
+        // match a pair of square brackets
+        m_flattenOperatorRule = eps >> lit("[]");
         // match zero or more literal characters enclosed in grave accents
         m_literalRule = lexeme[ lit('\x60')
                 >> *m_literalCharRule[phx::bind(&Grammar::appendUtf8,
@@ -210,10 +242,25 @@ public:
     }
 
 private:
-    qi::rule<Iterator, ast::ExpressionNode(), Skipper> m_expressionRule;
     qi::rule<Iterator,
-            ast::SubexpressionNode(ast::ExpressionNode&),
-            Skipper> m_subexpressionRule;
+             ast::ExpressionNode(),
+             qi::locals<ast::ExpressionNode>,
+             Skipper > m_expressionRule;
+    qi::rule<Iterator,
+             ast::SubexpressionNode(ast::ExpressionNode&),
+             Skipper> m_subexpressionRule;
+    qi::rule<Iterator,
+             ast::IndexExpressionNode(ast::ExpressionNode&),
+             Skipper> m_indexExpressionRule;
+    qi::rule<Iterator,
+             ast::BracketSpecifierNode(),
+             Skipper> m_bracketSpecifierRule;
+    qi::rule<Iterator,
+             ast::ArrayItemNode(),
+             Skipper> m_arrayItemRule;
+    qi::rule<Iterator,
+             ast::FlattenOperatorNode(),
+             Skipper> m_flattenOperatorRule;
     qi::rule<Iterator, ast::IdentifierNode(), Skipper> m_identifierRule;
     qi::rule<Iterator, ast::RawStringNode(), Skipper> m_rawStringRule;
     qi::rule<Iterator, ast::LiteralNode(), Skipper> m_literalRule;

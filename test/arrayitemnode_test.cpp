@@ -26,34 +26,52 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/parser/rotatenodeleftaction.h"
-#include "jmespath/ast/expressionnode.h"
-#include "jmespath/ast/subexpressionnode.h"
-#include "jmespath/ast/identifiernode.h"
-#include "jmespath/ast/rawstringnode.h"
-#include "jmespath/ast/literalnode.h"
+#include "jmespath/ast/arrayitemnode.h"
+#include "jmespath/interpreter/abstractvisitor.h"
 
-TEST_CASE("RotateNodeLeftAction")
+TEST_CASE("ArrayItemNode")
 {
-    using namespace jmespath::parser;
     using namespace jmespath::ast;
+    using namespace jmespath::interpreter;
     using namespace fakeit;
 
-    RotateNodeLeftAction action;
-
-    SECTION("rotates subtree left")
+    SECTION("can be constructed")
     {
-        ExpressionNode node{IdentifierNode{"id1"}};
-        SubexpressionNode rightChildNode;
-        IdentifierNode rightGrandChildNode{"id2"};
-        ExpressionNode expectedResult{
-            SubexpressionNode{
-                ExpressionNode{
-                    IdentifierNode{"id1"}},
-                IdentifierNode{"id2"}}};
+        SECTION("without parameters")
+        {
+            ArrayItemNode node{};
 
-        action(node, rightChildNode, rightGrandChildNode);
+            REQUIRE(node.index == 0);
+        }
 
-        REQUIRE(node == expectedResult);
+        SECTION("with array index")
+        {
+            int index = 5;
+
+            ArrayItemNode node{index};
+
+            REQUIRE(node.index == index);
+        }
+    }
+
+    SECTION("can be compared for equality")
+    {
+        ArrayItemNode node1{3};
+        ArrayItemNode node2{3};
+
+        REQUIRE(node1 == node2);
+        REQUIRE(node1 == node1);
+    }
+
+    SECTION("accepts visitor")
+    {
+        ArrayItemNode node{};
+        Mock<AbstractVisitor> visitor;
+        When(OverloadedMethod(visitor, visit, void(ArrayItemNode*)))
+                .AlwaysReturn();
+
+        node.accept(&visitor.get());
+
+        Verify(OverloadedMethod(visitor, visit, void(ArrayItemNode*))).Once();
     }
 }

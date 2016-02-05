@@ -25,53 +25,62 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef IDENTIFIERNODE_H
-#define IDENTIFIERNODE_H
+#ifndef BINARYEXPRESSIONNODE_H
+#define BINARYEXPRESSIONNODE_H
 #include "jmespath/ast/abstractnode.h"
-#include "jmespath/detail/types.h"
-#include <boost/fusion/include/adapt_struct.hpp>
+#include "jmespath/ast/expressionnode.h"
 
 namespace jmespath { namespace ast {
 
-using jmespath::detail::String;
 /**
- * @brief The IdentifierNode class represents a JMESPath identifier
+ * @brief The BinaryExpressionNode class is the base class for all node types
+ * which consist of a left and a right hand side expression.
+ * @tparam ExpressionNode The left hand node's type.
+ * @tparam ExpressionNode The right hand node's type.
  */
-class IdentifierNode : public AbstractNode
+class BinaryExpressionNode : public AbstractNode
 {
 public:
     /**
-     * @brief Constructs an IdentifierNode object with an empty name.
+     * @brief Constructs an empty BinaryExpressionNode object.
      */
-    IdentifierNode();
+    BinaryExpressionNode();
     /**
-     * @brief Constructs an IdentifierNode object with the given @a identifier
-     * parameter as its name.
-     * @param identifier The identifier's name.
+     * @brief Constructs a BinaryExpressionNode object with the given @a leftExpressin
+     * and @a rightExpression as its children.
+     * @param leftExpression Left hand expression of the node.
+     * @param rightExpression Right hand expression of the node.
      */
-    IdentifierNode(const String& identifier);
-    /**
-     * @brief Calls the visit method of the given \a visitor with the
-     * dynamic type of the node.
-     * @param visitor A visitor implementation
-     */
-    void accept(interpreter::AbstractVisitor* visitor) override;
+    BinaryExpressionNode(const ExpressionNode& leftExpression,
+               const ExpressionNode& rightExpression);
     /**
      * @brief Equality compares this node to the \a other
      * @param other The node that should be compared.
      * @return Returns true if this object is equal to the \a other, otherwise
      * false
      */
-    bool operator==(const IdentifierNode& other) const;
+    bool operator==(const BinaryExpressionNode& other) const;
     /**
-     * @brief Name of the identifier
+     * @brief Calls the accept method with the given @a visitor as the parameter
+     * on the node's child expressions.
+     * @param visitor A visitor implementation.
      */
-    String identifier;
+    void accept(interpreter::AbstractVisitor *visitor) override;
+    /**
+     * @brief Reports wheather the right hand side expression is projected onto
+     * the result of the operation or not.
+     * @return Returns true if the right hand expression is projected, otherwise
+     * returns false.
+     */
+    virtual bool isProjection() const = 0;
+    /**
+     * @brief The left hand expression of the node.
+     */
+    ExpressionNode leftExpression;
+    /**
+     * @brief The right hand expression of the node.
+     */
+    ExpressionNode rightExpression;
 };
 }} // namespace jmespath::ast
-
-BOOST_FUSION_ADAPT_STRUCT(
-    jmespath::ast::IdentifierNode,
-    (jmespath::detail::String, identifier)
-)
-#endif // IDENTIFIERNODE_H
+#endif // BINARYEXPRESSIONNODE_H

@@ -25,4 +25,48 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "abstractvisitor.h"
+#include "jmespath/ast/allnodes.h"
+
+namespace jmespath { namespace ast {
+
+IndexExpressionNode::IndexExpressionNode()
+    : BinaryExpressionNode()
+{
+}
+
+IndexExpressionNode::IndexExpressionNode(const BracketSpecifierNode
+                                            &bracketSpecifier)
+    : BinaryExpressionNode(),
+      bracketSpecifier(bracketSpecifier)
+{
+}
+
+IndexExpressionNode::IndexExpressionNode(const ExpressionNode &expression,
+                                         const BracketSpecifierNode
+                                            &bracketSpecifier,
+                                         const ExpressionNode &subexpression)
+    : BinaryExpressionNode(expression, subexpression),
+      bracketSpecifier(bracketSpecifier)
+{
+}
+
+bool IndexExpressionNode::operator ==(const IndexExpressionNode &other) const
+{
+    if (this != &other)
+    {
+        return BinaryExpressionNode::operator ==(other)
+                && (bracketSpecifier == other.bracketSpecifier);
+    }
+    return true;
+}
+
+bool IndexExpressionNode::isProjection() const
+{
+    return bracketSpecifier.isProjection();
+}
+
+void IndexExpressionNode::accept(interpreter::AbstractVisitor *visitor)
+{
+    visitor->visit(this);
+}
+}} // namespace jmespath::ast

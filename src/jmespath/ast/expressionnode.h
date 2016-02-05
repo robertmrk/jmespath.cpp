@@ -27,7 +27,7 @@
 ****************************************************************************/
 #ifndef EXPRESSIONNODE_H
 #define EXPRESSIONNODE_H
-#include "jmespath/ast/node.h"
+#include "jmespath/ast/abstractnode.h"
 #include "jmespath/ast/variantnode.h"
 #include <boost/variant.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
@@ -38,19 +38,20 @@ class IdentifierNode;
 class RawStringNode;
 class LiteralNode;
 class SubexpressionNode;
+class IndexExpressionNode;
 /**
  * @brief The ExpressionNode class represents a JMESPath expression.
  */
-class ExpressionNode : public Node
-{
-public:
-    using Expression = VariantNode<boost::recursive_wrapper<IdentifierNode>,
+class ExpressionNode : public VariantNode<
+        boost::recursive_wrapper<IdentifierNode>,
         boost::recursive_wrapper<RawStringNode>,
         boost::recursive_wrapper<LiteralNode>,
-        boost::recursive_wrapper<SubexpressionNode> >;
-
+        boost::recursive_wrapper<SubexpressionNode>,
+        boost::recursive_wrapper<IndexExpressionNode> >
+{
+public:
     /**
-     * @brief Constructs an empy ExpressionNode object
+     * @brief Constructs an empty ExpressionNode object
      */
     ExpressionNode();
     /**
@@ -58,24 +59,24 @@ public:
      * initialized to \a expression
      * @param expression The node's child expression
      */
-    ExpressionNode(const Expression& expression);
+    ExpressionNode(const ValueType& expression);
     /**
-     * @brief Equality compares this node to the \a other
-     * @param other The node that should be compared.
-     * @return Returns true if this object is equal to the \a other, otherwise
-     * false
+     * @brief Assigns the @a other object to this object.
+     * @param other An ExpressionNode object.
+     * @return Returns a reference to this object.
      */
-    bool operator==(const ExpressionNode& other) const;
-    void accept(interpreter::AbstractVisitor* visitor) override;
+    ExpressionNode& operator=(const ExpressionNode& other);
     /**
-     * @brief The node's child expression
+     * @brief Assigns the @a other Expression to this object's expression.
+     * @param expression An Expression object.
+     * @return Returns a reference to this object.
      */
-    Expression expression;
+    ExpressionNode& operator=(const ValueType& expression);
 };
 }} // namespace jmespath::ast
 
 BOOST_FUSION_ADAPT_STRUCT(
     jmespath::ast::ExpressionNode,
-    (jmespath::ast::ExpressionNode::Expression, expression)
+    (jmespath::ast::ExpressionNode::ValueType, value)
 )
 #endif // EXPRESSIONNODE_H

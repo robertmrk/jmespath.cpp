@@ -27,10 +27,12 @@
 ****************************************************************************/
 #include "fakeit.hpp"
 #include "jmespath/ast/rawstringnode.h"
+#include "jmespath/interpreter/abstractvisitor.h"
 
 TEST_CASE("RawStringNode")
 {
     using namespace jmespath::ast;
+    using namespace jmespath::interpreter;
     using namespace fakeit;
 
     SECTION("can be default constructed")
@@ -53,5 +55,17 @@ TEST_CASE("RawStringNode")
         RawStringNode node2{value};
 
         REQUIRE(node1 == node2);
+    }
+
+    SECTION("accepts visitor")
+    {
+        RawStringNode node{};
+        Mock<AbstractVisitor> visitor;
+        When(OverloadedMethod(visitor, visit, void(RawStringNode*)))
+                .AlwaysReturn();
+
+        node.accept(&visitor.get());
+
+        Verify(OverloadedMethod(visitor, visit, void(RawStringNode*))).Once();
     }
 }
