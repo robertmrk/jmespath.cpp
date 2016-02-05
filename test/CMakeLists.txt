@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.0)
 set(JMESPATH_UNITTEST_TARGET_NAME unit)
 set(JMESPATH_COMPLIANCETEST_TARGET_NAME compliance)
 set(JMESPATH_COPY_COMPLIANCETEST_FILES_TARGET_NAME copy_tests)
-set(JMESPATH_COVERAGE_INFO OFF CACHE BOOL "Generate code coverage information")
 
 add_executable(${JMESPATH_UNITTEST_TARGET_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/unit.cpp
