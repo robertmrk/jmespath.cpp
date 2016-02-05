@@ -365,4 +365,27 @@ TEST_CASE("ExpressionEvaluator")
 
         REQUIRE(evaluator.currentContext() == context);
     }
+
+    SECTION("evaluates slice expression with end value over the end of array")
+    {
+        Json context = "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]"_json;
+        evaluator.setContext(context);
+        ast::SliceExpressionNode sliceNode{0, 20};
+
+        evaluator.visit(&sliceNode);
+
+        REQUIRE(evaluator.currentContext() == context);
+    }
+
+    SECTION("evaluates slice expression with start value below the first item"
+            "of array")
+    {
+        Json context = "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]"_json;
+        evaluator.setContext(context);
+        ast::SliceExpressionNode sliceNode{-50};
+
+        evaluator.visit(&sliceNode);
+
+        REQUIRE(evaluator.currentContext() == context);
+    }
 }
