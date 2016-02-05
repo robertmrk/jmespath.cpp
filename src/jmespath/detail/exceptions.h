@@ -58,5 +58,10 @@ struct SyntaxError : virtual Exception {};
  * arguments
  */
 struct InvalidAgrument : virtual Exception {};
+/**
+ * @brief The InvalidValue struct represents an invalid value in the JMESPath
+ * expression.
+ */
+struct InvalidValue : virtual Exception {};
 }} // namespace jmespath::detail
 #endif // EXCEPTIONS_H

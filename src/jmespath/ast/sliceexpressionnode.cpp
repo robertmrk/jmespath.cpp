@@ -25,47 +25,34 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef BRACKETSPECIFIERNODE_H
-#define BRACKETSPECIFIERNODE_H
-#include "jmespath/ast/variantnode.h"
-#include <boost/fusion/include/adapt_struct.hpp>
+#include "jmespath/ast/sliceexpressionnode.h"
+#include "jmespath/interpreter/abstractvisitor.h"
 
 namespace jmespath { namespace ast {
 
-class ArrayItemNode;
-class FlattenOperatorNode;
-class SliceExpressionNode;
-/**
- * @brief The BracketSpecifierNode class represents a JMESPath bracket
- * specifier.
- */
-class BracketSpecifierNode : public VariantNode<
-        boost::recursive_wrapper<ArrayItemNode>,
-        boost::recursive_wrapper<FlattenOperatorNode>,
-        boost::recursive_wrapper<SliceExpressionNode> >
+SliceExpressionNode::SliceExpressionNode(const IndexType &start,
+                                         const IndexType &stop,
+                                         const IndexType &step)
+    : AbstractNode(),
+      start(start),
+      stop(stop),
+      step(step)
 {
-public:
-    /**
-     * @brief Constructs an empty BracketSpecifierNode object.
-     */
-    BracketSpecifierNode();
-    /**
-     * @brief Constructs a BracketSpecifierNode object with the given
-     * @a expression as its value.
-     * @param expression The node's child expression.
-     */
-    BracketSpecifierNode(const ValueType& expression);
-    /**
-     * @brief Returns whather this expression requires the projection of
-     * subsequent expressions.
-     * @return Returns true if projection is required, otherwise returns false.
-     */
-    bool isProjection() const;
-};
-}} // namespace jmespath::ast
+}
 
-BOOST_FUSION_ADAPT_STRUCT(
-    jmespath::ast::BracketSpecifierNode,
-    (jmespath::ast::BracketSpecifierNode::ValueType, value)
-)
-#endif // BRACKETSPECIFIERNODE_H
+void SliceExpressionNode::accept(interpreter::AbstractVisitor *visitor)
+{
+    visitor->visit(this);
+}
+
+bool SliceExpressionNode::operator==(const SliceExpressionNode &other) const
+{
+    if (this != &other)
+    {
+        return (start == other.start)
+                && (stop == other.stop)
+                && (step == other.step);
+    }
+    return true;
+}
+}} // namespace jmespath::ast

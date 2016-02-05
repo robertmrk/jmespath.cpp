@@ -67,6 +67,11 @@ TEST_CASE("nodeRank")
         REQUIRE(nodeRank(FlattenOperatorNode{}) == 2);
     }
 
+    SECTION("ranks slice expression node at 2")
+    {
+        REQUIRE(nodeRank(SliceExpressionNode{}) == 2);
+    }
+
     SECTION("ranks bracket specifier node as its expression")
     {
         REQUIRE(nodeRank(BracketSpecifierNode{ArrayItemNode{}}) == 1);

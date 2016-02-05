@@ -39,4 +39,5 @@
 #include "jmespath/ast/binaryexpressionnode.h"
 #include "jmespath/ast/flattenoperatornode.h"
 #include "jmespath/ast/bracketspecifiernode.h"
+#include "jmespath/ast/sliceexpressionnode.h"
 #endif // ALLNODES_H

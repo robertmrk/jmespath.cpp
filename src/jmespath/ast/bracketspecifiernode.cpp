@@ -31,33 +31,17 @@
 namespace jmespath { namespace ast {
 
 BracketSpecifierNode::BracketSpecifierNode()
-    : AbstractNode()
-{
-
-}
-
-BracketSpecifierNode::BracketSpecifierNode(const Expression &expression)
-    : AbstractNode(),
-      expression(expression)
+    : VariantNode()
 {
 }
 
-void BracketSpecifierNode::accept(interpreter::AbstractVisitor *visitor)
+BracketSpecifierNode::BracketSpecifierNode(const ValueType &expression)
+    : VariantNode(expression)
 {
-    expression.accept(visitor);
-}
-
-bool BracketSpecifierNode::operator==(const BracketSpecifierNode &other) const
-{
-    if (this != &other)
-    {
-        return expression == other.expression;
-    }
-    return true;
 }
 
 bool BracketSpecifierNode::isProjection() const
 {
-    return (boost::get<ArrayItemNode>(&expression.value) == nullptr);
+    return (boost::get<ArrayItemNode>(&value) == nullptr);
 }
 }} // namespace jmespath::ast
