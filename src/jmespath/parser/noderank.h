@@ -88,7 +88,7 @@ int nodeRank(const ast::SubexpressionNode&)
 template <>
 int nodeRank(const ast::BracketSpecifierNode& node)
 {
-    return boost::apply_visitor(NodeRankVisitor{}, node.expression.value);
+    return boost::apply_visitor(NodeRankVisitor{}, node.value);
 }
 
 template <>

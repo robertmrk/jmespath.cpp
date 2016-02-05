@@ -39,12 +39,12 @@ class SliceExpressionNode;
  * @brief The BracketSpecifierNode class represents a JMESPath bracket
  * specifier.
  */
-class BracketSpecifierNode : public AbstractNode
+class BracketSpecifierNode : public VariantNode<
+        boost::recursive_wrapper<ArrayItemNode>,
+        boost::recursive_wrapper<FlattenOperatorNode>,
+        boost::recursive_wrapper<SliceExpressionNode> >
 {
 public:
-    using Expression = VariantNode<boost::recursive_wrapper<ArrayItemNode>,
-        boost::recursive_wrapper<FlattenOperatorNode>,
-        boost::recursive_wrapper<SliceExpressionNode> >;
     /**
      * @brief Constructs an empty BracketSpecifierNode object.
      */
@@ -54,35 +54,18 @@ public:
      * @a expression as its value.
      * @param expression The node's child expression.
      */
-    BracketSpecifierNode(const Expression& expression);
-    /**
-     * @brief Calls the visit method of the given \a visitor with the
-     * dynamic type of the node.
-     * @param visitor A visitor implementation
-     */
-    void accept(interpreter::AbstractVisitor *visitor) override;
-    /**
-     * @brief Equality compares this node to the \a other
-     * @param other The node that should be compared.
-     * @return Returns true if this object is equal to the \a other, otherwise
-     * false
-     */
-    bool operator==(const BracketSpecifierNode& other) const;
+    BracketSpecifierNode(const ValueType& expression);
     /**
      * @brief Returns whather this expression requires the projection of
      * subsequent expressions.
      * @return Returns true if projection is required, otherwise returns false.
      */
     bool isProjection() const;
-    /**
-     * @brief The node's child expression
-     */
-    Expression expression;
 };
 }} // namespace jmespath::ast
 
 BOOST_FUSION_ADAPT_STRUCT(
     jmespath::ast::BracketSpecifierNode,
-    (jmespath::ast::BracketSpecifierNode::Expression, expression)
+    (jmespath::ast::BracketSpecifierNode::ValueType, value)
 )
 #endif // BRACKETSPECIFIERNODE_H

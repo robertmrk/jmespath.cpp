@@ -48,7 +48,7 @@ TEST_CASE("BracketSpecifierNode")
 
             BracketSpecifierNode node{arrayItem};
 
-            REQUIRE(node.expression == arrayItem);
+            REQUIRE(node == arrayItem);
         }
 
         SECTION("with flatten operator")
@@ -57,7 +57,7 @@ TEST_CASE("BracketSpecifierNode")
 
             BracketSpecifierNode node{flattenNode};
 
-            REQUIRE(node.expression == flattenNode);
+            REQUIRE(node == flattenNode);
         }
 
         SECTION("with slice expression")
@@ -66,7 +66,7 @@ TEST_CASE("BracketSpecifierNode")
 
             BracketSpecifierNode node{sliceNode};
 
-            REQUIRE(node.expression == sliceNode);
+            REQUIRE(node == sliceNode);
         }
     }
 
