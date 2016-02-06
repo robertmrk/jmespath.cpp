@@ -401,5 +401,31 @@ TEST_CASE("Grammar")
 
             REQUIRE(parseExpression(grammar, expression) == expectedResult);
         }
+
+        SECTION("standalone list wildcard expression")
+        {
+            auto expectedResult = ast::IndexExpressionNode{
+                    ast::BracketSpecifierNode{
+                        ast::ListWildcardNode{}}};
+            String expression{"[*]"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
+
+        SECTION("list wildcard expression with subexpression")
+        {
+            auto expectedResult = ast::IndexExpressionNode{
+                    ast::ExpressionNode{},
+                    ast::BracketSpecifierNode{
+                        ast::ListWildcardNode{}},
+                    ast::ExpressionNode{
+                        ast::SubexpressionNode{
+                            ast::ExpressionNode{},
+                            ast::ExpressionNode{
+                                ast::IdentifierNode{"id"}}}}};
+            String expression{"[*].id"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
     }
 }

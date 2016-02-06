@@ -114,10 +114,12 @@ public:
         m_indexExpressionRule = m_bracketSpecifierRule[at_c<1>(_val) = _1]
                     >> -m_subexpressionRule(_r1)[insertNode(_r1, _1)]
                     >> -m_indexExpressionRule(_r1)[insertNode(_r1, _1)];
-        // match a slice expression or an array item or a flatten operator
+        // match a slice expression or an array item or a list wildcard or a
+        // flatten operator
         m_bracketSpecifierRule = (lit("[")
                                   >> (m_sliceExpressionRule
-                                      | m_arrayItemRule)
+                                      | m_arrayItemRule
+                                      | m_listWildcardRule)
                                   >> lit("]"))
                 | m_flattenOperatorRule;
         // match an integer
@@ -132,6 +134,8 @@ public:
                 >> lit(':')
                 >> -int_[at_c<1>(_val) = _1]
                 >> -(lit(':') >> -int_[at_c<2>(_val) = _1]);
+        // match an asterisk
+        m_listWildcardRule = eps >> lit("*");
         // match zero or more literal characters enclosed in grave accents
         m_literalRule = lexeme[ lit('\x60')
                 >> *m_literalCharRule[phx::bind(&Grammar::appendUtf8,
@@ -273,6 +277,9 @@ private:
     qi::rule<Iterator,
              ast::SliceExpressionNode(),
              Skipper> m_sliceExpressionRule;
+    qi::rule<Iterator,
+             ast::ListWildcardNode(),
+             Skipper> m_listWildcardRule;
     qi::rule<Iterator, ast::IdentifierNode(), Skipper> m_identifierRule;
     qi::rule<Iterator, ast::RawStringNode(), Skipper> m_rawStringRule;
     qi::rule<Iterator, ast::LiteralNode(), Skipper> m_literalRule;

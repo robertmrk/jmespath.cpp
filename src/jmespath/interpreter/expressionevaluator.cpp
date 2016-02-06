@@ -218,6 +218,10 @@ void ExpressionEvaluator::visit(ast::SliceExpressionNode *node)
     m_context = result;
 }
 
+void ExpressionEvaluator::visit(ast::ListWildcardNode *node)
+{
+}
+
 int ExpressionEvaluator::adjustSliceEndpoint(int length,
                                              int endpoint,
                                              int step) const

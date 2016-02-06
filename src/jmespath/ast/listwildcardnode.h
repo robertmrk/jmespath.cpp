@@ -25,20 +25,36 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef ALLNODES_H
-#define ALLNODES_H
+#ifndef LISTWILDCARDNODE_H
+#define LISTWILDCARDNODE_H
 #include "jmespath/ast/abstractnode.h"
-#include "jmespath/ast/expressionnode.h"
-#include "jmespath/ast/identifiernode.h"
-#include "jmespath/ast/rawstringnode.h"
-#include "jmespath/ast/literalnode.h"
-#include "jmespath/ast/subexpressionnode.h"
-#include "jmespath/ast/indexexpressionnode.h"
-#include "jmespath/ast/arrayitemnode.h"
-#include "jmespath/ast/variantnode.h"
-#include "jmespath/ast/binaryexpressionnode.h"
-#include "jmespath/ast/flattenoperatornode.h"
-#include "jmespath/ast/bracketspecifiernode.h"
-#include "jmespath/ast/sliceexpressionnode.h"
-#include "jmespath/ast/listwildcardnode.h"
-#endif // ALLNODES_H
+
+namespace jmespath { namespace ast {
+
+/**
+ * @brief The ListWildcardNode class represents a JMESPath list wildcard
+ * expression.
+ */
+class ListWildcardNode : public AbstractNode
+{
+public:
+    /**
+     * @brief Constructs a ListWildcardNode object.
+     */
+    ListWildcardNode();
+    /**
+     * @brief Calls the visit method of the given \a visitor with the
+     * dynamic type of the node.
+     * @param visitor A visitor implementation
+     */
+    void accept(interpreter::AbstractVisitor* visitor) override;
+    /**
+     * @brief Equality compares this node to the \a other
+     * @param other The node that should be compared.
+     * @return Returns true if this object is equal to the \a other, otherwise
+     * false
+     */
+    bool operator==(const ListWildcardNode& other) const;
+};
+}} // namespace jmespath::ast
+#endif // LISTWILDCARDNODE_H

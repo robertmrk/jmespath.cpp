@@ -68,6 +68,15 @@ TEST_CASE("BracketSpecifierNode")
 
             REQUIRE(node == sliceNode);
         }
+
+        SECTION("with list wildcard expression")
+        {
+            ListWildcardNode listWildcardNode;
+
+            BracketSpecifierNode node{listWildcardNode};
+
+            REQUIRE(node == listWildcardNode);
+        }
     }
 
     SECTION("can be compared for equality")
