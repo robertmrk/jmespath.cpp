@@ -56,6 +56,7 @@ TEST_CASE("IdentifierNode")
         IdentifierNode node2{identifierName};
 
         REQUIRE(node1 == node2);
+        REQUIRE(node1 == node1);
     }
 
     SECTION("accepts visitor")

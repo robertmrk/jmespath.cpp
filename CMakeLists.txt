@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 project(jmespath.cpp)
 
+set(JMESPATH_COVERAGE_INFO OFF CACHE BOOL "Generate code coverage information")
 set(JMESPATH_PROJECT_NAME jmespath.cpp)
 set(JMESPATH_TARGET_NAME jmespath)
 if ((${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
@@ -28,3 +29,8 @@ target_link_libraries(${JMESPATH_TARGET_NAME}
     PUBLIC ${Boost_LIBRARIES})
 set_target_properties(${JMESPATH_TARGET_NAME} PROPERTIES
     COMPILE_DEFINITIONS "BOOST_SPIRIT_UNICODE=1")
+if (${JMESPATH_COVERAGE_INFO})
+    set_target_properties(${JMESPATH_TARGET_NAME} PROPERTIES
+        COMPILE_FLAGS "--coverage"
+        LINK_FLAGS "--coverage")
+endif ()

@@ -55,6 +55,7 @@ TEST_CASE("RawStringNode")
         RawStringNode node2{value};
 
         REQUIRE(node1 == node2);
+        REQUIRE(node1 == node1);
     }
 
     SECTION("accepts visitor")
