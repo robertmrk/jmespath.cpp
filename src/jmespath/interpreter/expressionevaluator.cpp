@@ -114,10 +114,17 @@ void ExpressionEvaluator::visit(ast::SubexpressionNode *node)
 void ExpressionEvaluator::visit(ast::IndexExpressionNode *node)
 {
     visit(&node->leftExpression);
-    visit(&node->bracketSpecifier);
-    if (node->isProjection())
+    if (m_context.is_array())
     {
-        evaluateProjection(&node->rightExpression);
+        visit(&node->bracketSpecifier);
+        if (node->isProjection())
+        {
+            evaluateProjection(&node->rightExpression);
+        }
+    }
+    else
+    {
+        m_context = {};
     }
 }
 
@@ -220,6 +227,10 @@ void ExpressionEvaluator::visit(ast::SliceExpressionNode *node)
 
 void ExpressionEvaluator::visit(ast::ListWildcardNode *node)
 {
+    if (!m_context.is_array())
+    {
+        m_context = {};
+    }
 }
 
 int ExpressionEvaluator::adjustSliceEndpoint(int length,

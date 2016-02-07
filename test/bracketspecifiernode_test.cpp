@@ -118,4 +118,11 @@ TEST_CASE("BracketSpecifierNode")
 
         REQUIRE_FALSE(node.isProjection());
     }
+
+    SECTION("returns false for isProjected if node is empty")
+    {
+        BracketSpecifierNode node;
+
+        REQUIRE_FALSE(node.isProjection());
+    }
 }

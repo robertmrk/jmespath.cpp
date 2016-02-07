@@ -157,6 +157,7 @@ TEST_CASE("ExpressionEvaluator")
     {
         ast::IndexExpressionNode node;
         Mock<ExpressionEvaluator> evaluatorMock(evaluator);
+        evaluatorMock.get().setContext("[1, 2, 3]"_json);
         When(OverloadedMethod(evaluatorMock, visit,
                               void(ast::ExpressionNode*)))
                 .AlwaysReturn();
@@ -176,6 +177,25 @@ TEST_CASE("ExpressionEvaluator")
         VerifyNoOtherInvocations(evaluatorMock);
     }
 
+    SECTION("evaluates index expression on non array to null without evaluating"
+            "bracket specifier")
+    {
+        ast::IndexExpressionNode node;
+        Mock<ExpressionEvaluator> evaluatorMock(evaluator);
+        evaluatorMock.get().setContext("string value");
+        When(OverloadedMethod(evaluatorMock, visit,
+                              void(ast::ExpressionNode*)))
+                .AlwaysReturn();
+
+        evaluatorMock.get().visit(&node);
+
+        REQUIRE(evaluatorMock.get().currentContext() == Json{});
+        Verify(OverloadedMethod(evaluatorMock, visit,
+                                void(ast::ExpressionNode*))
+                    .Using(&node.leftExpression)).Once();
+        VerifyNoOtherInvocations(evaluatorMock);
+    }
+
     SECTION("evaluates projected index expression")
     {
         ast::IndexExpressionNode node{
@@ -184,6 +204,7 @@ TEST_CASE("ExpressionEvaluator")
                 ast::FlattenOperatorNode{}},
             ast::ExpressionNode{}};
         Mock<ExpressionEvaluator> evaluatorMock(evaluator);
+        evaluatorMock.get().setContext("[1, 2, 3]"_json);
         When(OverloadedMethod(evaluatorMock, visit,
                               void(ast::ExpressionNode*)))
                 .AlwaysReturn();
@@ -385,6 +406,28 @@ TEST_CASE("ExpressionEvaluator")
         ast::SliceExpressionNode sliceNode{-50};
 
         evaluator.visit(&sliceNode);
+
+        REQUIRE(evaluator.currentContext() == context);
+    }
+
+    SECTION("evaluates list wildcard expression on non array to null")
+    {
+        Json context = "string";
+        evaluator.setContext(context);
+        ast::ListWildcardNode node;
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == Json{});
+    }
+
+    SECTION("evaluates list wildcard expression on arrays to the array itself")
+    {
+        Json context = "[1, 2, 3]"_json;
+        evaluator.setContext(context);
+        ast::ListWildcardNode node;
+
+        evaluator.visit(&node);
 
         REQUIRE(evaluator.currentContext() == context);
     }
