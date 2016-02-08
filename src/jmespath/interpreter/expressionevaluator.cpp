@@ -235,6 +235,14 @@ void ExpressionEvaluator::visit(ast::ListWildcardNode *node)
 
 void ExpressionEvaluator::visit(ast::HashWildcardNode *node)
 {
+    visit(&node->leftExpression);
+    Json result;
+    if (m_context.is_object())
+    {
+        rng::copy(m_context, std::back_inserter(result));
+    }
+    m_context = result;
+    evaluateProjection(&node->rightExpression);
 }
 
 int ExpressionEvaluator::adjustSliceEndpoint(int length,

@@ -43,7 +43,7 @@ struct InsertBinaryExpressionNodeAction
     /**
      * @brief Inserts @a currentNode into its apropriate position inside the
      * AST based on its rank.
-     * @param rootNode Reference to the root node of the AST.
+     * @param targetNode Reference to a node in the AST.
      * @param currentNode The node that should be inserted.
      * @param firstExpression An optional reference to the leftmost terminal
      * node. If specified, it will be inserted as the left expression of the
@@ -51,53 +51,41 @@ struct InsertBinaryExpressionNodeAction
      * @tparam T The type of @a currentNode.
      */
     template <typename T>
-    void operator()(ast::ExpressionNode& rootNode,
+    void operator()(ast::ExpressionNode& targetNode,
                     T& currentNode,
                     boost::optional<ast::ExpressionNode&> firstExpression
                     = {}) const
     {
-        auto rootBinaryNode = toBinaryNode(&rootNode);
+        auto targetBinaryNode = toBinaryNode(&targetNode);
         // if the root node is not a binary node replace it with the current
         // node
-        if (!rootBinaryNode)
+        if (!targetBinaryNode)
         {
-            rootNode.value = currentNode;
+            targetNode.value = currentNode;
         }
         else
         {
-            int rootNodeRank = nodeRank(rootNode);
+            int targetNodeRank = nodeRank(targetNode);
             int currentNodeRank = nodeRank(currentNode);
-            if ((rootNodeRank < currentNodeRank)
-                    || ((rootNodeRank == currentNodeRank)
-                        && currentNode.isProjection()
-                        && !rootBinaryNode->stopsProjection()))
+            // if current node has a higher rank then target node, or if their
+            // ranks are equal and current node is a projection and target node
+            // doesn't terminates projections
+            if ((currentNodeRank > targetNodeRank)
+                     || ((currentNodeRank == targetNodeRank)
+                         && (currentNode.isProjection()
+                             && ! targetBinaryNode->stopsProjection())))
             {
-                // move the root node to the right of current node
-                // and make the current node the new root node
-                currentNode.rightExpression = rootNode;
-                rootNode = currentNode;
+                // set target node as current node's right expression and
+                // replace the target node
+                currentNode.rightExpression = targetNode;
+                targetNode = currentNode;
             }
             else
             {
-                // find the leftmost binary node that has at least the rank of
-                // current node
-                ast::BinaryExpressionNode* leftmostNode
-                        = leftmostBinaryNode(&rootNode, currentNodeRank);
-
-                // if current node supports projection insert the left
-                // expression of the leftmost node to the right of current node,
-                // otherwise insert it to the left
-                if (currentNode.isProjection())
-                {
-                    currentNode.rightExpression = leftmostNode->leftExpression;
-                }
-                else
-                {
-                    currentNode.leftExpression = leftmostNode->leftExpression;
-                }
-                // replace the left expression of the leftmost node with the
-                // current node
-                leftmostNode->leftExpression = currentNode;
+                // insert current node into the left node of the target
+                (*this)(targetBinaryNode->leftExpression,
+                        currentNode,
+                        firstExpression);
             }
         }
         // if the firstExpression argument was specified
@@ -105,7 +93,7 @@ struct InsertBinaryExpressionNodeAction
         {
             // insert it to the left of the leftmost binary node
             ast::BinaryExpressionNode* leftmostNode
-                    = leftmostBinaryNode(&rootNode, nodeRank(*firstExpression));
+                = leftmostBinaryNode(&targetNode, nodeRank(*firstExpression));
             if (leftmostNode)
             {
                 leftmostNode->leftExpression = *firstExpression;

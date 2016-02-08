@@ -166,8 +166,7 @@ TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Unicode", "[unicode]")
     executeFeatureTest("unicode");
 }
 
-TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Wildcard",
-                 "[!hide][wildcard]")
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Wildcard", "[wildcard]")
 {
     executeFeatureTest("wildcard");
 }
