@@ -55,4 +55,18 @@ TEST_CASE("SubexpressionNode")
         REQUIRE(node.leftExpression == leftExpression);
         REQUIRE(node.rightExpression == rightExpression);
     }
+
+    SECTION("doesn't supports projection")
+    {
+        SubexpressionNode node;
+
+        REQUIRE_FALSE(node.isProjection());
+    }
+
+    SECTION("doesn't stops projection")
+    {
+        SubexpressionNode node;
+
+        REQUIRE_FALSE(node.stopsProjection());
+    }
 }

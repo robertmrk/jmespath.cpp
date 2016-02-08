@@ -45,4 +45,9 @@ bool BracketSpecifierNode::isProjection() const
     return (value.type() != typeid(boost::blank))
             && (value.type() != typeid(ArrayItemNode));
 }
+
+bool BracketSpecifierNode::stopsProjection() const
+{
+    return (value.type() == typeid(FlattenOperatorNode));
+}
 }} // namespace jmespath::ast

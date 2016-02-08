@@ -49,7 +49,10 @@ TEST_CASE("nodeRank")
 
     SECTION("ranks non empty expression node with contained expression rank")
     {
-        REQUIRE(nodeRank(ExpressionNode{IdentifierNode{}}) == 0);
+        IdentifierNode containedNode;
+        ExpressionNode node{containedNode};
+
+        REQUIRE(nodeRank(node) == nodeRank(containedNode));
     }
 
     SECTION("ranks subexpression node at 1")
@@ -79,20 +82,25 @@ TEST_CASE("nodeRank")
 
     SECTION("ranks bracket specifier node as its expression")
     {
-        REQUIRE(nodeRank(BracketSpecifierNode{ArrayItemNode{}}) == 1);
-        REQUIRE(nodeRank(BracketSpecifierNode{FlattenOperatorNode{}}) == 2);
+        ArrayItemNode expression1;
+        BracketSpecifierNode node1{expression1};
+        FlattenOperatorNode expression2;
+        BracketSpecifierNode node2{expression2};
+
+        REQUIRE(nodeRank(node1) == nodeRank(expression1));
+        REQUIRE(nodeRank(node2) == nodeRank(expression2));
     }
 
     SECTION("ranks index expression node as its bracket specifier")
     {
-        IndexExpressionNode node1{
-            BracketSpecifierNode{
-                ArrayItemNode{}}};
-        IndexExpressionNode node2{
-            BracketSpecifierNode{
-                FlattenOperatorNode{}}};
+        BracketSpecifierNode bracketSpecifier1{
+            ArrayItemNode{}};
+        IndexExpressionNode node1{bracketSpecifier1};
+        BracketSpecifierNode bracketSpecifier2{
+            FlattenOperatorNode{}};
+        IndexExpressionNode node2{bracketSpecifier2};
 
-        REQUIRE(nodeRank(node1) == 1);
-        REQUIRE(nodeRank(node2) == 2);
+        REQUIRE(nodeRank(node1) == nodeRank(bracketSpecifier1));
+        REQUIRE(nodeRank(node2) == nodeRank(bracketSpecifier2));
     }
 }

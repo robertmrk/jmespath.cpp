@@ -67,12 +67,19 @@ public:
      */
     void accept(interpreter::AbstractVisitor *visitor) override;
     /**
-     * @brief Reports wheather the right hand side expression is projected onto
+     * @brief Reports whether the right hand side expression is projected onto
      * the result of the operation or not.
      * @return Returns true if the right hand expression is projected, otherwise
      * returns false.
      */
     virtual bool isProjection() const = 0;
+    /**
+     * @brief Reports whether the node should stop an ongoing projection or
+     * not.
+     * @return Returns true if the node should stop an ongoing projection,
+     * otherwise returns false.
+     */
+    virtual bool stopsProjection() const = 0;
     /**
      * @brief The left hand expression of the node.
      */

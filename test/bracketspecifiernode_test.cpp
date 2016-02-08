@@ -125,4 +125,27 @@ TEST_CASE("BracketSpecifierNode")
 
         REQUIRE_FALSE(node.isProjection());
     }
+
+    SECTION("returns false for stopsProjection if node is empty")
+    {
+        BracketSpecifierNode node;
+
+        REQUIRE_FALSE(node.stopsProjection());
+    }
+
+    SECTION("returns false for stopsProjection if actual expression doesn't"
+            "stops a projection")
+    {
+        BracketSpecifierNode node{ArrayItemNode{}};
+
+        REQUIRE_FALSE(node.stopsProjection());
+    }
+
+    SECTION("returns true for stopsProjection if actual expression stops a"
+            "projections")
+    {
+        BracketSpecifierNode node{FlattenOperatorNode{}};
+
+        REQUIRE(node.stopsProjection());
+    }
 }

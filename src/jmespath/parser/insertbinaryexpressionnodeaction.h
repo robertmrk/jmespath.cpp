@@ -67,8 +67,17 @@ struct InsertBinaryExpressionNodeAction
         {
             int rootNodeRank = nodeRank(rootNode);
             int currentNodeRank = nodeRank(currentNode);
-            // if the root node's rank is higher or equal to current node's rank
-            if (rootNodeRank >= currentNodeRank)
+            if ((rootNodeRank < currentNodeRank)
+                    || ((rootNodeRank == currentNodeRank)
+                        && currentNode.isProjection()
+                        && !rootBinaryNode->stopsProjection()))
+            {
+                // move the root node to the right of current node
+                // and make the current node the new root node
+                currentNode.rightExpression = rootNode;
+                rootNode = currentNode;
+            }
+            else
             {
                 // find the leftmost binary node that has at least the rank of
                 // current node
@@ -89,14 +98,6 @@ struct InsertBinaryExpressionNodeAction
                 // replace the left expression of the leftmost node with the
                 // current node
                 leftmostNode->leftExpression = currentNode;
-            }
-            else
-            {
-                // if the root node's rank is smaller than the current node's
-                // rank, then move the root node to the right of current node
-                // and make the current node the new root node
-                currentNode.rightExpression = rootNode;
-                rootNode = currentNode;
             }
         }
         // if the firstExpression argument was specified

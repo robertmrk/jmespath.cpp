@@ -95,6 +95,24 @@ TEST_CASE("IndexExpressionNode")
         REQUIRE_FALSE(node.isProjection());
     }
 
+    SECTION("returns true for stopsProjection if bracket specifier stops "
+            "projection")
+    {
+        BracketSpecifierNode bracketNode{FlattenOperatorNode{}};
+        IndexExpressionNode node{bracketNode};
+
+        REQUIRE(node.stopsProjection());
+    }
+
+    SECTION("returns false for stopsProjection if bracket specifier doesn't"
+            "stops projection")
+    {
+        IndexExpressionNode node{BracketSpecifierNode{ArrayItemNode{3}}};
+
+
+        REQUIRE_FALSE(node.stopsProjection());
+    }
+
     SECTION("accepts visitor")
     {
         IndexExpressionNode node{};

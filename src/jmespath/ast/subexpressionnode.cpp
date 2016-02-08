@@ -44,4 +44,9 @@ bool SubexpressionNode::isProjection() const
 {
     return false;
 }
+
+bool SubexpressionNode::stopsProjection() const
+{
+    return false;
+}
 }} // namespace jmespath::ast

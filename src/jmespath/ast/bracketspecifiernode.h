@@ -63,6 +63,13 @@ public:
      * @return Returns true if projection is required, otherwise returns false.
      */
     bool isProjection() const;
+    /**
+     * @brief Reports whether the node should stop an ongoing projection or
+     * not.
+     * @return Returns true if the node should stop an ongoing projection,
+     * otherwise returns false.
+     */
+    bool stopsProjection() const;
 };
 }} // namespace jmespath::ast
 

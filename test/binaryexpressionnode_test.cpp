@@ -54,6 +54,11 @@ public:
     {
         return false;
     }
+
+    bool stopsProjection() const override
+    {
+        return false;
+    }
 };
 
 TEST_CASE("BinaryExpressionNode")

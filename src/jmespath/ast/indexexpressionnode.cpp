@@ -65,6 +65,11 @@ bool IndexExpressionNode::isProjection() const
     return bracketSpecifier.isProjection();
 }
 
+bool IndexExpressionNode::stopsProjection() const
+{
+    return bracketSpecifier.stopsProjection();
+}
+
 void IndexExpressionNode::accept(interpreter::AbstractVisitor *visitor)
 {
     visitor->visit(this);
