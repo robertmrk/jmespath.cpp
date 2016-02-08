@@ -93,27 +93,31 @@ public:
         // lazy function for inserting binary nodes to the appropriate position
         phx::function<InsertBinaryExpressionNodeAction> insertNode;
 
-        // match a standalone index expression or identifier or literal or a
-        // raw string, optionally followed by a subexpression or an
-        // index expression
+        // match a standalone index expression or hash wildcard expression or
+        // identifier or literal or a raw string, optionally followed by a
+        // subexpression an index expression and a hash wildcard subexpression
         m_expressionRule = (m_indexExpressionRule(_val)[insertNode(_val, _1)]
+                            | m_hashWildcardRule(_val)[insertNode(_val, _1)]
                             | (m_identifierRule
                               | m_literalRule
                               | m_rawStringRule)[at_c<0>(_val) = _1, _a = _val])
-                >> -m_subexpressionRule(_val)[insertNode(_val, _1, _a)]
-                >> -m_indexExpressionRule(_val)[insertNode(_val, _1, _a)];
+            >> -m_subexpressionRule(_val)[insertNode(_val, _1, _a)]
+            >> -m_indexExpressionRule(_val)[insertNode(_val, _1, _a)]
+            >> -m_hashWildcardSubexpressionRule(_val)[insertNode(_val, _1, _a)];
         // match an identifier preceded by a dot, a subexpression can also be
-        // optionally followed by an index expression and by another
-        // subexpression
+        // optionally followed by an index expression a hash wildcard
+        // subexpression and by another subexpression
         m_subexpressionRule = (lit('.')
                 >> m_identifierRule[at_c<1>(_val) = _1])
                 >> -m_indexExpressionRule(_r1)[insertNode(_r1, _1)]
+                >> -m_hashWildcardSubexpressionRule(_r1)[insertNode(_r1, _1)]
                 >> -m_subexpressionRule(_r1)[insertNode(_r1, _1)];
         // match a bracket specifier which can be optionally followed by a
-        // subexpression and an index expression
+        // subexpression a hash wildcard subexpression and an index expression
         m_indexExpressionRule = m_bracketSpecifierRule[at_c<1>(_val) = _1]
-                    >> -m_subexpressionRule(_r1)[insertNode(_r1, _1)]
-                    >> -m_indexExpressionRule(_r1)[insertNode(_r1, _1)];
+                >> -m_subexpressionRule(_r1)[insertNode(_r1, _1)]
+                >> -m_hashWildcardSubexpressionRule(_r1)[insertNode(_r1, _1)]
+                >> -m_indexExpressionRule(_r1)[insertNode(_r1, _1)];
         // match a slice expression or an array item or a list wildcard or a
         // flatten operator
         m_bracketSpecifierRule = (lit("[")
@@ -136,6 +140,18 @@ public:
                 >> -(lit(':') >> -int_[at_c<2>(_val) = _1]);
         // match an asterisk
         m_listWildcardRule = eps >> lit("*");
+        // match an asterisk optionally followd by a subexpression an
+        // index expression and a hash wildcard subexpression
+        m_hashWildcardRule = eps >> lit("*")
+                >> -m_subexpressionRule(_r1)[insertNode(_r1, _1)]
+                >> -m_indexExpressionRule(_r1)[insertNode(_r1, _1)]
+                >> -m_hashWildcardSubexpressionRule(_r1)[insertNode(_r1, _1)];
+        // match a dot followd by an asterisk optionally followd by a
+        // subexpression an index expression and a hash wildcard subexpression
+        m_hashWildcardSubexpressionRule = eps >> lit(".") >> lit("*")
+                >> -m_subexpressionRule(_r1)[insertNode(_r1, _1)]
+                >> -m_indexExpressionRule(_r1)[insertNode(_r1, _1)]
+                >> -m_hashWildcardSubexpressionRule(_r1)[insertNode(_r1, _1)];
         // match zero or more literal characters enclosed in grave accents
         m_literalRule = lexeme[ lit('\x60')
                 >> *m_literalCharRule[phx::bind(&Grammar::appendUtf8,
@@ -264,7 +280,13 @@ private:
              Skipper> m_subexpressionRule;
     qi::rule<Iterator,
              ast::IndexExpressionNode(ast::ExpressionNode&),
-             Skipper> m_indexExpressionRule;
+             Skipper> m_indexExpressionRule;                
+    qi::rule<Iterator,
+             ast::HashWildcardNode(ast::ExpressionNode&),
+             Skipper> m_hashWildcardRule;
+    qi::rule<Iterator,
+             ast::HashWildcardNode(ast::ExpressionNode&),
+             Skipper> m_hashWildcardSubexpressionRule;
     qi::rule<Iterator,
              ast::BracketSpecifierNode(),
              Skipper> m_bracketSpecifierRule;

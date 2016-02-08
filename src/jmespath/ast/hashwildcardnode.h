@@ -25,69 +25,52 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef BINARYEXPRESSIONNODE_H
-#define BINARYEXPRESSIONNODE_H
-#include "jmespath/ast/abstractnode.h"
-#include "jmespath/ast/expressionnode.h"
+#ifndef HASHWILDCARDNODE_H
+#define HASHWILDCARDNODE_H
+#include "jmespath/ast/binaryexpressionnode.h"
 
 namespace jmespath { namespace ast {
 
-/**
- * @brief The BinaryExpressionNode class is the base class for all node types
- * which consist of a left and a right hand side expression.
- * @tparam ExpressionNode The left hand node's type.
- * @tparam ExpressionNode The right hand node's type.
- */
-class BinaryExpressionNode : public AbstractNode
+class HashWildcardNode : public BinaryExpressionNode
 {
 public:
     /**
-     * @brief Constructs an empty BinaryExpressionNode object.
+     * @brief Constructs an empty HashWildcardNode object.
      */
-    BinaryExpressionNode();
+    HashWildcardNode();
     /**
-     * @brief Constructs a BinaryExpressionNode object with the given @a leftExpressin
-     * and @a rightExpression as its children.
+     * @brief Constructs a HashWildcardNode object with the given
+     * @a leftExpression and @a rightExpression as its children.
      * @param leftExpression Left hand expression of the node.
      * @param rightExpression Right hand expression of the node.
      */
-    BinaryExpressionNode(const ExpressionNode& leftExpression,
-                         const ExpressionNode& rightExpression);
+    HashWildcardNode(const ExpressionNode& leftExpression,
+                     const ExpressionNode& rightExpression);
     /**
-     * @brief Equality compares this node to the \a other
-     * @param other The node that should be compared.
-     * @return Returns true if this object is equal to the \a other, otherwise
-     * false
+     * @brief Returns whather this expression requires the projection of
+     * subsequent expressions.
+     * @return Returns true if projection is required, otherwise returns false.
      */
-    bool operator==(const BinaryExpressionNode& other) const;
-    /**
-     * @brief Calls the accept method with the given @a visitor as the parameter
-     * on the node's child expressions.
-     * @param visitor A visitor implementation.
-     */
-    void accept(interpreter::AbstractVisitor *visitor) override;
-    /**
-     * @brief Reports whether the right hand side expression is projected onto
-     * the result of the operation or not.
-     * @return Returns true if the right hand expression is projected, otherwise
-     * returns false.
-     */
-    virtual bool isProjection() const = 0;
+    bool isProjection() const override;
     /**
      * @brief Reports whether the node should stop an ongoing projection or
      * not.
      * @return Returns true if the node should stop an ongoing projection,
      * otherwise returns false.
      */
-    virtual bool stopsProjection() const = 0;
+    bool stopsProjection() const override;
     /**
-     * @brief The left hand expression of the node.
+     * @brief Calls the visit method of the given \a visitor with the
+     * dynamic type of the node.
+     * @param visitor A visitor implementation
      */
-    ExpressionNode leftExpression;
-    /**
-     * @brief The right hand expression of the node.
-     */
-    ExpressionNode rightExpression;
+    void accept(interpreter::AbstractVisitor* visitor) override;
 };
 }} // namespace jmespath::ast
-#endif // BINARYEXPRESSIONNODE_H
+
+BOOST_FUSION_ADAPT_STRUCT(
+    jmespath::ast::HashWildcardNode,
+    (jmespath::ast::ExpressionNode, leftExpression)
+    (jmespath::ast::ExpressionNode, rightExpression)
+)
+#endif // HASHWILDCARDNODE_H

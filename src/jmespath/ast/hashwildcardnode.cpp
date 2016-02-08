@@ -25,21 +25,34 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef ALLNODES_H
-#define ALLNODES_H
-#include "jmespath/ast/abstractnode.h"
-#include "jmespath/ast/expressionnode.h"
-#include "jmespath/ast/identifiernode.h"
-#include "jmespath/ast/rawstringnode.h"
-#include "jmespath/ast/literalnode.h"
-#include "jmespath/ast/subexpressionnode.h"
-#include "jmespath/ast/indexexpressionnode.h"
-#include "jmespath/ast/arrayitemnode.h"
-#include "jmespath/ast/variantnode.h"
-#include "jmespath/ast/binaryexpressionnode.h"
-#include "jmespath/ast/flattenoperatornode.h"
-#include "jmespath/ast/bracketspecifiernode.h"
-#include "jmespath/ast/sliceexpressionnode.h"
-#include "jmespath/ast/listwildcardnode.h"
 #include "jmespath/ast/hashwildcardnode.h"
-#endif // ALLNODES_H
+#include "jmespath/ast/allnodes.h"
+
+namespace jmespath { namespace ast {
+
+HashWildcardNode::HashWildcardNode()
+    : BinaryExpressionNode()
+{
+}
+
+HashWildcardNode::HashWildcardNode(const ExpressionNode &leftExpression,
+                                   const ExpressionNode &rightExpression)
+    : BinaryExpressionNode(leftExpression, rightExpression)
+{
+}
+
+bool HashWildcardNode::isProjection() const
+{
+    return true;
+}
+
+bool HashWildcardNode::stopsProjection() const
+{
+    return false;
+}
+
+void HashWildcardNode::accept(interpreter::AbstractVisitor *visitor)
+{
+    visitor->visit(this);
+}
+}} // namespace jmespath::ast

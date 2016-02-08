@@ -39,6 +39,7 @@ class RawStringNode;
 class LiteralNode;
 class SubexpressionNode;
 class IndexExpressionNode;
+class HashWildcardNode;
 /**
  * @brief The ExpressionNode class represents a JMESPath expression.
  */
@@ -47,7 +48,8 @@ class ExpressionNode : public VariantNode<
         boost::recursive_wrapper<RawStringNode>,
         boost::recursive_wrapper<LiteralNode>,
         boost::recursive_wrapper<SubexpressionNode>,
-        boost::recursive_wrapper<IndexExpressionNode> >
+        boost::recursive_wrapper<IndexExpressionNode>,
+        boost::recursive_wrapper<HashWildcardNode> >
 {
 public:
     /**

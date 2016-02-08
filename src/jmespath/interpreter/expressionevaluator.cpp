@@ -233,6 +233,10 @@ void ExpressionEvaluator::visit(ast::ListWildcardNode *node)
     }
 }
 
+void ExpressionEvaluator::visit(ast::HashWildcardNode *node)
+{
+}
+
 int ExpressionEvaluator::adjustSliceEndpoint(int length,
                                              int endpoint,
                                              int step) const

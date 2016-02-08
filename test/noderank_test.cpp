@@ -80,6 +80,11 @@ TEST_CASE("nodeRank")
         REQUIRE(nodeRank(ListWildcardNode{}) == 2);
     }
 
+    SECTION("ranks hash wildcard expression node at 2")
+    {
+        REQUIRE(nodeRank(HashWildcardNode{}) == 2);
+    }
+
     SECTION("ranks bracket specifier node as its expression")
     {
         ArrayItemNode expression1;
