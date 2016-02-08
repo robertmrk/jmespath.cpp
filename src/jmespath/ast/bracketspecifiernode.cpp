@@ -42,6 +42,12 @@ BracketSpecifierNode::BracketSpecifierNode(const ValueType &expression)
 
 bool BracketSpecifierNode::isProjection() const
 {
-    return (boost::get<ArrayItemNode>(&value) == nullptr);
+    return (value.type() != typeid(boost::blank))
+            && (value.type() != typeid(ArrayItemNode));
+}
+
+bool BracketSpecifierNode::stopsProjection() const
+{
+    return (value.type() == typeid(FlattenOperatorNode));
 }
 }} // namespace jmespath::ast

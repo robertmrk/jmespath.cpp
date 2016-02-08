@@ -401,5 +401,135 @@ TEST_CASE("Grammar")
 
             REQUIRE(parseExpression(grammar, expression) == expectedResult);
         }
+
+        SECTION("standalone list wildcard expression")
+        {
+            auto expectedResult = ast::IndexExpressionNode{
+                    ast::BracketSpecifierNode{
+                        ast::ListWildcardNode{}}};
+            String expression{"[*]"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
+
+        SECTION("list wildcard expression with subexpression")
+        {
+            auto expectedResult = ast::IndexExpressionNode{
+                    ast::ExpressionNode{},
+                    ast::BracketSpecifierNode{
+                        ast::ListWildcardNode{}},
+                    ast::ExpressionNode{
+                        ast::SubexpressionNode{
+                            ast::ExpressionNode{},
+                            ast::ExpressionNode{
+                                ast::IdentifierNode{"id"}}}}};
+            String expression{"[*].id"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
+
+        SECTION("recursive list wildcard expression with recursive "
+                "subexpressions")
+        {
+            auto expectedResult = ast::IndexExpressionNode{
+                    ast::ExpressionNode{
+                        ast::IdentifierNode{"id1"}},
+                    ast::BracketSpecifierNode{
+                        ast::ListWildcardNode{}},
+                    ast::ExpressionNode{
+                        ast::IndexExpressionNode{
+                            ast::ExpressionNode{
+                                ast::SubexpressionNode{
+                                    ast::ExpressionNode{
+                                        ast::SubexpressionNode{
+                                            ast::ExpressionNode{},
+                                            ast::ExpressionNode{
+                                                ast::IdentifierNode{"id2"}}}},
+                                    ast::ExpressionNode{
+                                        ast::IdentifierNode{"id3"}}}},
+                            ast::BracketSpecifierNode{
+                                ast::ListWildcardNode{}},
+                            ast::ExpressionNode{
+                                ast::SubexpressionNode{
+                                    ast::ExpressionNode{
+                                        ast::SubexpressionNode{
+                                            ast::ExpressionNode{},
+                                            ast::ExpressionNode{
+                                                ast::IdentifierNode{"id4"}}}},
+                                    ast::ExpressionNode{
+                                        ast::IdentifierNode{"id5"}}}}}}};
+            String expression{"id1[*].id2.id3[*].id4.id5"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
+
+        SECTION("standalon hash wildcard expression")
+        {
+            auto expectedResult = ast::HashWildcardNode{};
+            String expression{"*"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
+
+        SECTION("standalon hash wildcard with subexpressions")
+        {
+            auto expectedResult = ast::HashWildcardNode{
+                    ast::ExpressionNode{},
+                    ast::ExpressionNode{
+                        ast::SubexpressionNode{
+                            ast::ExpressionNode{
+                                ast::SubexpressionNode{
+                                    ast::ExpressionNode{},
+                                    ast::ExpressionNode{
+                                        ast::IdentifierNode{"id1"}}}},
+                            ast::ExpressionNode{
+                                ast::IdentifierNode{"id2"}}}}};
+            String expression{"*.id1.id2"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
+
+        SECTION("hash wildcard as a subexpression")
+        {
+            auto expectedResult = ast::HashWildcardNode{
+                    ast::ExpressionNode{
+                        ast::IdentifierNode{"id1"}},
+                    ast::ExpressionNode{}};
+            String expression{"id1.*"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
+
+        SECTION("recursive hash wildcard nodes with recursive subexpressions")
+        {
+            auto expectedResult = ast::HashWildcardNode{
+                    ast::ExpressionNode{
+                        ast::IdentifierNode{"id1"}},
+                    ast::ExpressionNode{
+                        ast::HashWildcardNode{
+                            ast::ExpressionNode{
+                                ast::SubexpressionNode{
+                                    ast::ExpressionNode{
+                                        ast::SubexpressionNode{
+                                            ast::ExpressionNode{},
+                                            ast::ExpressionNode{
+                                                ast::IdentifierNode{"id2"}}}},
+                                    ast::ExpressionNode{
+                                        ast::IdentifierNode{"id3"}}}},
+                            ast::ExpressionNode{
+                                ast::SubexpressionNode{
+                                    ast::ExpressionNode{
+                                        ast::SubexpressionNode{
+                                            ast::ExpressionNode{},
+                                            ast::ExpressionNode{
+                                                ast::IdentifierNode{"id4"}}}},
+                                    ast::ExpressionNode{
+                                        ast::IdentifierNode{"id5"}}}}}}};
+            String expression{"id1.*.id2.id3.*.id4.id5"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
     }
 }
+
+;

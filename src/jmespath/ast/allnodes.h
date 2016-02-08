@@ -40,4 +40,6 @@
 #include "jmespath/ast/flattenoperatornode.h"
 #include "jmespath/ast/bracketspecifiernode.h"
 #include "jmespath/ast/sliceexpressionnode.h"
+#include "jmespath/ast/listwildcardnode.h"
+#include "jmespath/ast/hashwildcardnode.h"
 #endif // ALLNODES_H

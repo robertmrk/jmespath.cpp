@@ -74,6 +74,13 @@ public:
      */
     bool isProjection() const override;
     /**
+     * @brief Reports whether the node should stop an ongoing projection or
+     * not.
+     * @return Returns true if the node should stop an ongoing projection,
+     * otherwise returns false.
+     */
+    bool stopsProjection() const override;
+    /**
      * @brief Calls the visit method of the given \a visitor with the
      * dynamic type of the node.
      * @param visitor A visitor implementation

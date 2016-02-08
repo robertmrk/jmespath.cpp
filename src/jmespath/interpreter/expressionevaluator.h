@@ -81,6 +81,8 @@ public:
     void visit(ast::FlattenOperatorNode* node) override;
     void visit(ast::BracketSpecifierNode* node) override;
     void visit(ast::SliceExpressionNode* node) override;
+    void visit(ast::ListWildcardNode* node) override;
+    void visit(ast::HashWildcardNode* node) override;
 
 private:
     /**

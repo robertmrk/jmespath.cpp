@@ -29,7 +29,7 @@
 #include "jmespath/ast/allnodes.h"
 #include "jmespath/interpreter/abstractvisitor.h"
 
-TEST_CASE("ExpressionNode")
+TEST_CASE("HashWildcardNode")
 {
     using namespace jmespath::ast;
     using namespace jmespath::interpreter;
@@ -39,93 +39,57 @@ TEST_CASE("ExpressionNode")
     {
         SECTION("without parameters")
         {
-            REQUIRE_NOTHROW(ExpressionNode{});
+            REQUIRE_NOTHROW(HashWildcardNode{});
         }
 
-        SECTION("with identifier")
+        SECTION("with left and right expression")
         {
-            IdentifierNode identifier;
+            ExpressionNode leftExpression{
+                IdentifierNode{"id1"}};
+            ExpressionNode rightExpression{
+                IdentifierNode{"id2"}};
 
-            ExpressionNode expression{identifier};
+            HashWildcardNode node{leftExpression, rightExpression};
 
-            REQUIRE(expression == identifier);
-        }
-
-        SECTION("with raw string")
-        {
-            RawStringNode rawString;
-
-            ExpressionNode expression{rawString};
-
-            REQUIRE(expression == rawString);
-        }
-
-        SECTION("with literal")
-        {
-            LiteralNode literal;
-
-            ExpressionNode expression{literal};
-
-            REQUIRE(expression == literal);
-        }
-
-        SECTION("with subexpression")
-        {
-            SubexpressionNode subexpression;
-
-            ExpressionNode expression{subexpression};
-
-            REQUIRE(expression == subexpression);
-        }
-
-        SECTION("with index expression")
-        {
-            IndexExpressionNode indexExpression;
-
-            ExpressionNode expression{indexExpression};
-
-            REQUIRE(expression == indexExpression);
-        }
-
-        SECTION("with hash wildcard")
-        {
-            HashWildcardNode hashWildcard;
-
-            ExpressionNode expression{hashWildcard};
-
-            REQUIRE(expression == hashWildcard);
+            REQUIRE(node.leftExpression == leftExpression);
+            REQUIRE(node.rightExpression == rightExpression);
         }
     }
 
-    SECTION("accepts assignment of another ExpressionNode")
+    SECTION("can be compared for equality")
     {
-        ExpressionNode node1;
-        ExpressionNode node2{IdentifierNode{}};
-
-        node1 = node2;
+        ExpressionNode leftExpression{
+            IdentifierNode{"id1"}};
+        ExpressionNode rightExpression{
+            IdentifierNode{"id2"}};
+        HashWildcardNode node1{leftExpression, rightExpression};
+        HashWildcardNode node2;
+        node2 = node1;
 
         REQUIRE(node1 == node2);
+        REQUIRE(node1 == node1);
     }
 
-    SECTION("accepts assignment of an ExpressionNode::Expression")
+    SECTION("return true for isProjection")
     {
-        ExpressionNode node1;
-        IdentifierNode node2;
+        REQUIRE(HashWildcardNode{}.isProjection());
+    }
 
-        node1 = node2;
-
-        REQUIRE(node1 == node2);
+    SECTION("return false for stopsProjection")
+    {
+        REQUIRE_FALSE(HashWildcardNode{}.stopsProjection());
     }
 
     SECTION("accepts visitor")
     {
-        ExpressionNode node{IdentifierNode{}};
+        HashWildcardNode node{};
         Mock<AbstractVisitor> visitor;
-        When(OverloadedMethod(visitor, visit, void(IdentifierNode*)))
+        When(OverloadedMethod(visitor, visit, void(HashWildcardNode*)))
                 .AlwaysReturn();
 
         node.accept(&visitor.get());
 
-        Verify(OverloadedMethod(visitor, visit, void(IdentifierNode*))).Once();
+        Verify(OverloadedMethod(visitor, visit, void(HashWildcardNode*)))
+                .Once();
     }
 }

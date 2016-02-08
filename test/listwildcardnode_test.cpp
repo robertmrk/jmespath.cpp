@@ -25,53 +25,39 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "jmespath/ast/allnodes.h"
+#include "fakeit.hpp"
+#include "jmespath/ast/listwildcardnode.h"
+#include "jmespath/interpreter/abstractvisitor.h"
 
-namespace jmespath { namespace ast {
-
-IndexExpressionNode::IndexExpressionNode()
-    : BinaryExpressionNode()
+TEST_CASE("ListWildcardNode")
 {
-}
+    using namespace jmespath::ast;
+    using namespace jmespath::interpreter;
+    using namespace fakeit;
 
-IndexExpressionNode::IndexExpressionNode(const BracketSpecifierNode
-                                            &bracketSpecifier)
-    : BinaryExpressionNode(),
-      bracketSpecifier(bracketSpecifier)
-{
-}
-
-IndexExpressionNode::IndexExpressionNode(const ExpressionNode &expression,
-                                         const BracketSpecifierNode
-                                            &bracketSpecifier,
-                                         const ExpressionNode &subexpression)
-    : BinaryExpressionNode(expression, subexpression),
-      bracketSpecifier(bracketSpecifier)
-{
-}
-
-bool IndexExpressionNode::operator ==(const IndexExpressionNode &other) const
-{
-    if (this != &other)
+    SECTION("can be constructed without parameters")
     {
-        return BinaryExpressionNode::operator ==(other)
-                && (bracketSpecifier == other.bracketSpecifier);
+        REQUIRE_NOTHROW(ListWildcardNode{});
     }
-    return true;
-}
 
-bool IndexExpressionNode::isProjection() const
-{
-    return bracketSpecifier.isProjection();
-}
+    SECTION("can be compared for equality")
+    {
+        ListWildcardNode node1;
+        ListWildcardNode node2;
 
-bool IndexExpressionNode::stopsProjection() const
-{
-    return bracketSpecifier.stopsProjection();
-}
+        REQUIRE(node1 == node2);
+    }
 
-void IndexExpressionNode::accept(interpreter::AbstractVisitor *visitor)
-{
-    visitor->visit(this);
+    SECTION("accepts visitor")
+    {
+        ListWildcardNode node{};
+        Mock<AbstractVisitor> visitor;
+        When(OverloadedMethod(visitor, visit, void(ListWildcardNode*)))
+                .AlwaysReturn();
+
+        node.accept(&visitor.get());
+
+        Verify(OverloadedMethod(visitor, visit, void(ListWildcardNode*)))
+                .Once();
+    }
 }
-}} // namespace jmespath::ast

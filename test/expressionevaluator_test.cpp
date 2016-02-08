@@ -29,6 +29,7 @@
 #include "jmespath/interpreter/expressionevaluator.h"
 #include "jmespath/ast/allnodes.h"
 #include "jmespath/detail/exceptions.h"
+#include <boost/range/algorithm.hpp>
 
 TEST_CASE("ExpressionEvaluator")
 {
@@ -37,6 +38,7 @@ TEST_CASE("ExpressionEvaluator")
     using jmespath::detail::String;
     using jmespath::detail::InvalidValue;
     namespace ast = jmespath::ast;
+    namespace rng = boost::range;
     using namespace fakeit;
 
     ExpressionEvaluator evaluator;
@@ -157,6 +159,7 @@ TEST_CASE("ExpressionEvaluator")
     {
         ast::IndexExpressionNode node;
         Mock<ExpressionEvaluator> evaluatorMock(evaluator);
+        evaluatorMock.get().setContext("[1, 2, 3]"_json);
         When(OverloadedMethod(evaluatorMock, visit,
                               void(ast::ExpressionNode*)))
                 .AlwaysReturn();
@@ -176,6 +179,25 @@ TEST_CASE("ExpressionEvaluator")
         VerifyNoOtherInvocations(evaluatorMock);
     }
 
+    SECTION("evaluates index expression on non array to null without evaluating"
+            "bracket specifier")
+    {
+        ast::IndexExpressionNode node;
+        Mock<ExpressionEvaluator> evaluatorMock(evaluator);
+        evaluatorMock.get().setContext("string value");
+        When(OverloadedMethod(evaluatorMock, visit,
+                              void(ast::ExpressionNode*)))
+                .AlwaysReturn();
+
+        evaluatorMock.get().visit(&node);
+
+        REQUIRE(evaluatorMock.get().currentContext() == Json{});
+        Verify(OverloadedMethod(evaluatorMock, visit,
+                                void(ast::ExpressionNode*))
+                    .Using(&node.leftExpression)).Once();
+        VerifyNoOtherInvocations(evaluatorMock);
+    }
+
     SECTION("evaluates projected index expression")
     {
         ast::IndexExpressionNode node{
@@ -184,6 +206,7 @@ TEST_CASE("ExpressionEvaluator")
                 ast::FlattenOperatorNode{}},
             ast::ExpressionNode{}};
         Mock<ExpressionEvaluator> evaluatorMock(evaluator);
+        evaluatorMock.get().setContext("[1, 2, 3]"_json);
         When(OverloadedMethod(evaluatorMock, visit,
                               void(ast::ExpressionNode*)))
                 .AlwaysReturn();
@@ -387,5 +410,73 @@ TEST_CASE("ExpressionEvaluator")
         evaluator.visit(&sliceNode);
 
         REQUIRE(evaluator.currentContext() == context);
+    }
+
+    SECTION("evaluates list wildcard expression on non array to null")
+    {
+        Json context = "string";
+        evaluator.setContext(context);
+        ast::ListWildcardNode node;
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == Json{});
+    }
+
+    SECTION("evaluates list wildcard expression on arrays to the array itself")
+    {
+        Json context = "[1, 2, 3]"_json;
+        evaluator.setContext(context);
+        ast::ListWildcardNode node;
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == context);
+    }
+
+    SECTION("evaluates hash wildcard expression on non object to null")
+    {
+        Json context = "[1, 2, 3]"_json;
+        evaluator.setContext(context);
+        ast::HashWildcardNode node;
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == Json{});
+    }
+
+    SECTION("evaluates hash wildcard expression on objects to array of values")
+    {
+        Json context = "{\"a\": 1, \"b\":2, \"c\":3}"_json;
+        Json values(Json::value_t::array);
+        rng::copy(context, std::back_inserter(values));
+        evaluator.setContext(context);
+        ast::HashWildcardNode node;
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == values);
+    }
+
+    SECTION("evaluates left expression of hash wildcard expresion and projects"
+            "right expression")
+    {
+        ast::HashWildcardNode node;
+        Mock<ExpressionEvaluator> evaluatorMock(evaluator);
+        When(OverloadedMethod(evaluatorMock, visit,
+                              void(ast::ExpressionNode*)))
+                .AlwaysReturn();
+        When(Method(evaluatorMock, evaluateProjection))
+                .AlwaysReturn();
+
+        evaluatorMock.get().visit(&node);
+
+        Verify(OverloadedMethod(evaluatorMock, visit,
+                                void(ast::ExpressionNode*))
+                    .Using(&node.leftExpression)
+               + Method(evaluatorMock, evaluateProjection)
+                    .Using(&node.rightExpression))
+                .Once();
+        VerifyNoOtherInvocations(evaluatorMock);
     }
 }

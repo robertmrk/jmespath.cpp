@@ -93,23 +93,24 @@ TEST_CASE("InsertBinaryExpressionNodeAction")
         REQUIRE(result == sub);
     }
 
-    SECTION("replaces root with current node if root is not a binary node")
+    SECTION("replaces target node with current node if target is not a binary"
+            "node")
     {
-        ExpressionNode rootNode;
+        ExpressionNode targetNode;
         SubexpressionNode currentNode{
             ExpressionNode{},
             ExpressionNode{
                 IdentifierNode{}}};
 
-        action(rootNode, currentNode);
+        action(targetNode, currentNode);
 
-        REQUIRE(rootNode == ExpressionNode{currentNode});
+        REQUIRE(targetNode == ExpressionNode{currentNode});
     }
 
-    SECTION("replaces root with current node and makes old root the right child"
-            " of current node if current node has a higher rank")
+    SECTION("replaces target with current node and makes the target the right"
+            "child of current node if current node has a higher rank")
     {
-        ExpressionNode rootNode{
+        ExpressionNode targetNode{
             SubexpressionNode{
                 ExpressionNode{},
                 ExpressionNode{
@@ -128,15 +129,37 @@ TEST_CASE("InsertBinaryExpressionNodeAction")
                         ExpressionNode{
                             IdentifierNode{}}}}}};
 
-        action(rootNode, currentNode);
+        action(targetNode, currentNode);
 
-        REQUIRE(rootNode == expectedResult);
+        REQUIRE(targetNode == expectedResult);
+    }
+
+    SECTION("replaces target with current node and makes the target the right"
+            "child of current node, if they have equal rank, current is a "
+            "projection and target doesn't stops projections")
+    {
+        HashWildcardNode currentNode;
+        ExpressionNode targetNode{
+            IndexExpressionNode{
+                BracketSpecifierNode{
+                    ListWildcardNode{}}}};
+        ExpressionNode expectedResult{
+            HashWildcardNode{
+                ExpressionNode{},
+                ExpressionNode{
+                    IndexExpressionNode{
+                        BracketSpecifierNode{
+                            ListWildcardNode{}}}}}};
+
+        action(targetNode, currentNode);
+
+        REQUIRE(targetNode == expectedResult);
     }
 
     SECTION("inserts projected current node and makes the left expression of"
-            " the leftmost suitable node its right expression")
+            "the leftmost suitable node its right expression")
     {
-        ExpressionNode rootNode{
+        ExpressionNode targetNode{
             IndexExpressionNode{
                 ExpressionNode{
                     SubexpressionNode{
@@ -165,38 +188,9 @@ TEST_CASE("InsertBinaryExpressionNodeAction")
                     FlattenOperatorNode{}},
                 ExpressionNode{}}};
 
-        action(rootNode, currentNode);
+        action(targetNode, currentNode);
 
-        REQUIRE(rootNode == expectedResult);
-    }
-
-    SECTION("inserts non projected current node and makes the left expression"
-            " of the leftmost suitable node its left expression")
-    {
-        ExpressionNode rootNode{
-            SubexpressionNode{
-                ExpressionNode{
-                    IdentifierNode{"id1"}},
-                ExpressionNode{
-                    IdentifierNode{"id2"}}}};
-        SubexpressionNode currentNode{
-            ExpressionNode{},
-            ExpressionNode{
-                IdentifierNode{"id3"}}};
-        ExpressionNode expectedResult{
-            SubexpressionNode{
-                ExpressionNode{
-                    SubexpressionNode{
-                        ExpressionNode{
-                            IdentifierNode{"id1"}},
-                        ExpressionNode{
-                            IdentifierNode{"id3"}}}},
-                ExpressionNode{
-                    IdentifierNode{"id2"}}}};
-
-        action(rootNode, currentNode);
-
-        REQUIRE(rootNode == expectedResult);
+        REQUIRE(targetNode == expectedResult);
     }
 
     SECTION("inserts first expression as the left child of the leftmost"

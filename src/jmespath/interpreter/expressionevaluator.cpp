@@ -114,10 +114,17 @@ void ExpressionEvaluator::visit(ast::SubexpressionNode *node)
 void ExpressionEvaluator::visit(ast::IndexExpressionNode *node)
 {
     visit(&node->leftExpression);
-    visit(&node->bracketSpecifier);
-    if (node->isProjection())
+    if (m_context.is_array())
     {
-        evaluateProjection(&node->rightExpression);
+        visit(&node->bracketSpecifier);
+        if (node->isProjection())
+        {
+            evaluateProjection(&node->rightExpression);
+        }
+    }
+    else
+    {
+        m_context = {};
     }
 }
 
@@ -216,6 +223,26 @@ void ExpressionEvaluator::visit(ast::SliceExpressionNode *node)
         }
     }
     m_context = result;
+}
+
+void ExpressionEvaluator::visit(ast::ListWildcardNode *node)
+{
+    if (!m_context.is_array())
+    {
+        m_context = {};
+    }
+}
+
+void ExpressionEvaluator::visit(ast::HashWildcardNode *node)
+{
+    visit(&node->leftExpression);
+    Json result;
+    if (m_context.is_object())
+    {
+        rng::copy(m_context, std::back_inserter(result));
+    }
+    m_context = result;
+    evaluateProjection(&node->rightExpression);
 }
 
 int ExpressionEvaluator::adjustSliceEndpoint(int length,

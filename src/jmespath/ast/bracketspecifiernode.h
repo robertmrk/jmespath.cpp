@@ -35,6 +35,7 @@ namespace jmespath { namespace ast {
 class ArrayItemNode;
 class FlattenOperatorNode;
 class SliceExpressionNode;
+class ListWildcardNode;
 /**
  * @brief The BracketSpecifierNode class represents a JMESPath bracket
  * specifier.
@@ -42,7 +43,8 @@ class SliceExpressionNode;
 class BracketSpecifierNode : public VariantNode<
         boost::recursive_wrapper<ArrayItemNode>,
         boost::recursive_wrapper<FlattenOperatorNode>,
-        boost::recursive_wrapper<SliceExpressionNode> >
+        boost::recursive_wrapper<SliceExpressionNode>,
+        boost::recursive_wrapper<ListWildcardNode> >
 {
 public:
     /**
@@ -61,6 +63,13 @@ public:
      * @return Returns true if projection is required, otherwise returns false.
      */
     bool isProjection() const;
+    /**
+     * @brief Reports whether the node should stop an ongoing projection or
+     * not.
+     * @return Returns true if the node should stop an ongoing projection,
+     * otherwise returns false.
+     */
+    bool stopsProjection() const;
 };
 }} // namespace jmespath::ast
 

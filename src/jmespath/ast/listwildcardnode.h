@@ -25,53 +25,36 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "jmespath/ast/allnodes.h"
+#ifndef LISTWILDCARDNODE_H
+#define LISTWILDCARDNODE_H
+#include "jmespath/ast/abstractnode.h"
 
 namespace jmespath { namespace ast {
 
-IndexExpressionNode::IndexExpressionNode()
-    : BinaryExpressionNode()
+/**
+ * @brief The ListWildcardNode class represents a JMESPath list wildcard
+ * expression.
+ */
+class ListWildcardNode : public AbstractNode
 {
-}
-
-IndexExpressionNode::IndexExpressionNode(const BracketSpecifierNode
-                                            &bracketSpecifier)
-    : BinaryExpressionNode(),
-      bracketSpecifier(bracketSpecifier)
-{
-}
-
-IndexExpressionNode::IndexExpressionNode(const ExpressionNode &expression,
-                                         const BracketSpecifierNode
-                                            &bracketSpecifier,
-                                         const ExpressionNode &subexpression)
-    : BinaryExpressionNode(expression, subexpression),
-      bracketSpecifier(bracketSpecifier)
-{
-}
-
-bool IndexExpressionNode::operator ==(const IndexExpressionNode &other) const
-{
-    if (this != &other)
-    {
-        return BinaryExpressionNode::operator ==(other)
-                && (bracketSpecifier == other.bracketSpecifier);
-    }
-    return true;
-}
-
-bool IndexExpressionNode::isProjection() const
-{
-    return bracketSpecifier.isProjection();
-}
-
-bool IndexExpressionNode::stopsProjection() const
-{
-    return bracketSpecifier.stopsProjection();
-}
-
-void IndexExpressionNode::accept(interpreter::AbstractVisitor *visitor)
-{
-    visitor->visit(this);
-}
+public:
+    /**
+     * @brief Constructs a ListWildcardNode object.
+     */
+    ListWildcardNode();
+    /**
+     * @brief Calls the visit method of the given \a visitor with the
+     * dynamic type of the node.
+     * @param visitor A visitor implementation
+     */
+    void accept(interpreter::AbstractVisitor* visitor) override;
+    /**
+     * @brief Equality compares this node to the \a other
+     * @param other The node that should be compared.
+     * @return Returns true if this object is equal to the \a other, otherwise
+     * false
+     */
+    bool operator==(const ListWildcardNode& other) const;
+};
 }} // namespace jmespath::ast
+#endif // LISTWILDCARDNODE_H

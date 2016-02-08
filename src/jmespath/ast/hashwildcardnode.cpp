@@ -25,52 +25,33 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
+#include "jmespath/ast/hashwildcardnode.h"
 #include "jmespath/ast/allnodes.h"
 
 namespace jmespath { namespace ast {
 
-IndexExpressionNode::IndexExpressionNode()
+HashWildcardNode::HashWildcardNode()
     : BinaryExpressionNode()
 {
 }
 
-IndexExpressionNode::IndexExpressionNode(const BracketSpecifierNode
-                                            &bracketSpecifier)
-    : BinaryExpressionNode(),
-      bracketSpecifier(bracketSpecifier)
+HashWildcardNode::HashWildcardNode(const ExpressionNode &leftExpression,
+                                   const ExpressionNode &rightExpression)
+    : BinaryExpressionNode(leftExpression, rightExpression)
 {
 }
 
-IndexExpressionNode::IndexExpressionNode(const ExpressionNode &expression,
-                                         const BracketSpecifierNode
-                                            &bracketSpecifier,
-                                         const ExpressionNode &subexpression)
-    : BinaryExpressionNode(expression, subexpression),
-      bracketSpecifier(bracketSpecifier)
+bool HashWildcardNode::isProjection() const
 {
-}
-
-bool IndexExpressionNode::operator ==(const IndexExpressionNode &other) const
-{
-    if (this != &other)
-    {
-        return BinaryExpressionNode::operator ==(other)
-                && (bracketSpecifier == other.bracketSpecifier);
-    }
     return true;
 }
 
-bool IndexExpressionNode::isProjection() const
+bool HashWildcardNode::stopsProjection() const
 {
-    return bracketSpecifier.isProjection();
+    return false;
 }
 
-bool IndexExpressionNode::stopsProjection() const
-{
-    return bracketSpecifier.stopsProjection();
-}
-
-void IndexExpressionNode::accept(interpreter::AbstractVisitor *visitor)
+void HashWildcardNode::accept(interpreter::AbstractVisitor *visitor)
 {
     visitor->visit(this);
 }

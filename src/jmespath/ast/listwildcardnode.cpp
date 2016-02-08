@@ -25,53 +25,23 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "jmespath/ast/allnodes.h"
+#include "jmespath/ast/listwildcardnode.h"
+#include "jmespath/interpreter/abstractvisitor.h"
 
 namespace jmespath { namespace ast {
 
-IndexExpressionNode::IndexExpressionNode()
-    : BinaryExpressionNode()
+ListWildcardNode::ListWildcardNode()
+    : AbstractNode()
 {
 }
 
-IndexExpressionNode::IndexExpressionNode(const BracketSpecifierNode
-                                            &bracketSpecifier)
-    : BinaryExpressionNode(),
-      bracketSpecifier(bracketSpecifier)
-{
-}
-
-IndexExpressionNode::IndexExpressionNode(const ExpressionNode &expression,
-                                         const BracketSpecifierNode
-                                            &bracketSpecifier,
-                                         const ExpressionNode &subexpression)
-    : BinaryExpressionNode(expression, subexpression),
-      bracketSpecifier(bracketSpecifier)
-{
-}
-
-bool IndexExpressionNode::operator ==(const IndexExpressionNode &other) const
-{
-    if (this != &other)
-    {
-        return BinaryExpressionNode::operator ==(other)
-                && (bracketSpecifier == other.bracketSpecifier);
-    }
-    return true;
-}
-
-bool IndexExpressionNode::isProjection() const
-{
-    return bracketSpecifier.isProjection();
-}
-
-bool IndexExpressionNode::stopsProjection() const
-{
-    return bracketSpecifier.stopsProjection();
-}
-
-void IndexExpressionNode::accept(interpreter::AbstractVisitor *visitor)
+void ListWildcardNode::accept(interpreter::AbstractVisitor *visitor)
 {
     visitor->visit(this);
+}
+
+bool ListWildcardNode::operator==(const ListWildcardNode &other) const
+{
+    return true;
 }
 }} // namespace jmespath::ast

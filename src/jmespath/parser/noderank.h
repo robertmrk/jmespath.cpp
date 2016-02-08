@@ -114,6 +114,18 @@ int nodeRank(const ast::SliceExpressionNode& node)
 {
     return 2;
 }
+
+template <>
+int nodeRank(const ast::ListWildcardNode& node)
+{
+    return 2;
+}
+
+template <>
+int nodeRank(const ast::HashWildcardNode& node)
+{
+    return 2;
+}
 } // anonymous namespace
 }} // namespace jmespath::parser
 #endif // NODERANK_H
