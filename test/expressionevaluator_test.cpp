@@ -609,4 +609,162 @@ TEST_CASE("ExpressionEvaluator")
         REQUIRE(evaluator.currentContext() == "{\"id1\":\"value2\","
                                               "\"id3\":\"value4\"}"_json);
     }
+
+    SECTION("evaluates child expression of not expression")
+    {
+        ast::NotExpressionNode node;
+        Mock<ExpressionEvaluator> evaluatorMock(evaluator);
+        When(OverloadedMethod(evaluatorMock, visit,
+                              void(ast::ExpressionNode*))).AlwaysReturn();
+
+        evaluatorMock.get().visit(&node);
+
+        Verify(OverloadedMethod(evaluatorMock, visit,
+                                void(ast::ExpressionNode*))
+               .Using(&node.expression)).Once();
+        VerifyNoOtherInvocations(evaluatorMock);
+    }
+
+    SECTION("evaluates not expression on false to true")
+    {
+        ast::NotExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id"}}};
+        evaluator.setContext("{\"id\":false}"_json);
+        Json expectedResult = true;
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates not expression on true to false")
+    {
+        ast::NotExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id"}}};
+        evaluator.setContext("{\"id\":true}"_json);
+        Json expectedResult = false;
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates not expression on null to true")
+    {
+        ast::NotExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id"}}};
+        evaluator.setContext("{\"id\":null}"_json);
+        Json expectedResult = true;
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates not expression on 0 to true")
+    {
+        ast::NotExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id"}}};
+        evaluator.setContext("{\"id\":0}"_json);
+        Json expectedResult = true;
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates not expression on non 0 value to false")
+    {
+        ast::NotExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id"}}};
+        evaluator.setContext("{\"id\":5}"_json);
+        Json expectedResult = false;
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates not expression on empty string to true")
+    {
+        ast::NotExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id"}}};
+        evaluator.setContext("{\"id\":\"\"}"_json);
+        Json expectedResult = true;
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates not expression on non empty string to false")
+    {
+        ast::NotExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id"}}};
+        evaluator.setContext("{\"id\":\"string\"}"_json);
+        Json expectedResult = false;
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates not expression on empty array to true")
+    {
+        ast::NotExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id"}}};
+        evaluator.setContext("{\"id\":[]}"_json);
+        Json expectedResult = true;
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates not expression on non empty array to false")
+    {
+        ast::NotExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id"}}};
+        evaluator.setContext("{\"id\":[1, 2, 3]}"_json);
+        Json expectedResult = false;
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates not expression on empty object to true")
+    {
+        ast::NotExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id"}}};
+        evaluator.setContext("{\"id\":{}}"_json);
+        Json expectedResult = true;
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates not expression on non empty object to false")
+    {
+        ast::NotExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id"}}};
+        evaluator.setContext("{\"id\":{\"id2\":\"string\"}}"_json);
+        Json expectedResult = false;
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
 }

@@ -279,6 +279,10 @@ void ExpressionEvaluator::visit(ast::MultiselectHashNode *node)
 
 void ExpressionEvaluator::visit(ast::NotExpressionNode *node)
 {
+    visit(&node->expression);
+    bool result = !toBoolean(m_context);
+    m_context = Json(Json::value_t::boolean);
+    m_context = result;
 }
 
 int ExpressionEvaluator::adjustSliceEndpoint(int length,
@@ -298,5 +302,14 @@ int ExpressionEvaluator::adjustSliceEndpoint(int length,
         endpoint = step < 0 ? length - 1: length;
     }
     return endpoint;
+}
+
+bool ExpressionEvaluator::toBoolean(const Json &json) const
+{
+    return (!json.is_null()
+            && (!json.is_boolean() || (json.get<bool>() != false))
+            && (!json.is_number() || (json.get<int>() != 0))
+            && (!json.is_string() || !json.get<std::string>().empty())
+            && ((!json.is_array() && !json.is_object()) || !json.empty()));
 }
 }} // namespace jmespath::interpreter
