@@ -526,4 +526,48 @@ TEST_CASE("ExpressionEvaluator")
 
         REQUIRE(evaluator.currentContext() == "[1, 2, 3]"_json);
     }
+
+    SECTION("visits child expressions of multiselect hash expression on "
+            "evaluation")
+    {
+        ast::MultiselectHashNode node{
+                {ast::IdentifierNode{"id1"},
+                 ast::ExpressionNode{
+                    ast::IdentifierNode{"id2"}}},
+                {ast::IdentifierNode{"id3"},
+                 ast::ExpressionNode{
+                    ast::IdentifierNode{"id4"}}}};
+        Mock<ExpressionEvaluator> evaluatorMock(evaluator);
+        When(OverloadedMethod(evaluatorMock, visit,
+                              void(ast::ExpressionNode*)))
+                .AlwaysReturn();
+
+        evaluatorMock.get().visit(&node);
+
+        Verify(OverloadedMethod(evaluatorMock, visit,
+                                void(ast::ExpressionNode*))
+               .Using(&node.expressions[0].second)).Once();
+        Verify(OverloadedMethod(evaluatorMock, visit,
+                                void(ast::ExpressionNode*))
+               .Using(&node.expressions[1].second)).Once();
+        VerifyNoOtherInvocations(evaluatorMock);
+    }
+
+    SECTION("evaluates multiselect hash by creating an object from the child"
+            "expressions' key and value")
+    {
+        evaluator.setContext("{\"id2\":\"value2\", \"id4\":\"value4\"}"_json);
+        ast::MultiselectHashNode node{
+                {ast::IdentifierNode{"id1"},
+                 ast::ExpressionNode{
+                    ast::IdentifierNode{"id2"}}},
+                {ast::IdentifierNode{"id3"},
+                 ast::ExpressionNode{
+                    ast::IdentifierNode{"id4"}}}};
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == "{\"id1\":\"value2\","
+                                              "\"id3\":\"value4\"}"_json);
+    }
 }

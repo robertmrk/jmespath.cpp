@@ -260,6 +260,15 @@ void ExpressionEvaluator::visit(ast::MultiselectListNode *node)
 
 void ExpressionEvaluator::visit(ast::MultiselectHashNode *node)
 {
+    Json result(Json::value_t::object);
+    Json childContext = m_context;
+    for (auto& keyValuePair: node->expressions)
+    {
+        visit(&keyValuePair.second);
+        result[keyValuePair.first.identifier] = m_context;
+        m_context = childContext;
+    }
+    m_context = result;
 }
 
 int ExpressionEvaluator::adjustSliceEndpoint(int length,
