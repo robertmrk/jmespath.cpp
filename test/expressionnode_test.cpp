@@ -95,6 +95,15 @@ TEST_CASE("ExpressionNode")
 
             REQUIRE(expression == hashWildcard);
         }
+
+        SECTION("with multiselect list")
+        {
+            MultiselectListNode multiselectList;
+
+            ExpressionNode expression{multiselectList};
+
+            REQUIRE(expression == multiselectList);
+        }
     }
 
     SECTION("accepts assignment of another ExpressionNode")

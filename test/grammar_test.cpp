@@ -529,7 +529,33 @@ TEST_CASE("Grammar")
 
             REQUIRE(parseExpression(grammar, expression) == expectedResult);
         }
+
+        SECTION("standalone multiselect list expression")
+        {
+            auto expectedResult = ast::MultiselectListNode{
+                    ast::ExpressionNode{
+                        ast::IdentifierNode{"id1"}},
+                    ast::ExpressionNode{
+                        ast::IdentifierNode{"id2"}}};
+            String expression{"[id1, id2]"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
+
+        SECTION("multiselect list expression as subexpression")
+        {
+            auto expectedResult = ast::SubexpressionNode{
+                    ast::ExpressionNode{
+                        ast::IdentifierNode{"id"}},
+                    ast::ExpressionNode{
+                        ast::MultiselectListNode{
+                        ast::ExpressionNode{
+                            ast::IdentifierNode{"id1"}},
+                        ast::ExpressionNode{
+                            ast::IdentifierNode{"id2"}}}}};
+            String expression{"id.[id1, id2]"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
     }
 }
-
-;

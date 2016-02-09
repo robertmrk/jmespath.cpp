@@ -245,6 +245,10 @@ void ExpressionEvaluator::visit(ast::HashWildcardNode *node)
     evaluateProjection(&node->rightExpression);
 }
 
+void ExpressionEvaluator::visit(ast::MultiselectListNode *node)
+{
+}
+
 int ExpressionEvaluator::adjustSliceEndpoint(int length,
                                              int endpoint,
                                              int step) const

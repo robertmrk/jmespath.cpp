@@ -25,22 +25,41 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef ALLNODES_H
-#define ALLNODES_H
-#include "jmespath/ast/abstractnode.h"
-#include "jmespath/ast/expressionnode.h"
-#include "jmespath/ast/identifiernode.h"
-#include "jmespath/ast/rawstringnode.h"
-#include "jmespath/ast/literalnode.h"
-#include "jmespath/ast/subexpressionnode.h"
-#include "jmespath/ast/indexexpressionnode.h"
-#include "jmespath/ast/arrayitemnode.h"
-#include "jmespath/ast/variantnode.h"
-#include "jmespath/ast/binaryexpressionnode.h"
-#include "jmespath/ast/flattenoperatornode.h"
-#include "jmespath/ast/bracketspecifiernode.h"
-#include "jmespath/ast/sliceexpressionnode.h"
-#include "jmespath/ast/listwildcardnode.h"
-#include "jmespath/ast/hashwildcardnode.h"
 #include "jmespath/ast/multiselectlistnode.h"
-#endif // ALLNODES_H
+#include "jmespath/ast/allnodes.h"
+
+namespace jmespath { namespace ast {
+
+MultiselectListNode::MultiselectListNode()
+    : AbstractNode()
+{
+}
+
+MultiselectListNode::MultiselectListNode(
+        const std::vector<ExpressionNode> &expressions)
+    : AbstractNode(),
+      expressions(expressions)
+{
+}
+
+MultiselectListNode::MultiselectListNode(
+        const std::initializer_list<ExpressionNode> &expressions)
+    : AbstractNode(),
+      expressions(expressions)
+{
+}
+
+void MultiselectListNode::accept(interpreter::AbstractVisitor *visitor)
+{
+    visitor->visit(this);
+}
+
+bool MultiselectListNode::operator==(const MultiselectListNode &other) const
+{
+    if (this != &other)
+    {
+        return expressions == other.expressions;
+    }
+    return true;
+}
+}} // namespace jmespath::ast
