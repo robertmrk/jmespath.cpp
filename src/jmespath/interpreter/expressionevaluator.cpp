@@ -247,28 +247,34 @@ void ExpressionEvaluator::visit(ast::HashWildcardNode *node)
 
 void ExpressionEvaluator::visit(ast::MultiselectListNode *node)
 {
-    Json result(Json::value_t::array);
-    Json childContext = m_context;
-    for (auto& expression: node->expressions)
+    if (!m_context.is_null())
     {
-        visit(&expression);
-        result.push_back(m_context);
-        m_context = childContext;
+        Json result(Json::value_t::array);
+        Json childContext = m_context;
+        for (auto& expression: node->expressions)
+        {
+            visit(&expression);
+            result.push_back(m_context);
+            m_context = childContext;
+        }
+        m_context = result;
     }
-    m_context = result;
 }
 
 void ExpressionEvaluator::visit(ast::MultiselectHashNode *node)
 {
-    Json result(Json::value_t::object);
-    Json childContext = m_context;
-    for (auto& keyValuePair: node->expressions)
+    if (!m_context.is_null())
     {
-        visit(&keyValuePair.second);
-        result[keyValuePair.first.identifier] = m_context;
-        m_context = childContext;
+        Json result(Json::value_t::object);
+        Json childContext = m_context;
+        for (auto& keyValuePair: node->expressions)
+        {
+            visit(&keyValuePair.second);
+            result[keyValuePair.first.identifier] = m_context;
+            m_context = childContext;
+        }
+        m_context = result;
     }
-    m_context = result;
 }
 
 int ExpressionEvaluator::adjustSliceEndpoint(int length,

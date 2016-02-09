@@ -494,6 +494,7 @@ TEST_CASE("ExpressionEvaluator")
         When(OverloadedMethod(evaluatorMock, visit,
                               void(ast::ExpressionNode*)))
                 .AlwaysReturn();
+        evaluatorMock.get().setContext("value");
 
         evaluatorMock.get().visit(&node);
 
@@ -507,6 +508,25 @@ TEST_CASE("ExpressionEvaluator")
                                    void(ast::ExpressionNode*))
                        .Using(&node.expressions[2]))
                 .Once();
+        VerifyNoOtherInvocations(evaluatorMock);
+    }
+
+    SECTION("doesn't evaluates multiselect list expression on null context")
+    {
+        ast::ExpressionNode exp1{
+            ast::IdentifierNode{"id1"}};
+        ast::ExpressionNode exp2{
+            ast::IdentifierNode{"id2"}};
+        ast::ExpressionNode exp3{
+            ast::IdentifierNode{"id3"}};
+        ast::MultiselectListNode node{exp1, exp2, exp3};
+        Mock<ExpressionEvaluator> evaluatorMock(evaluator);
+        When(OverloadedMethod(evaluatorMock, visit,
+                              void(ast::ExpressionNode*)))
+                .AlwaysReturn();
+
+        evaluatorMock.get().visit(&node);
+
         VerifyNoOtherInvocations(evaluatorMock);
     }
 
@@ -539,8 +559,8 @@ TEST_CASE("ExpressionEvaluator")
                     ast::IdentifierNode{"id4"}}}};
         Mock<ExpressionEvaluator> evaluatorMock(evaluator);
         When(OverloadedMethod(evaluatorMock, visit,
-                              void(ast::ExpressionNode*)))
-                .AlwaysReturn();
+                              void(ast::ExpressionNode*))).AlwaysReturn();
+        evaluatorMock.get().setContext("value");
 
         evaluatorMock.get().visit(&node);
 
@@ -550,6 +570,25 @@ TEST_CASE("ExpressionEvaluator")
         Verify(OverloadedMethod(evaluatorMock, visit,
                                 void(ast::ExpressionNode*))
                .Using(&node.expressions[1].second)).Once();
+        VerifyNoOtherInvocations(evaluatorMock);
+    }
+
+    SECTION("doesn't evaluates multiselect hash expression on null context")
+    {
+        ast::MultiselectHashNode node{
+                {ast::IdentifierNode{"id1"},
+                 ast::ExpressionNode{
+                    ast::IdentifierNode{"id2"}}},
+                {ast::IdentifierNode{"id3"},
+                 ast::ExpressionNode{
+                    ast::IdentifierNode{"id4"}}}};
+        Mock<ExpressionEvaluator> evaluatorMock(evaluator);
+        When(OverloadedMethod(evaluatorMock, visit,
+                              void(ast::ExpressionNode*))).AlwaysReturn();
+        evaluatorMock.get().setContext({});
+
+        evaluatorMock.get().visit(&node);
+
         VerifyNoOtherInvocations(evaluatorMock);
     }
 
