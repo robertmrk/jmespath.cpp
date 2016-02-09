@@ -258,6 +258,10 @@ void ExpressionEvaluator::visit(ast::MultiselectListNode *node)
     m_context = result;
 }
 
+void ExpressionEvaluator::visit(ast::MultiselectHashNode *node)
+{
+}
+
 int ExpressionEvaluator::adjustSliceEndpoint(int length,
                                              int endpoint,
                                              int step) const

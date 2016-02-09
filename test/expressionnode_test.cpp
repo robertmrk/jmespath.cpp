@@ -104,6 +104,15 @@ TEST_CASE("ExpressionNode")
 
             REQUIRE(expression == multiselectList);
         }
+
+        SECTION("with multiselect hash")
+        {
+            MultiselectHashNode multiselectHash;
+
+            ExpressionNode expression{multiselectHash};
+
+            REQUIRE(expression == multiselectHash);
+        }
     }
 
     SECTION("accepts assignment of another ExpressionNode")

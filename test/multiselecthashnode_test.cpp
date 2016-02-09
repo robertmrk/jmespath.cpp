@@ -29,7 +29,7 @@
 #include "jmespath/ast/allnodes.h"
 #include "jmespath/interpreter/abstractvisitor.h"
 
-TEST_CASE("MultiselectListNode")
+TEST_CASE("MultiselectHashNode")
 {
     using namespace jmespath::ast;
     using namespace jmespath::interpreter;
@@ -39,50 +39,52 @@ TEST_CASE("MultiselectListNode")
     {
         SECTION("without parameters")
         {
-            REQUIRE_NOTHROW(MultiselectListNode{});
+            REQUIRE_NOTHROW(MultiselectHashNode{});
         }
 
-        SECTION("with vector of expressions")
+        SECTION("with vector of key-value expressions")
         {
-            std::vector<ExpressionNode> expressions = {
-                ExpressionNode{
-                    IdentifierNode{"id1"}},
-                ExpressionNode{
-                    IdentifierNode{"id2"}},
-                ExpressionNode{
-                    IdentifierNode{"id3"}}};
+            MultiselectHashNode::KeyValuePairType pair1{
+                IdentifierNode{"id1"},
+                ExpressionNode{}};
+            MultiselectHashNode::KeyValuePairType pair2{
+                IdentifierNode{"id2"},
+                ExpressionNode{}};
+            std::vector<MultiselectHashNode::KeyValuePairType> vector{
+                pair1, pair2};
 
-            MultiselectListNode node{expressions};
+            MultiselectHashNode node{vector};
 
-            REQUIRE(node.expressions == expressions);
+            REQUIRE(node.expressions == vector);
         }
 
-        SECTION("with initializer list of expressions")
+        SECTION("with initializer list of key-value expressions")
         {
-            ExpressionNode node1{
-                IdentifierNode{"id1"}};
-            ExpressionNode node2{
-                IdentifierNode{"id2"}};
-            ExpressionNode node3{
-                IdentifierNode{"id3"}};
-            std::vector<ExpressionNode> expressions{node1, node2, node3};
+            MultiselectHashNode::KeyValuePairType pair1{
+                IdentifierNode{"id1"},
+                ExpressionNode{}};
+            MultiselectHashNode::KeyValuePairType pair2{
+                IdentifierNode{"id2"},
+                ExpressionNode{}};
+            std::vector<MultiselectHashNode::KeyValuePairType> vector{
+                pair1, pair2};
 
-            MultiselectListNode node{node1, node2, node3};
+            MultiselectHashNode node{pair1, pair2};
 
-            REQUIRE(node.expressions == expressions);
+            REQUIRE(node.expressions == vector);
         }
     }
 
     SECTION("can be compared for equality")
     {
-        ExpressionNode exp1{
-            IdentifierNode{"id1"}};
-        ExpressionNode exp2{
-            IdentifierNode{"id2"}};
-        ExpressionNode exp3{
-            IdentifierNode{"id3"}};
-        MultiselectListNode node1{exp1, exp2, exp3};
-        MultiselectListNode node2;
+        MultiselectHashNode::KeyValuePairType pair1{
+            IdentifierNode{"id1"},
+            ExpressionNode{}};
+        MultiselectHashNode::KeyValuePairType pair2{
+            IdentifierNode{"id2"},
+            ExpressionNode{}};
+        MultiselectHashNode node1{pair1, pair2};
+        MultiselectHashNode node2;
         node2 = node1;
 
         REQUIRE(node1 == node2);
@@ -91,14 +93,14 @@ TEST_CASE("MultiselectListNode")
 
     SECTION("accepts visitor")
     {
-        MultiselectListNode node;
+        MultiselectHashNode node;
         Mock<AbstractVisitor> visitor;
-        When(OverloadedMethod(visitor, visit, void(MultiselectListNode*)))
+        When(OverloadedMethod(visitor, visit, void(MultiselectHashNode*)))
                 .AlwaysReturn();
 
         node.accept(&visitor.get());
 
-        Verify(OverloadedMethod(visitor, visit, void(MultiselectListNode*)))
+        Verify(OverloadedMethod(visitor, visit, void(MultiselectHashNode*)))
                 .Once();
     }
 }

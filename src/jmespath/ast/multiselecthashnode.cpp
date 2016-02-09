@@ -25,23 +25,42 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef ALLNODES_H
-#define ALLNODES_H
-#include "jmespath/ast/abstractnode.h"
-#include "jmespath/ast/expressionnode.h"
-#include "jmespath/ast/identifiernode.h"
-#include "jmespath/ast/rawstringnode.h"
-#include "jmespath/ast/literalnode.h"
-#include "jmespath/ast/subexpressionnode.h"
-#include "jmespath/ast/indexexpressionnode.h"
-#include "jmespath/ast/arrayitemnode.h"
-#include "jmespath/ast/variantnode.h"
-#include "jmespath/ast/binaryexpressionnode.h"
-#include "jmespath/ast/flattenoperatornode.h"
-#include "jmespath/ast/bracketspecifiernode.h"
-#include "jmespath/ast/sliceexpressionnode.h"
-#include "jmespath/ast/listwildcardnode.h"
-#include "jmespath/ast/hashwildcardnode.h"
-#include "jmespath/ast/multiselectlistnode.h"
 #include "jmespath/ast/multiselecthashnode.h"
-#endif // ALLNODES_H
+#include "jmespath/ast/allnodes.h"
+#include "jmespath/interpreter/abstractvisitor.h"
+
+namespace jmespath { namespace ast {
+
+MultiselectHashNode::MultiselectHashNode()
+    : AbstractNode()
+{
+}
+
+MultiselectHashNode::MultiselectHashNode(
+        const std::vector<KeyValuePairType> &expressions)
+    : AbstractNode(),
+      expressions(expressions)
+{
+}
+
+MultiselectHashNode::MultiselectHashNode(
+        const std::initializer_list<KeyValuePairType> &expressions)
+    : AbstractNode(),
+      expressions(expressions)
+{
+}
+
+void MultiselectHashNode::accept(interpreter::AbstractVisitor *visitor)
+{
+    visitor->visit(this);
+}
+
+bool MultiselectHashNode::operator==(const MultiselectHashNode &other) const
+{
+    if (this != &other)
+    {
+        return expressions == other.expressions;
+    }
+    return true;
+}
+}} // namespace jmespath::ast

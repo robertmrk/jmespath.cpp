@@ -557,5 +557,37 @@ TEST_CASE("Grammar")
 
             REQUIRE(parseExpression(grammar, expression) == expectedResult);
         }
+
+        SECTION("standalone multiselect hash expression")
+        {
+            auto expectedResult = ast::MultiselectHashNode{
+                    {ast::IdentifierNode{"id1"},
+                     ast::ExpressionNode{
+                        ast::IdentifierNode{"id2"}}},
+                    {ast::IdentifierNode{"id3"},
+                     ast::ExpressionNode{
+                        ast::IdentifierNode{"id4"}}}};
+            String expression{"{\"id1\":\"id2\", \"id3\":\"id4\"}"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
+
+        SECTION("multiselect hash expression as subexpression")
+        {
+            auto expectedResult = ast::SubexpressionNode{
+                    ast::ExpressionNode{
+                        ast::IdentifierNode{"id"}},
+                    ast::ExpressionNode{
+                        ast::MultiselectHashNode{
+                        {ast::IdentifierNode{"id1"},
+                         ast::ExpressionNode{
+                            ast::IdentifierNode{"id2"}}},
+                        {ast::IdentifierNode{"id3"},
+                         ast::ExpressionNode{
+                            ast::IdentifierNode{"id4"}}}}}};
+            String expression{"id.{\"id1\":\"id2\", \"id3\":\"id4\"}"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
     }
 }

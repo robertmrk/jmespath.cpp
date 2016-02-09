@@ -47,6 +47,8 @@ list(APPEND JMESPATH_SOURCE_FILES
     ${JMESPATH_AST_SOURCE_DIR}/hashwildcardnode.cpp
     ${JMESPATH_AST_SOURCE_DIR}/multiselectlistnode.h
     ${JMESPATH_AST_SOURCE_DIR}/multiselectlistnode.cpp
+    ${JMESPATH_AST_SOURCE_DIR}/multiselecthashnode.h
+    ${JMESPATH_AST_SOURCE_DIR}/multiselecthashnode.cpp
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/abstractvisitor.h
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/expressionevaluator.h
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/expressionevaluator.cpp)
