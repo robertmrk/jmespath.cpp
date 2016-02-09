@@ -44,6 +44,8 @@ class BracketSpecifierNode;
 class SliceExpressionNode;
 class ListWildcardNode;
 class HashWildcardNode;
+class MultiselectListNode;
+class MultiselectHashNode;
 }} // namespace jmespath::ast
 
 /**
@@ -77,6 +79,8 @@ public:
     virtual void visit(ast::SliceExpressionNode* node) = 0;    
     virtual void visit(ast::ListWildcardNode* node) = 0;
     virtual void visit(ast::HashWildcardNode* node) = 0;
+    virtual void visit(ast::MultiselectListNode* node) = 0;
+    virtual void visit(ast::MultiselectHashNode* node) = 0;
     /** @}*/
 };
 }} // namespace jmespath::interpreter

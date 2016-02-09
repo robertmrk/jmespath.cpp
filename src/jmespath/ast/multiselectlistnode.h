@@ -25,64 +25,62 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef EXPRESSIONNODE_H
-#define EXPRESSIONNODE_H
+#ifndef MULTISELECTLISTNODE_H
+#define MULTISELECTLISTNODE_H
 #include "jmespath/ast/abstractnode.h"
-#include "jmespath/ast/variantnode.h"
-#include <boost/variant.hpp>
+#include "jmespath/ast/expressionnode.h"
+#include <vector>
+#include <initializer_list>
 #include <boost/fusion/include/adapt_struct.hpp>
 
 namespace jmespath { namespace ast {
 
-class IdentifierNode;
-class RawStringNode;
-class LiteralNode;
-class SubexpressionNode;
-class IndexExpressionNode;
-class HashWildcardNode;
-class MultiselectListNode;
-class MultiselectHashNode;
 /**
- * @brief The ExpressionNode class represents a JMESPath expression.
+ * @brief The MultiselectListNode class represents a JMESPath list wildcard
+ * expression.
  */
-class ExpressionNode : public VariantNode<
-        boost::recursive_wrapper<IdentifierNode>,
-        boost::recursive_wrapper<RawStringNode>,
-        boost::recursive_wrapper<LiteralNode>,
-        boost::recursive_wrapper<SubexpressionNode>,
-        boost::recursive_wrapper<IndexExpressionNode>,
-        boost::recursive_wrapper<HashWildcardNode>,
-        boost::recursive_wrapper<MultiselectListNode>,
-        boost::recursive_wrapper<MultiselectHashNode> >
+class MultiselectListNode : public AbstractNode
 {
 public:
     /**
-     * @brief Constructs an empty ExpressionNode object
+     * @brief Constructs an empty MultiselectListNode object.
      */
-    ExpressionNode();
+    MultiselectListNode();    
     /**
-     * @brief Constructs an ExpressionNode object with its child expression
-     * initialized to \a expression
-     * @param expression The node's child expression
+     * @brief Constructs a MultiselectListNode object with the given
+     * @a expressions as its subexpressions
+     * @param expressions The node's subexpressoins
      */
-    ExpressionNode(const ValueType& expression);
+    MultiselectListNode(const std::vector<ExpressionNode>& expressions);
     /**
-     * @brief Assigns the @a other object to this object.
-     * @param other An ExpressionNode object.
-     * @return Returns a reference to this object.
+     * @brief Constructs a MultiselectListNode object with the given
+     * @a expressions as its subexpressions
+     * @param expressions The node's subexpressoins
      */
-    ExpressionNode& operator=(const ExpressionNode& other);
+    MultiselectListNode(
+            const std::initializer_list<ExpressionNode>& expressions);
     /**
-     * @brief Assigns the @a other Expression to this object's expression.
-     * @param expression An Expression object.
-     * @return Returns a reference to this object.
+     * @brief Calls the visit method of the given \a visitor with the
+     * dynamic type of the node.
+     * @param visitor A visitor implementation
      */
-    ExpressionNode& operator=(const ValueType& expression);
+    void accept(interpreter::AbstractVisitor* visitor) override;
+    /**
+     * @brief Equality compares this node to the \a other
+     * @param other The node that should be compared.
+     * @return Returns true if this object is equal to the \a other, otherwise
+     * false
+     */
+    bool operator==(const MultiselectListNode& other) const;
+    /**
+     * @brief The node's child expressions.
+     */
+    std::vector<ExpressionNode> expressions;
 };
 }} // namespace jmespath::ast
 
 BOOST_FUSION_ADAPT_STRUCT(
-    jmespath::ast::ExpressionNode,
-    (jmespath::ast::ExpressionNode::ValueType, value)
+    jmespath::ast::MultiselectListNode,
+    (std::vector<jmespath::ast::ExpressionNode>, expressions)
 )
-#endif // EXPRESSIONNODE_H
+#endif // MULTISELECTLISTNODE_H

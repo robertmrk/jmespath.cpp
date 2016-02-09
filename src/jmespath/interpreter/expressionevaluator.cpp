@@ -245,6 +245,38 @@ void ExpressionEvaluator::visit(ast::HashWildcardNode *node)
     evaluateProjection(&node->rightExpression);
 }
 
+void ExpressionEvaluator::visit(ast::MultiselectListNode *node)
+{
+    if (!m_context.is_null())
+    {
+        Json result(Json::value_t::array);
+        Json childContext = m_context;
+        for (auto& expression: node->expressions)
+        {
+            visit(&expression);
+            result.push_back(m_context);
+            m_context = childContext;
+        }
+        m_context = result;
+    }
+}
+
+void ExpressionEvaluator::visit(ast::MultiselectHashNode *node)
+{
+    if (!m_context.is_null())
+    {
+        Json result(Json::value_t::object);
+        Json childContext = m_context;
+        for (auto& keyValuePair: node->expressions)
+        {
+            visit(&keyValuePair.second);
+            result[keyValuePair.first.identifier] = m_context;
+            m_context = childContext;
+        }
+        m_context = result;
+    }
+}
+
 int ExpressionEvaluator::adjustSliceEndpoint(int length,
                                              int endpoint,
                                              int step) const

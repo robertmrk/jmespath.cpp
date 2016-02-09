@@ -94,21 +94,26 @@ public:
         phx::function<InsertBinaryExpressionNodeAction> insertNode;
 
         // match a standalone index expression or hash wildcard expression or
-        // identifier or literal or a raw string, optionally followed by a
-        // subexpression an index expression and a hash wildcard subexpression
+        // identifier or multiselect list or multiselect hash or literal or a
+        // raw string, optionally followed by a subexpression an index
+        // expression and a hash wildcard subexpression
         m_expressionRule = (m_indexExpressionRule(_val)[insertNode(_val, _1)]
                             | m_hashWildcardRule(_val)[insertNode(_val, _1)]
                             | (m_identifierRule
+                              | m_multiselectListRule
+                              | m_multiselectHashRule
                               | m_literalRule
                               | m_rawStringRule)[at_c<0>(_val) = _1, _a = _val])
             >> -m_subexpressionRule(_val)[insertNode(_val, _1, _a)]
             >> -m_indexExpressionRule(_val)[insertNode(_val, _1, _a)]
             >> -m_hashWildcardSubexpressionRule(_val)[insertNode(_val, _1, _a)];
-        // match an identifier preceded by a dot, a subexpression can also be
-        // optionally followed by an index expression a hash wildcard
-        // subexpression and by another subexpression
+        // match an identifier or multiselect list or multiselect hash preceded
+        // by a dot, a subexpression can also be optionally followed by an index
+        // expression a hash wildcard subexpression and by another subexpression
         m_subexpressionRule = (lit('.')
-                >> m_identifierRule[at_c<1>(_val) = _1])
+                >> (m_identifierRule
+                    | m_multiselectListRule
+                    | m_multiselectHashRule)[at_c<1>(_val) = _1])
                 >> -m_indexExpressionRule(_r1)[insertNode(_r1, _1)]
                 >> -m_hashWildcardSubexpressionRule(_r1)[insertNode(_r1, _1)]
                 >> -m_subexpressionRule(_r1)[insertNode(_r1, _1)];
@@ -152,6 +157,19 @@ public:
                 >> -m_subexpressionRule(_r1)[insertNode(_r1, _1)]
                 >> -m_indexExpressionRule(_r1)[insertNode(_r1, _1)]
                 >> -m_hashWildcardSubexpressionRule(_r1)[insertNode(_r1, _1)];
+        // matches an expression enclosed in square brackets, the expression
+        // can optionally be followd by more expressions separated with commas
+        m_multiselectListRule = lit('[')
+                >> m_expressionRule % lit(',')
+                >> lit(']');
+        // match a key-value pair enclosed in curly braces, the key-value pair
+        // can optionally be followed by more key-value pairs separated with
+        // commas
+        m_multiselectHashRule = lit('{')
+                >> m_keyValuePairRule % lit(',')
+                >> lit('}');
+        // match an identifier and an expression separated with a colon
+        m_keyValuePairRule = m_identifierRule >> lit(':') >> m_expressionRule;
         // match zero or more literal characters enclosed in grave accents
         m_literalRule = lexeme[ lit('\x60')
                 >> *m_literalCharRule[phx::bind(&Grammar::appendUtf8,
@@ -302,6 +320,15 @@ private:
     qi::rule<Iterator,
              ast::ListWildcardNode(),
              Skipper> m_listWildcardRule;
+    qi::rule<Iterator,
+             ast::MultiselectListNode(),
+             Skipper> m_multiselectListRule;
+    qi::rule<Iterator,
+             ast::MultiselectHashNode(),
+             Skipper> m_multiselectHashRule;
+    qi::rule<Iterator,
+             ast::MultiselectHashNode::KeyValuePairType(),
+             Skipper> m_keyValuePairRule;
     qi::rule<Iterator, ast::IdentifierNode(), Skipper> m_identifierRule;
     qi::rule<Iterator, ast::RawStringNode(), Skipper> m_rawStringRule;
     qi::rule<Iterator, ast::LiteralNode(), Skipper> m_literalRule;

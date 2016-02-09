@@ -83,6 +83,8 @@ public:
     void visit(ast::SliceExpressionNode* node) override;
     void visit(ast::ListWildcardNode* node) override;
     void visit(ast::HashWildcardNode* node) override;
+    void visit(ast::MultiselectListNode* node) override;
+    void visit(ast::MultiselectHashNode* node) override;
 
 private:
     /**
