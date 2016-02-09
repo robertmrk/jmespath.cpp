@@ -113,6 +113,15 @@ TEST_CASE("ExpressionNode")
 
             REQUIRE(expression == multiselectHash);
         }
+
+        SECTION("with not expression")
+        {
+            NotExpressionNode notExpression;
+
+            ExpressionNode expression{notExpression};
+
+            REQUIRE(expression == notExpression);
+        }
     }
 
     SECTION("accepts assignment of another ExpressionNode")

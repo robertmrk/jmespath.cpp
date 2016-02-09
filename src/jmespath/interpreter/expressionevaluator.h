@@ -85,6 +85,7 @@ public:
     void visit(ast::HashWildcardNode* node) override;
     void visit(ast::MultiselectListNode* node) override;
     void visit(ast::MultiselectHashNode* node) override;
+    void visit(ast::NotExpressionNode* node) override;
 
 private:
     /**

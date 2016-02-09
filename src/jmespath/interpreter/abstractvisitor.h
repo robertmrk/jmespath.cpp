@@ -46,6 +46,7 @@ class ListWildcardNode;
 class HashWildcardNode;
 class MultiselectListNode;
 class MultiselectHashNode;
+class NotExpressionNode;
 }} // namespace jmespath::ast
 
 /**
@@ -81,6 +82,7 @@ public:
     virtual void visit(ast::HashWildcardNode* node) = 0;
     virtual void visit(ast::MultiselectListNode* node) = 0;
     virtual void visit(ast::MultiselectHashNode* node) = 0;
+    virtual void visit(ast::NotExpressionNode* node) = 0;
     /** @}*/
 };
 }} // namespace jmespath::interpreter

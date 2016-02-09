@@ -49,6 +49,8 @@ list(APPEND JMESPATH_SOURCE_FILES
     ${JMESPATH_AST_SOURCE_DIR}/multiselectlistnode.cpp
     ${JMESPATH_AST_SOURCE_DIR}/multiselecthashnode.h
     ${JMESPATH_AST_SOURCE_DIR}/multiselecthashnode.cpp
+    ${JMESPATH_AST_SOURCE_DIR}/notexpressionnode.h
+    ${JMESPATH_AST_SOURCE_DIR}/notexpressionnode.cpp
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/abstractvisitor.h
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/expressionevaluator.h
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/expressionevaluator.cpp)

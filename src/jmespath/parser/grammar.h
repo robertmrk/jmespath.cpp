@@ -94,12 +94,13 @@ public:
         phx::function<InsertBinaryExpressionNodeAction> insertNode;
 
         // match a standalone index expression or hash wildcard expression or
-        // identifier or multiselect list or multiselect hash or literal or a
-        // raw string, optionally followed by a subexpression an index
-        // expression and a hash wildcard subexpression
+        // identifier or not expression or multiselect list or multiselect hash
+        // or literal or a raw string, optionally followed by a subexpression
+        // an index expression and a hash wildcard subexpression
         m_expressionRule = (m_indexExpressionRule(_val)[insertNode(_val, _1)]
                             | m_hashWildcardRule(_val)[insertNode(_val, _1)]
                             | (m_identifierRule
+                              | m_notExpressionRule
                               | m_multiselectListRule
                               | m_multiselectHashRule
                               | m_literalRule
@@ -168,6 +169,8 @@ public:
         m_multiselectHashRule = lit('{')
                 >> m_keyValuePairRule % lit(',')
                 >> lit('}');
+        // match an expression preceded by an exclamation mark
+        m_notExpressionRule = lit('!') >> m_expressionRule;
         // match an identifier and an expression separated with a colon
         m_keyValuePairRule = m_identifierRule >> lit(':') >> m_expressionRule;
         // match zero or more literal characters enclosed in grave accents
@@ -329,6 +332,7 @@ private:
     qi::rule<Iterator,
              ast::MultiselectHashNode::KeyValuePairType(),
              Skipper> m_keyValuePairRule;
+    qi::rule<Iterator, ast::NotExpressionNode(), Skipper> m_notExpressionRule;
     qi::rule<Iterator, ast::IdentifierNode(), Skipper> m_identifierRule;
     qi::rule<Iterator, ast::RawStringNode(), Skipper> m_rawStringRule;
     qi::rule<Iterator, ast::LiteralNode(), Skipper> m_literalRule;

@@ -589,5 +589,15 @@ TEST_CASE("Grammar")
 
             REQUIRE(parseExpression(grammar, expression) == expectedResult);
         }
+
+        SECTION("not expression")
+        {
+            auto expectedResult = ast::NotExpressionNode{
+                    ast::ExpressionNode{
+                        ast::IdentifierNode{"id"}}};
+            String expression{"!id"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
     }
 }

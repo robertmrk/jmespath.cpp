@@ -277,6 +277,10 @@ void ExpressionEvaluator::visit(ast::MultiselectHashNode *node)
     }
 }
 
+void ExpressionEvaluator::visit(ast::NotExpressionNode *node)
+{
+}
+
 int ExpressionEvaluator::adjustSliceEndpoint(int length,
                                              int endpoint,
                                              int step) const
