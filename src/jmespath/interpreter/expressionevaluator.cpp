@@ -247,6 +247,15 @@ void ExpressionEvaluator::visit(ast::HashWildcardNode *node)
 
 void ExpressionEvaluator::visit(ast::MultiselectListNode *node)
 {
+    Json result(Json::value_t::array);
+    Json childContext = m_context;
+    for (auto& expression: node->expressions)
+    {
+        visit(&expression);
+        result.push_back(m_context);
+        m_context = childContext;
+    }
+    m_context = result;
 }
 
 int ExpressionEvaluator::adjustSliceEndpoint(int length,
