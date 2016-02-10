@@ -37,6 +37,7 @@ TEST_CASE("ExpressionEvaluator")
     using jmespath::detail::Json;
     using jmespath::detail::String;
     using jmespath::detail::InvalidValue;
+    using jmespath::detail::InvalidAgrument;
     namespace ast = jmespath::ast;
     namespace rng = boost::range;
     using namespace fakeit;
@@ -766,5 +767,204 @@ TEST_CASE("ExpressionEvaluator")
         evaluator.visit(&node);
 
         REQUIRE(evaluator.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates comparator expression")
+    {
+        ast::ComparatorExpressionNode node{
+            ast::ExpressionNode{
+                ast::LiteralNode{"2"}},
+            ast::ComparatorExpressionNode::Comparator::NotEqual,
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}}};
+        Mock<ExpressionEvaluator> evaluatorMock(evaluator);
+        When(OverloadedMethod(evaluatorMock, visit,
+                              void(ast::ExpressionNode*))).AlwaysReturn();
+
+        evaluatorMock.get().visit(&node);
+
+        Verify(OverloadedMethod(evaluatorMock, visit,
+                                void(ast::ExpressionNode*))
+                    .Using(&node.leftExpression)
+               + OverloadedMethod(evaluatorMock, visit,
+                                void(ast::ExpressionNode*))
+                    .Using(&node.rightExpression)).Once();
+        VerifyNoOtherInvocations(evaluatorMock);
+    }
+
+    SECTION("evaluates comparator expression with less operator")
+    {
+        ast::ComparatorExpressionNode node1{
+            ast::ExpressionNode{
+                ast::LiteralNode{"2"}},
+            ast::ComparatorExpressionNode::Comparator::Less,
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}}};
+        ast::ComparatorExpressionNode node2{
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}},
+            ast::ComparatorExpressionNode::Comparator::Less,
+            ast::ExpressionNode{
+                ast::LiteralNode{"2"}}};
+        Json trueResult = true;
+
+        evaluator.visit(&node1);
+        Json result1 = evaluator.currentContext();
+        evaluator.visit(&node2);
+        Json result2 = evaluator.currentContext();
+
+        REQUIRE(result1);
+        REQUIRE_FALSE(result2);
+    }
+
+    SECTION("evaluates comparator expression with less or equal operator")
+    {
+        ast::ComparatorExpressionNode node1{
+            ast::ExpressionNode{
+                ast::LiteralNode{"2"}},
+            ast::ComparatorExpressionNode::Comparator::LessOrEqual,
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}}};
+        ast::ComparatorExpressionNode node2{
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}},
+            ast::ComparatorExpressionNode::Comparator::LessOrEqual,
+            ast::ExpressionNode{
+                ast::LiteralNode{"2"}}};
+        ast::ComparatorExpressionNode node3{
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}},
+            ast::ComparatorExpressionNode::Comparator::LessOrEqual,
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}}};
+        Json trueResult = true;
+
+        evaluator.visit(&node1);
+        Json result1 = evaluator.currentContext();
+        evaluator.visit(&node2);
+        Json result2 = evaluator.currentContext();
+        evaluator.visit(&node3);
+        Json result3 = evaluator.currentContext();
+
+        REQUIRE(result1);
+        REQUIRE_FALSE(result2);
+        REQUIRE(result3);
+    }
+
+    SECTION("evaluates comparator expression with equal operator")
+    {
+        ast::ComparatorExpressionNode node1{
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}},
+            ast::ComparatorExpressionNode::Comparator::Equal,
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}}};
+        ast::ComparatorExpressionNode node2{
+            ast::ExpressionNode{
+                ast::LiteralNode{"2"}},
+            ast::ComparatorExpressionNode::Comparator::Equal,
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}}};
+        Json trueResult = true;
+
+        evaluator.visit(&node1);
+        Json result1 = evaluator.currentContext();
+        evaluator.visit(&node2);
+        Json result2 = evaluator.currentContext();
+
+        REQUIRE(result1);
+        REQUIRE_FALSE(result2);
+    }
+
+    SECTION("evaluates comparator expression with greater or equal operator")
+    {
+        ast::ComparatorExpressionNode node1{
+            ast::ExpressionNode{
+                ast::LiteralNode{"2"}},
+            ast::ComparatorExpressionNode::Comparator::GreaterOrEqual,
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}}};
+        ast::ComparatorExpressionNode node2{
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}},
+            ast::ComparatorExpressionNode::Comparator::GreaterOrEqual,
+            ast::ExpressionNode{
+                ast::LiteralNode{"2"}}};
+        ast::ComparatorExpressionNode node3{
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}},
+            ast::ComparatorExpressionNode::Comparator::GreaterOrEqual,
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}}};
+        Json trueResult = true;
+
+        evaluator.visit(&node1);
+        Json result1 = evaluator.currentContext();
+        evaluator.visit(&node2);
+        Json result2 = evaluator.currentContext();
+        evaluator.visit(&node3);
+        Json result3 = evaluator.currentContext();
+
+        REQUIRE_FALSE(result1);
+        REQUIRE(result2);
+        REQUIRE(result3);
+    }
+
+    SECTION("evaluates comparator expression with greater operator")
+    {
+        ast::ComparatorExpressionNode node1{
+            ast::ExpressionNode{
+                ast::LiteralNode{"2"}},
+            ast::ComparatorExpressionNode::Comparator::Greater,
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}}};
+        ast::ComparatorExpressionNode node2{
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}},
+            ast::ComparatorExpressionNode::Comparator::Greater,
+            ast::ExpressionNode{
+                ast::LiteralNode{"2"}}};
+        Json trueResult = true;
+
+        evaluator.visit(&node1);
+        Json result1 = evaluator.currentContext();
+        evaluator.visit(&node2);
+        Json result2 = evaluator.currentContext();
+
+        REQUIRE_FALSE(result1);
+        REQUIRE(result2);
+    }
+
+    SECTION("evaluates comparator expression with not equal operator")
+    {
+        ast::ComparatorExpressionNode node1{
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}},
+            ast::ComparatorExpressionNode::Comparator::NotEqual,
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}}};
+        ast::ComparatorExpressionNode node2{
+            ast::ExpressionNode{
+                ast::LiteralNode{"2"}},
+            ast::ComparatorExpressionNode::Comparator::NotEqual,
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}}};
+        Json trueResult = true;
+
+        evaluator.visit(&node1);
+        Json result1 = evaluator.currentContext();
+        evaluator.visit(&node2);
+        Json result2 = evaluator.currentContext();
+
+        REQUIRE_FALSE(result1);
+        REQUIRE(result2);
+    }
+
+    SECTION("throws exception on evaluating comparator expression with "
+            "unknown operator")
+    {
+        ast::ComparatorExpressionNode node;
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node), InvalidAgrument);
     }
 }

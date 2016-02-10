@@ -287,6 +287,46 @@ void ExpressionEvaluator::visit(ast::NotExpressionNode *node)
 
 void ExpressionEvaluator::visit(ast::ComparatorExpressionNode *node)
 {
+    using Comparator = ast::ComparatorExpressionNode::Comparator;
+
+    if (node->comparator == Comparator::Unknown)
+    {
+        BOOST_THROW_EXCEPTION(detail::InvalidAgrument{});
+    }
+
+    Json childContext = m_context;
+    visit(&node->leftExpression);
+    Json leftResult = m_context;
+
+    m_context = childContext;
+    visit(&node->rightExpression);
+    Json rightResult = m_context;
+
+    m_context = Json(Json::value_t::boolean);
+    if (node->comparator == Comparator::Less)
+    {
+        m_context = leftResult < rightResult;
+    }
+    else if (node->comparator == Comparator::LessOrEqual)
+    {
+        m_context = leftResult <= rightResult;
+    }
+    else if (node->comparator == Comparator::Equal)
+    {
+        m_context = leftResult == rightResult;
+    }
+    else if (node->comparator == Comparator::GreaterOrEqual)
+    {
+        m_context = leftResult >= rightResult;
+    }
+    else if (node->comparator == Comparator::Greater)
+    {
+        m_context = leftResult > rightResult;
+    }
+    else if (node->comparator == Comparator::NotEqual)
+    {
+        m_context = leftResult != rightResult;
+    }
 }
 
 int ExpressionEvaluator::adjustSliceEndpoint(int length,
