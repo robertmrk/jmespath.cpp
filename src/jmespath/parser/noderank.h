@@ -126,6 +126,12 @@ int nodeRank(const ast::HashWildcardNode& node)
 {
     return 2;
 }
+
+template <>
+int nodeRank(const ast::ComparatorExpressionNode& node)
+{
+    return 3;
+}
 } // anonymous namespace
 }} // namespace jmespath::parser
 #endif // NODERANK_H

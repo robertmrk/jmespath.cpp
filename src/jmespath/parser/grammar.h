@@ -96,7 +96,8 @@ public:
         // match a standalone index expression or hash wildcard expression or
         // identifier or not expression or multiselect list or multiselect hash
         // or literal or a raw string, optionally followed by a subexpression
-        // an index expression and a hash wildcard subexpression
+        // an index expression a hash wildcard subexpression and a comparator
+        // expression
         m_expressionRule = (m_indexExpressionRule(_val)[insertNode(_val, _1)]
                             | m_hashWildcardRule(_val)[insertNode(_val, _1)]
                             | (m_identifierRule
@@ -107,23 +108,28 @@ public:
                               | m_rawStringRule)[at_c<0>(_val) = _1, _a = _val])
             >> -m_subexpressionRule(_val)[insertNode(_val, _1, _a)]
             >> -m_indexExpressionRule(_val)[insertNode(_val, _1, _a)]
-            >> -m_hashWildcardSubexpressionRule(_val)[insertNode(_val, _1, _a)];
+            >> -m_hashWildcardSubexpressionRule(_val)[insertNode(_val, _1, _a)]
+            >> -m_comparatorExpressionRule(_val)[insertNode(_val, _1, _a)];
         // match an identifier or multiselect list or multiselect hash preceded
         // by a dot, a subexpression can also be optionally followed by an index
-        // expression a hash wildcard subexpression and by another subexpression
+        // expression a hash wildcard subexpression by another subexpression
+        // and a comparator expression
         m_subexpressionRule = (lit('.')
                 >> (m_identifierRule
                     | m_multiselectListRule
                     | m_multiselectHashRule)[at_c<1>(_val) = _1])
                 >> -m_indexExpressionRule(_r1)[insertNode(_r1, _1)]
                 >> -m_hashWildcardSubexpressionRule(_r1)[insertNode(_r1, _1)]
-                >> -m_subexpressionRule(_r1)[insertNode(_r1, _1)];
+                >> -m_subexpressionRule(_r1)[insertNode(_r1, _1)]
+                >> -m_comparatorExpressionRule(_r1)[insertNode(_r1, _1)];
         // match a bracket specifier which can be optionally followed by a
-        // subexpression a hash wildcard subexpression and an index expression
+        // subexpression a hash wildcard subexpression an index expression
+        // and a comparator expression
         m_indexExpressionRule = m_bracketSpecifierRule[at_c<1>(_val) = _1]
                 >> -m_subexpressionRule(_r1)[insertNode(_r1, _1)]
                 >> -m_hashWildcardSubexpressionRule(_r1)[insertNode(_r1, _1)]
-                >> -m_indexExpressionRule(_r1)[insertNode(_r1, _1)];
+                >> -m_indexExpressionRule(_r1)[insertNode(_r1, _1)]
+                >> -m_comparatorExpressionRule(_r1)[insertNode(_r1, _1)];
         // match a slice expression or an array item or a list wildcard or a
         // flatten operator
         m_bracketSpecifierRule = (lit("[")
@@ -147,17 +153,21 @@ public:
         // match an asterisk
         m_listWildcardRule = eps >> lit("*");
         // match an asterisk optionally followd by a subexpression an
-        // index expression and a hash wildcard subexpression
+        // index expression a hash wildcard subexpression and a comparator
+        // expression
         m_hashWildcardRule = eps >> lit("*")
                 >> -m_subexpressionRule(_r1)[insertNode(_r1, _1)]
                 >> -m_indexExpressionRule(_r1)[insertNode(_r1, _1)]
-                >> -m_hashWildcardSubexpressionRule(_r1)[insertNode(_r1, _1)];
+                >> -m_hashWildcardSubexpressionRule(_r1)[insertNode(_r1, _1)]
+                >> -m_comparatorExpressionRule(_r1)[insertNode(_r1, _1)];
         // match a dot followd by an asterisk optionally followd by a
-        // subexpression an index expression and a hash wildcard subexpression
+        // subexpression an index expression a hash wildcard subexpression
+        // and a comparator expression
         m_hashWildcardSubexpressionRule = eps >> lit(".") >> lit("*")
                 >> -m_subexpressionRule(_r1)[insertNode(_r1, _1)]
                 >> -m_indexExpressionRule(_r1)[insertNode(_r1, _1)]
-                >> -m_hashWildcardSubexpressionRule(_r1)[insertNode(_r1, _1)];
+                >> -m_hashWildcardSubexpressionRule(_r1)[insertNode(_r1, _1)]
+                >> -m_comparatorExpressionRule(_r1)[insertNode(_r1, _1)];
         // matches an expression enclosed in square brackets, the expression
         // can optionally be followd by more expressions separated with commas
         m_multiselectListRule = lit('[')
@@ -171,6 +181,17 @@ public:
                 >> lit('}');
         // match an expression preceded by an exclamation mark
         m_notExpressionRule = lit('!') >> m_expressionRule;
+        // match a comparator symbol followed by an expression
+        m_comparatorExpressionRule = m_comparatorSymbols[at_c<1>(_val) = _1]
+                >> m_expressionRule[at_c<2>(_val) = _1];
+        // convert textual comparator symbols to enum values
+        m_comparatorSymbols.add
+            (U"<", ast::ComparatorExpressionNode::Comparator::Less)
+            (U"<=", ast::ComparatorExpressionNode::Comparator::LessOrEqual)
+            (U"==", ast::ComparatorExpressionNode::Comparator::Equal)
+            (U">=", ast::ComparatorExpressionNode::Comparator::GreaterOrEqual)
+            (U">", ast::ComparatorExpressionNode::Comparator::Greater)
+            (U"!=", ast::ComparatorExpressionNode::Comparator::NotEqual);
         // match an identifier and an expression separated with a colon
         m_keyValuePairRule = m_identifierRule >> lit(':') >> m_expressionRule;
         // match zero or more literal characters enclosed in grave accents
@@ -333,6 +354,11 @@ private:
              ast::MultiselectHashNode::KeyValuePairType(),
              Skipper> m_keyValuePairRule;
     qi::rule<Iterator, ast::NotExpressionNode(), Skipper> m_notExpressionRule;
+    qi::rule<Iterator,
+             ast::ComparatorExpressionNode(ast::ExpressionNode&),
+             Skipper> m_comparatorExpressionRule;
+    qi::symbols<UnicodeChar,
+                ast::ComparatorExpressionNode::Comparator> m_comparatorSymbols;
     qi::rule<Iterator, ast::IdentifierNode(), Skipper> m_identifierRule;
     qi::rule<Iterator, ast::RawStringNode(), Skipper> m_rawStringRule;
     qi::rule<Iterator, ast::LiteralNode(), Skipper> m_literalRule;

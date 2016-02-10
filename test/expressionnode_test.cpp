@@ -122,6 +122,15 @@ TEST_CASE("ExpressionNode")
 
             REQUIRE(expression == notExpression);
         }
+
+        SECTION("with comparator expression")
+        {
+            ComparatorExpressionNode comparatorExpression;
+
+            ExpressionNode expression{comparatorExpression};
+
+            REQUIRE(expression == comparatorExpression);
+        }
     }
 
     SECTION("accepts assignment of another ExpressionNode")

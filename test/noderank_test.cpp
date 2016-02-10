@@ -85,6 +85,11 @@ TEST_CASE("nodeRank")
         REQUIRE(nodeRank(HashWildcardNode{}) == 2);
     }
 
+    SECTION("ranks comparator expression node at 3")
+    {
+        REQUIRE(nodeRank(ComparatorExpressionNode{}) == 3);
+    }
+
     SECTION("ranks bracket specifier node as its expression")
     {
         ArrayItemNode expression1;

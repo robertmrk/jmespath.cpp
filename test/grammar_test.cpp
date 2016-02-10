@@ -599,5 +599,58 @@ TEST_CASE("Grammar")
 
             REQUIRE(parseExpression(grammar, expression) == expectedResult);
         }
+
+        SECTION("comparator expression")
+        {
+            auto expectedResult = ast::ComparatorExpressionNode{
+                    ast::ExpressionNode{
+                        ast::IdentifierNode{"id1"}},
+                    ast::ComparatorExpressionNode::Comparator::Equal,
+                    ast::ExpressionNode{
+                        ast::IdentifierNode{"id2"}}};
+            String expression{"id1 == id2"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
+
+        SECTION("comparator expression with complex subexpressions")
+        {
+            auto subexpression = ast::ExpressionNode{
+                ast::IndexExpressionNode{
+                    ast::ExpressionNode{
+                        ast::IdentifierNode{"id1"}},
+                    ast::BracketSpecifierNode{
+                        ast::ListWildcardNode{}},
+                    ast::ExpressionNode{
+                        ast::IndexExpressionNode{
+                            ast::ExpressionNode{
+                                ast::SubexpressionNode{
+                                    ast::ExpressionNode{
+                                        ast::SubexpressionNode{
+                                            ast::ExpressionNode{},
+                                            ast::ExpressionNode{
+                                                ast::IdentifierNode{"id2"}}}},
+                                    ast::ExpressionNode{
+                                        ast::IdentifierNode{"id3"}}}},
+                            ast::BracketSpecifierNode{
+                                ast::ListWildcardNode{}},
+                            ast::ExpressionNode{
+                                ast::SubexpressionNode{
+                                    ast::ExpressionNode{
+                                        ast::SubexpressionNode{
+                                            ast::ExpressionNode{},
+                                            ast::ExpressionNode{
+                                                ast::IdentifierNode{"id4"}}}},
+                                    ast::ExpressionNode{
+                                        ast::IdentifierNode{"id5"}}}}}}}};
+            auto expectedResult = ast::ComparatorExpressionNode{
+                    subexpression,
+                    ast::ComparatorExpressionNode::Comparator::Equal,
+                    subexpression};
+            String expression{
+                "id1[*].id2.id3[*].id4.id5 == id1[*].id2.id3[*].id4.id5"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
     }
 }

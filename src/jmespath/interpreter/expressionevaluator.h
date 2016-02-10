@@ -86,6 +86,7 @@ public:
     void visit(ast::MultiselectListNode* node) override;
     void visit(ast::MultiselectHashNode* node) override;
     void visit(ast::NotExpressionNode* node) override;
+    void visit(ast::ComparatorExpressionNode* node) override;
 
 private:
     /**
