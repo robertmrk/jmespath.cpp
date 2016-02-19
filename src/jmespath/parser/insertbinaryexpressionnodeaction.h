@@ -34,6 +34,22 @@
 
 namespace jmespath { namespace parser {
 
+struct ReplaceIfNull
+{
+    using return_type = void;
+    void operator() (ast::ExpressionNode& targetNode,
+                     const ast::ExpressionNode& node) const
+    {
+        const ast::BinaryExpressionNode* binaryNode
+                = boost::polymorphic_get<ast::BinaryExpressionNode>(
+                    &targetNode.value);
+        if (!binaryNode)
+        {
+            targetNode = node;
+        }
+    }
+};
+
 struct InsertBinaryExpressionNodeAction
 {
     /**
@@ -57,23 +73,25 @@ struct InsertBinaryExpressionNodeAction
                     = {}) const
     {
         auto targetBinaryNode = toBinaryNode(&targetNode);
+        int currentNodeRank = nodeRank(currentNode);
         // if the root node is not a binary node replace it with the current
         // node
-        if (!targetBinaryNode)
+        if (!targetBinaryNode
+                && (currentNodeRank
+                    < nodeRank<ast::ComparatorExpressionNode>({})))
         {
             targetNode.value = currentNode;
         }
         else
         {
             int targetNodeRank = nodeRank(targetNode);
-            int currentNodeRank = nodeRank(currentNode);
             // if current node has a higher rank then target node, or if their
             // ranks are equal and current node is a projection and target node
             // doesn't terminates projections
             if ((currentNodeRank > targetNodeRank)
-                     || ((currentNodeRank == targetNodeRank)
-                         && (currentNode.isProjection()
-                             && ! targetBinaryNode->stopsProjection())))
+                    || ((currentNodeRank == targetNodeRank)
+                        && (currentNode.isProjection()
+                            && ! targetBinaryNode->stopsProjection())))
             {
                 // set target node as current node's right expression and
                 // replace the target node
@@ -84,8 +102,7 @@ struct InsertBinaryExpressionNodeAction
             {
                 // insert current node into the left node of the target
                 (*this)(targetBinaryNode->leftExpression,
-                        currentNode,
-                        firstExpression);
+                        currentNode);
             }
         }
         // if the firstExpression argument was specified

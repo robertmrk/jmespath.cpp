@@ -131,6 +131,15 @@ TEST_CASE("ExpressionNode")
 
             REQUIRE(expression == comparatorExpression);
         }
+
+        SECTION("with or expression")
+        {
+            OrExpressionNode orExpression;
+
+            ExpressionNode expression{orExpression};
+
+            REQUIRE(expression == orExpression);
+        }
     }
 
     SECTION("accepts assignment of another ExpressionNode")

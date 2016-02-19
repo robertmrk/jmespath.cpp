@@ -90,6 +90,11 @@ TEST_CASE("nodeRank")
         REQUIRE(nodeRank(ComparatorExpressionNode{}) == 3);
     }
 
+    SECTION("ranks or expression node at 4")
+    {
+        REQUIRE(nodeRank(OrExpressionNode{}) == 4);
+    }
+
     SECTION("ranks bracket specifier node as its expression")
     {
         ArrayItemNode expression1;

@@ -132,6 +132,12 @@ int nodeRank(const ast::ComparatorExpressionNode& node)
 {
     return 3;
 }
+
+template <>
+int nodeRank(const ast::OrExpressionNode& node)
+{
+    return 4;
+}
 } // anonymous namespace
 }} // namespace jmespath::parser
 #endif // NODERANK_H

@@ -652,5 +652,102 @@ TEST_CASE("Grammar")
 
             REQUIRE(parseExpression(grammar, expression) == expectedResult);
         }
+
+        SECTION("or expression")
+        {
+            auto expectedResult = ast::OrExpressionNode{
+                    ast::ExpressionNode{
+                        ast::IdentifierNode{"id1"}},
+                    ast::ExpressionNode{
+                        ast::IdentifierNode{"id2"}}};
+            String expression{"id1 || id2"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
+
+        SECTION("or expression with comparator")
+        {
+            auto expectedResult = ast::OrExpressionNode{
+                    ast::ExpressionNode{
+                        ast::ComparatorExpressionNode{
+                            ast::ExpressionNode{
+                                ast::IdentifierNode{"id1"}},
+                            ast::ComparatorExpressionNode::Comparator::Less,
+                            ast::ExpressionNode{
+                                ast::IdentifierNode{"id2"}}}},
+                    ast::ExpressionNode{
+                        ast::IdentifierNode{"id3"}}};
+            String expression{"id1 < id2 || id3"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
+
+        SECTION("recursive or expression")
+        {
+            auto expectedResult = ast::OrExpressionNode{
+                    ast::ExpressionNode{
+                        ast::OrExpressionNode{
+                            ast::ExpressionNode{
+                                ast::OrExpressionNode{
+                                    ast::ExpressionNode{
+                                        ast::OrExpressionNode{
+                                            ast::ExpressionNode{
+                                                ast::IdentifierNode{"id1"}},
+                                            ast::ExpressionNode{
+                                                ast::IdentifierNode{"id2"}}}},
+                                    ast::ExpressionNode{
+                                        ast::IdentifierNode{"id3"}}}},
+                            ast::ExpressionNode{
+                                ast::IdentifierNode{"id4"}}}},
+                    ast::ExpressionNode{
+                        ast::IdentifierNode{"id5"}}};
+            String expression{"id1 || id2 || id3 || id4 || id5"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
+
+        SECTION("recursive or expression with complex subexpressions")
+        {
+            auto expectedResult = ast::OrExpressionNode{
+            ast::ExpressionNode{
+                ast::OrExpressionNode{
+                    ast::ExpressionNode{
+                        ast::ComparatorExpressionNode{
+                            ast::ExpressionNode{
+                                ast::SubexpressionNode{
+                                    ast::ExpressionNode{
+                                        ast::IdentifierNode{"id1"}},
+                                    ast::ExpressionNode{
+                                        ast::IdentifierNode{"sub"}}}},
+                            ast::ComparatorExpressionNode::Comparator::Less,
+                            ast::ExpressionNode{
+                                ast::ExpressionNode{
+                                    ast::IdentifierNode{"id2"}}}}},
+                    ast::ExpressionNode{
+                        ast::ComparatorExpressionNode{
+                            ast::ExpressionNode{
+                                ast::IdentifierNode{"id3"}},
+                            ast::ComparatorExpressionNode::Comparator::Greater,
+                            ast::ExpressionNode{
+                                ast::SubexpressionNode{
+                                    ast::ExpressionNode{
+                                        ast::SubexpressionNode{
+                                            ast::ExpressionNode{
+                                                ast::IdentifierNode{"id2"}},
+                                            ast::ExpressionNode{
+                                                ast::IdentifierNode{"sub"}}}},
+                                    ast::ExpressionNode{
+                                        ast::IdentifierNode{"sub"}}}}}}}},
+            ast::ExpressionNode{
+                ast::IndexExpressionNode{
+                    ast::ExpressionNode{
+                        ast::IdentifierNode{"id3"}},
+                    ast::BracketSpecifierNode{
+                        ast::ArrayItemNode{5}},
+                    ast::ExpressionNode{}}}};
+            String expression{"id1.sub < id2 || id3 > id2.sub.sub || id3[5]"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
     }
 }

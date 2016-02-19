@@ -329,6 +329,10 @@ void ExpressionEvaluator::visit(ast::ComparatorExpressionNode *node)
     }
 }
 
+void ExpressionEvaluator::visit(ast::OrExpressionNode *node)
+{
+}
+
 int ExpressionEvaluator::adjustSliceEndpoint(int length,
                                              int endpoint,
                                              int step) const
