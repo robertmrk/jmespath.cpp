@@ -62,7 +62,17 @@ protected:
                 }
                 else
                 {
-                    REQUIRE(search(expression, document) == expectedResult);
+                    Json result = search(expression, document);
+                    if (result == expectedResult)
+                    {
+                        SUCCEED();
+                    }
+                    else
+                    {
+                        FAIL("Expression: " + expression
+                             + "\nExpected result: " + expectedResult.dump()
+                             + "\nResult: " + result.dump());
+                    }
                 }
             }
         }
