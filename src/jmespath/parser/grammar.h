@@ -30,7 +30,10 @@
 #include "jmespath/detail/types.h"
 #include "jmespath/ast/allnodes.h"
 #include "jmespath/parser/noderank.h"
-#include "jmespath/parser/insertbinaryexpressionnodeaction.h"
+#include "jmespath/parser/insertnodeaction.h"
+#include "jmespath/parser/nodechildextractionpolicy.h"
+#include "jmespath/parser/nodeinsertpolicy.h"
+#include "jmespath/parser/nodeinsertcondition.h"
 #include <boost/spirit/include/qi.hpp>
 #include <boost/phoenix.hpp>
 
@@ -66,8 +69,7 @@ public:
      * @brief Constructs a Grammar object
      */
     Grammar()
-        : Grammar::base_type(m_expressionRule),
-          m_rootNode(nullptr)
+        : Grammar::base_type(m_expressionRule)
     {
         using encoding::char_;
         using qi::int_;
@@ -89,62 +91,60 @@ public:
         // Since boost spirit doesn't support left recursive grammars, some of
         // the rules are converted into tail expressions. When a tail expression
         // is parsed and the parser returns from a recursion the
-        // InsertBinaryExpressionNodeAction functor is used to compensate for
-        // tail expressions. It inserts the binary expression nodes into the
-        // appropriate position in the AST which leads to an easy to interpret
-        // AST.
+        // InsertNodeAction functor is used to compensate for tail expressions.
+        // It inserts the binary expression nodes into the appropriate position
+        // which leads to an easy to interpret AST.
 
         // lazy function for inserting binary nodes to the appropriate position
-        phx::function<InsertBinaryExpressionNodeAction> insertNode;
-        phx::function<ReplaceIfNull> replaceIfNull;
+        phx::function<InsertNodeAction<
+                NodeChildExtractionPolicy,
+                NodeInsertPolicy,
+                NodeInsertCondition> > insertNode;
 
         // match a standalone index expression or hash wildcard expression or
-        // identifier or not expression or multiselect list or multiselect hash
+        // not expression identifier or multiselect list or multiselect hash
         // or literal or a raw string, optionally followed by a subexpression
-        // an index expression a hash wildcard subexpression and a comparator
-        // expression
-        m_expressionRule = eps[
-                            if_(!ref(m_rootNode))[
-                                ref(m_rootNode) = &_val
-                            ]]
-                >> (m_indexExpressionRule[insertNode(*ref(m_rootNode), _1)]
-                    | m_hashWildcardRule[insertNode(*ref(m_rootNode), _1)]
+        // an index expression a hash wildcard subexpression a comparator
+        // expression or an or expression
+        m_expressionRule = (m_indexExpressionRule(_val)[insertNode(_val, _1)]
+                    | m_hashWildcardRule(_val)[insertNode(_val, _1)]
+                    | m_notExpressionRule(_val)[insertNode(_val, _1)]
                     | (m_identifierRule
-                      | m_notExpressionRule
                       | m_multiselectListRule
                       | m_multiselectHashRule
                       | m_literalRule
-                      | m_rawStringRule)[at_c<0>(_val) = _1, _a = _val])
-            >> -m_subexpressionRule[insertNode(*ref(m_rootNode), _1, _a)]
-            >> -m_indexExpressionRule[insertNode(*ref(m_rootNode), _1, _a)]
-            >> -m_hashWildcardSubexpressionRule[insertNode(*ref(m_rootNode),
-                                                           _1, _a)]
-            >> -m_comparatorExpressionRule[insertNode(*ref(m_rootNode), _1, _a)]
-            >> -m_orExpressionRule[insertNode(*ref(m_rootNode), _1, _a)];
+                      | m_rawStringRule)[_a = _1])
+            >> -m_subexpressionRule(_val)[insertNode(_val, _1)]
+            >> -m_indexExpressionRule(_val)[insertNode(_val, _1)]
+            >> -m_hashWildcardSubexpressionRule(_val)[insertNode(_val, _1)]
+            >> -m_comparatorExpressionRule(_val)[insertNode(_val, _1)]
+            >> -m_orExpressionRule(_val)[insertNode(_val, _1)]
+            >> eps[insertNode(_val, _a)];
+
         // match an identifier or multiselect list or multiselect hash preceded
         // by a dot, a subexpression can also be optionally followed by an index
         // expression a hash wildcard subexpression by another subexpression
-        // and a comparator expression
+        // a comparator expression or an or expression
         m_subexpressionRule = (lit('.')
             >> (m_identifierRule
                 | m_multiselectListRule
                 | m_multiselectHashRule)[at_c<1>(_val) = _1])
-            >> -m_indexExpressionRule[insertNode(*ref(m_rootNode), _1)]
-            >> -m_hashWildcardSubexpressionRule[insertNode(*ref(m_rootNode),
-                                                           _1)]
-            >> -m_subexpressionRule[insertNode(*ref(m_rootNode), _1)]
-            >> -m_comparatorExpressionRule[insertNode(*ref(m_rootNode), _1)]
-            >> -m_orExpressionRule[insertNode(*ref(m_rootNode), _1)];
+            >> -m_indexExpressionRule(_r1)[insertNode(_r1, _1)]
+            >> -m_hashWildcardSubexpressionRule(_r1)[insertNode(_r1, _1)]
+            >> -m_subexpressionRule(_r1)[insertNode(_r1, _1)]
+            >> -m_comparatorExpressionRule(_r1)[insertNode(_r1, _1)]
+            >> -m_orExpressionRule(_r1)[insertNode(_r1, _1)];
+
         // match a bracket specifier which can be optionally followed by a
         // subexpression a hash wildcard subexpression an index expression
-        // and a comparator expression
+        // a comparator expression and an or expression
         m_indexExpressionRule = m_bracketSpecifierRule[at_c<1>(_val) = _1]
-            >> -m_subexpressionRule[insertNode(*ref(m_rootNode), _1)]
-            >> -m_hashWildcardSubexpressionRule[insertNode(*ref(m_rootNode),
-                                                           _1)]
-            >> -m_indexExpressionRule[insertNode(*ref(m_rootNode), _1)]
-            >> -m_comparatorExpressionRule[insertNode(*ref(m_rootNode), _1)]
-            >> -m_orExpressionRule[insertNode(*ref(m_rootNode), _1)];
+            >> -m_subexpressionRule(_r1)[insertNode(_r1, _1)]
+            >> -m_hashWildcardSubexpressionRule(_r1)[insertNode(_r1, _1)]
+            >> -m_indexExpressionRule(_r1)[insertNode(_r1, _1)]
+            >> -m_comparatorExpressionRule(_r1)[insertNode(_r1, _1)]
+            >> -m_orExpressionRule(_r1)[insertNode(_r1, _1)];
+
         // match a slice expression or an array item or a list wildcard or a
         // flatten operator
         m_bracketSpecifierRule = (lit("[")
@@ -153,10 +153,13 @@ public:
                                       | m_listWildcardRule)
                                   >> lit("]"))
                 | m_flattenOperatorRule;
+
         // match an integer
         m_arrayItemRule = int_;
+
         // match a pair of square brackets
         m_flattenOperatorRule = eps >> lit("[]");
+
         // match a colon which can be optionally preceded and followed by a
         // single integer, these matches can also be optionally followed by
         // another colon which can be followed by an integer whose value doesn't
@@ -165,44 +168,50 @@ public:
                 >> lit(':')
                 >> -int_[at_c<1>(_val) = _1]
                 >> -(lit(':') >> -int_[at_c<2>(_val) = _1]);
+
         // match an asterisk
         m_listWildcardRule = eps >> lit("*");
+
         // match an asterisk optionally followd by a subexpression an
-        // index expression a hash wildcard subexpression and a comparator
-        // expression
+        // index expression a hash wildcard subexpression a comparator
+        // expression and an or expression
         m_hashWildcardRule = eps >> lit("*")
-            >> -m_subexpressionRule[insertNode(*ref(m_rootNode), _1)]
-            >> -m_indexExpressionRule[insertNode(*ref(m_rootNode), _1)]
-            >> -m_hashWildcardSubexpressionRule[insertNode(*ref(m_rootNode),
-                                                           _1)]
-            >> -m_comparatorExpressionRule[insertNode(*ref(m_rootNode), _1)]
-            >> -m_orExpressionRule[insertNode(*ref(m_rootNode), _1)];
+            >> -m_subexpressionRule(_r1)[insertNode(_r1, _1)]
+            >> -m_indexExpressionRule(_r1)[insertNode(_r1, _1)]
+            >> -m_hashWildcardSubexpressionRule(_r1)[insertNode(_r1, _1)]
+            >> -m_comparatorExpressionRule(_r1)[insertNode(_r1, _1)]
+            >> -m_orExpressionRule(_r1)[insertNode(_r1, _1)];
+
         // match a dot followd by an asterisk optionally followd by a
         // subexpression an index expression a hash wildcard subexpression
-        // and a comparator expression
+        // a comparator expression and an or expression
         m_hashWildcardSubexpressionRule = eps >> lit(".") >> lit("*")
-            >> -m_subexpressionRule[insertNode(*ref(m_rootNode), _1)]
-            >> -m_indexExpressionRule[insertNode(*ref(m_rootNode), _1)]
-            >> -m_hashWildcardSubexpressionRule[insertNode(*ref(m_rootNode),
-                                                           _1)]
-            >> -m_comparatorExpressionRule[insertNode(*ref(m_rootNode), _1)]
-            >> -m_orExpressionRule[insertNode(*ref(m_rootNode), _1)];
+            >> -m_subexpressionRule(_r1)[insertNode(_r1, _1)]
+            >> -m_indexExpressionRule(_r1)[insertNode(_r1, _1)]
+            >> -m_hashWildcardSubexpressionRule(_r1)[insertNode(_r1, _1)]
+            >> -m_comparatorExpressionRule(_r1)[insertNode(_r1, _1)]
+            >> -m_orExpressionRule(_r1)[insertNode(_r1, _1)];
+
         // matches an expression enclosed in square brackets, the expression
         // can optionally be followd by more expressions separated with commas
         m_multiselectListRule = lit('[')
                 >> m_expressionRule % lit(',')
                 >> lit(']');
+
         // match a key-value pair enclosed in curly braces, the key-value pair
         // can optionally be followed by more key-value pairs separated with
         // commas
         m_multiselectHashRule = lit('{')
                 >> m_keyValuePairRule % lit(',')
                 >> lit('}');
+
         // match an expression preceded by an exclamation mark
-        m_notExpressionRule = lit('!') >> m_expressionRule;
+        m_notExpressionRule = lit('!') >> m_expressionRule[_r1 = _1];
+
         // match a comparator symbol followed by an expression
         m_comparatorExpressionRule = m_comparatorSymbols[at_c<1>(_val) = _1]
-                >> m_expressionRule[replaceIfNull(*ref(m_rootNode), _1)];
+                >> m_expressionRule[_r1 = _1];
+
         // convert textual comparator symbols to enum values
         m_comparatorSymbols.add
             (U"<", ast::ComparatorExpressionNode::Comparator::Less)
@@ -212,11 +221,12 @@ public:
             (U">", ast::ComparatorExpressionNode::Comparator::Greater)
             (U"!=", ast::ComparatorExpressionNode::Comparator::NotEqual);
 
-        m_orExpressionRule = lit("||")
-                >> m_expressionRule[replaceIfNull(*ref(m_rootNode), _1)];
+        // match double vertical bars followed by an expression
+        m_orExpressionRule = lit("||") >> m_expressionRule[_r1 = _1];
 
         // match an identifier and an expression separated with a colon
         m_keyValuePairRule = m_identifierRule >> lit(':') >> m_expressionRule;
+
         // match zero or more literal characters enclosed in grave accents
         m_literalRule = lexeme[ lit('\x60')
                 >> *m_literalCharRule[phx::bind(&Grammar::appendUtf8,
@@ -224,18 +234,21 @@ public:
                                                 at_c<0>(_val),
                                                 _1)]
                 >> lit('\x60') ];
+
         // match a character in the range of 0x00-0x5B or 0x5D-0x5F or
         // 0x61-0x10FFFF or a literal escape
         m_literalCharRule = char_(U'\x00', U'\x5B')
                 | char_(U'\x5D', U'\x5F')
                 | char_(U'\x61', U'\U0010FFFF')
                 | m_literalEscapeRule;
+
         // match a grave accent preceded by an escape or match a backslash if
         // it's not followed by a grave accent
         m_literalEscapeRule = (m_escapeRule
                                 >> char_(U'\x60'))
                                | (char_(U'\\')
                                   >> & (!lit('`')));
+
         // match zero or more raw string characters enclosed in apostrophes
         m_rawStringRule = lexeme[ lit("\'")
                 >> *m_rawStringCharRule[phx::bind(&Grammar::appendUtf8,
@@ -341,16 +354,16 @@ private:
              qi::locals<ast::ExpressionNode>,
              Skipper > m_expressionRule;
     qi::rule<Iterator,
-             ast::SubexpressionNode(),
+             ast::SubexpressionNode(ast::ExpressionNode&),
              Skipper> m_subexpressionRule;
     qi::rule<Iterator,
-             ast::IndexExpressionNode(),
+             ast::IndexExpressionNode(ast::ExpressionNode&),
              Skipper> m_indexExpressionRule;                
     qi::rule<Iterator,
-             ast::HashWildcardNode(),
+             ast::HashWildcardNode(ast::ExpressionNode&),
              Skipper> m_hashWildcardRule;
     qi::rule<Iterator,
-             ast::HashWildcardNode(),
+             ast::HashWildcardNode(ast::ExpressionNode&),
              Skipper> m_hashWildcardSubexpressionRule;
     qi::rule<Iterator,
              ast::BracketSpecifierNode(),
@@ -376,14 +389,16 @@ private:
     qi::rule<Iterator,
              ast::MultiselectHashNode::KeyValuePairType(),
              Skipper> m_keyValuePairRule;
-    qi::rule<Iterator, ast::NotExpressionNode(), Skipper> m_notExpressionRule;
     qi::rule<Iterator,
-             ast::ComparatorExpressionNode(),
+             ast::NotExpressionNode(ast::ExpressionNode&),
+             Skipper> m_notExpressionRule;
+    qi::rule<Iterator,
+             ast::ComparatorExpressionNode(ast::ExpressionNode&),
              Skipper> m_comparatorExpressionRule;
     qi::symbols<UnicodeChar,
                 ast::ComparatorExpressionNode::Comparator> m_comparatorSymbols;
     qi::rule<Iterator,
-             ast::OrExpressionNode(),
+             ast::OrExpressionNode(ast::ExpressionNode&),
              Skipper> m_orExpressionRule;
     qi::rule<Iterator, ast::IdentifierNode(), Skipper> m_identifierRule;
     qi::rule<Iterator, ast::RawStringNode(), Skipper> m_rawStringRule;
@@ -401,7 +416,6 @@ private:
     qi::rule<Iterator>                      m_quoteRule;
     qi::rule<Iterator>                      m_escapeRule;
     qi::symbols<UnicodeChar, UnicodeChar>   m_controlCharacterSymbols;
-    ast::ExpressionNode* m_rootNode;
 
     /**
     * @brief Appends the \a utf32Char character to the \a utf8String encoded in

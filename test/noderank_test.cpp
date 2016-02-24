@@ -85,14 +85,19 @@ TEST_CASE("nodeRank")
         REQUIRE(nodeRank(HashWildcardNode{}) == 2);
     }
 
-    SECTION("ranks comparator expression node at 3")
+    SECTION("ranks not expression node at 3")
     {
-        REQUIRE(nodeRank(ComparatorExpressionNode{}) == 3);
+        REQUIRE(nodeRank(NotExpressionNode{}) == 3);
     }
 
-    SECTION("ranks or expression node at 4")
+    SECTION("ranks comparator expression node at 4")
     {
-        REQUIRE(nodeRank(OrExpressionNode{}) == 4);
+        REQUIRE(nodeRank(ComparatorExpressionNode{}) == 4);
+    }
+
+    SECTION("ranks or expression node at 5")
+    {
+        REQUIRE(nodeRank(OrExpressionNode{}) == 5);
     }
 
     SECTION("ranks bracket specifier node as its expression")

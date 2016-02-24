@@ -500,7 +500,7 @@ TEST_CASE("Grammar")
             REQUIRE(parseExpression(grammar, expression) == expectedResult);
         }
 
-        SECTION("recursive hash wildcard nodes with recursive subexpressions")
+        SECTION("recursive hash wildcards with recursive subexpressions")
         {
             auto expectedResult = ast::HashWildcardNode{
                     ast::ExpressionNode{
@@ -526,6 +526,29 @@ TEST_CASE("Grammar")
                                     ast::ExpressionNode{
                                         ast::IdentifierNode{"id5"}}}}}}};
             String expression{"id1.*.id2.id3.*.id4.id5"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
+
+        SECTION("recursive hash wildcard with flatten operator")
+        {
+            auto expectedResult = ast::IndexExpressionNode{
+                ast::ExpressionNode{
+                    ast::HashWildcardNode{
+                        ast::ExpressionNode{},
+                        ast::ExpressionNode{
+                            ast::HashWildcardNode{
+                                ast::ExpressionNode{},
+                                ast::ExpressionNode{
+                                    ast::SubexpressionNode{
+                                        ast::ExpressionNode{},
+                                        ast::ExpressionNode{
+                                            ast::IdentifierNode{"foo"}}}}}}}},
+                ast::BracketSpecifierNode{
+                    ast::FlattenOperatorNode{}},
+                ast::ExpressionNode{}
+            };
+            String expression{"*.*.foo[]"};
 
             REQUIRE(parseExpression(grammar, expression) == expectedResult);
         }
