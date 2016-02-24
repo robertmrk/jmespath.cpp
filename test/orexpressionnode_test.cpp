@@ -57,14 +57,14 @@ TEST_CASE("OrExpressionNode")
 
     SECTION("returns false for isProjection")
     {
-        ComparatorExpressionNode node;
+        OrExpressionNode node;
 
         REQUIRE_FALSE(node.isProjection());
     }
 
     SECTION("returns true for stopsProjection")
     {
-        ComparatorExpressionNode node;
+        OrExpressionNode node;
 
         REQUIRE(node.stopsProjection());
     }

@@ -43,7 +43,7 @@ public:
      */
     OrExpressionNode();
     /**
-     * @brief Constructs a ComparatorExpressionNode object with the given @a
+     * @brief Constructs a OrExpressionNode object with the given @a
      * leftExpression and @a rightExpression.
      * @param leftExpression The node's left hand child expression.
      * @param rightExpression The node's right hand child expression.
