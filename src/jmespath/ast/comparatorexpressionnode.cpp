@@ -25,28 +25,50 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef ALLNODES_H
-#define ALLNODES_H
-#include "jmespath/ast/abstractnode.h"
-#include "jmespath/ast/expressionnode.h"
-#include "jmespath/ast/identifiernode.h"
-#include "jmespath/ast/rawstringnode.h"
-#include "jmespath/ast/literalnode.h"
-#include "jmespath/ast/subexpressionnode.h"
-#include "jmespath/ast/indexexpressionnode.h"
-#include "jmespath/ast/arrayitemnode.h"
-#include "jmespath/ast/variantnode.h"
-#include "jmespath/ast/binaryexpressionnode.h"
-#include "jmespath/ast/flattenoperatornode.h"
-#include "jmespath/ast/bracketspecifiernode.h"
-#include "jmespath/ast/sliceexpressionnode.h"
-#include "jmespath/ast/listwildcardnode.h"
-#include "jmespath/ast/hashwildcardnode.h"
-#include "jmespath/ast/multiselectlistnode.h"
-#include "jmespath/ast/multiselecthashnode.h"
-#include "jmespath/ast/notexpressionnode.h"
 #include "jmespath/ast/comparatorexpressionnode.h"
-#include "jmespath/ast/orexpressionnode.h"
-#include "jmespath/ast/andexpressionnode.h"
-#include "jmespath/ast/parenexpressionnode.h"
-#endif // ALLNODES_H
+#include "jmespath/ast/allnodes.h"
+#include "jmespath/interpreter/abstractvisitor.h"
+
+namespace jmespath { namespace ast {
+
+ComparatorExpressionNode::ComparatorExpressionNode()
+    : BinaryExpressionNode(),
+      comparator(Comparator::Unknown)
+{
+}
+
+ComparatorExpressionNode::ComparatorExpressionNode(
+        const ExpressionNode &leftExpression,
+        Comparator comparator,
+        const ExpressionNode &rightExpression)
+    : BinaryExpressionNode(leftExpression, rightExpression),
+      comparator(comparator)
+{
+}
+
+bool ComparatorExpressionNode::operator ==(
+        const ComparatorExpressionNode &other) const
+{
+    if (this != &other)
+    {
+        return BinaryExpressionNode::operator ==(other)
+                && (comparator == other.comparator);
+    }
+    return true;
+}
+
+bool ComparatorExpressionNode::isProjection() const
+{
+    return false;
+}
+
+bool ComparatorExpressionNode::stopsProjection() const
+{
+    return true;
+}
+
+void ComparatorExpressionNode::accept(interpreter::AbstractVisitor *visitor)
+{
+    visitor->visit(this);
+}
+}} // namespace jmespath::ast

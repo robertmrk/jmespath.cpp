@@ -85,6 +85,11 @@ public:
     void visit(ast::HashWildcardNode* node) override;
     void visit(ast::MultiselectListNode* node) override;
     void visit(ast::MultiselectHashNode* node) override;
+    void visit(ast::NotExpressionNode* node) override;
+    void visit(ast::ComparatorExpressionNode* node) override;
+    void visit(ast::OrExpressionNode* node) override;
+    void visit(ast::AndExpressionNode* node) override;
+    void visit(ast::ParenExpressionNode* node) override;
 
 private:
     /**
@@ -100,6 +105,13 @@ private:
      * @return Returns the endpoint's new value.
      */
     int adjustSliceEndpoint(int length, int endpoint, int step) const;
+    /**
+     * @brief Converts the @a json value to a boolean.
+     * @param json The JSON value that needs to be converted.
+     * @return Returns false if @a json is a false like value (false, 0, empty
+     * list, empty object, empty string, null), otherwise returns true.
+     */
+    bool toBoolean(const Json& json) const;
 };
 }} // namespace jmespath::interpreter
 #endif // EXPRESSIONEVALUATOR_H

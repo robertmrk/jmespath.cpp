@@ -91,7 +91,6 @@ TEST_CASE("IndexExpressionNode")
     {
         IndexExpressionNode node{BracketSpecifierNode{ArrayItemNode{3}}};
 
-
         REQUIRE_FALSE(node.isProjection());
     }
 

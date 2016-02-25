@@ -113,6 +113,51 @@ TEST_CASE("ExpressionNode")
 
             REQUIRE(expression == multiselectHash);
         }
+
+        SECTION("with not expression")
+        {
+            NotExpressionNode notExpression;
+
+            ExpressionNode expression{notExpression};
+
+            REQUIRE(expression == notExpression);
+        }
+
+        SECTION("with comparator expression")
+        {
+            ComparatorExpressionNode comparatorExpression;
+
+            ExpressionNode expression{comparatorExpression};
+
+            REQUIRE(expression == comparatorExpression);
+        }
+
+        SECTION("with or expression")
+        {
+            OrExpressionNode orExpression;
+
+            ExpressionNode expression{orExpression};
+
+            REQUIRE(expression == orExpression);
+        }
+
+        SECTION("with and expression")
+        {
+            AndExpressionNode andExpression;
+
+            ExpressionNode expression{andExpression};
+
+            REQUIRE(expression == andExpression);
+        }
+
+        SECTION("with paren expression")
+        {
+            ParenExpressionNode parenExpression;
+
+            ExpressionNode expression{parenExpression};
+
+            REQUIRE(expression == parenExpression);
+        }
     }
 
     SECTION("accepts assignment of another ExpressionNode")

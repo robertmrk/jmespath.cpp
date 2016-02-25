@@ -66,6 +66,12 @@ struct NodeRankVisitor : public boost::static_visitor<>
     }
 };
 
+template <typename... Args>
+int nodeRank(const boost::variant<Args...>& variant)
+{
+    return boost::apply_visitor(NodeRankVisitor{}, variant);
+}
+
 template <>
 int nodeRank(const ast::ExpressionNode& node)
 {
@@ -75,7 +81,7 @@ int nodeRank(const ast::ExpressionNode& node)
     }
     else
     {
-        return boost::apply_visitor(NodeRankVisitor{}, node.value);
+        return nodeRank(node.value);
     }
 }
 
@@ -88,7 +94,7 @@ int nodeRank(const ast::SubexpressionNode&)
 template <>
 int nodeRank(const ast::BracketSpecifierNode& node)
 {
-    return boost::apply_visitor(NodeRankVisitor{}, node.value);
+    return nodeRank(node.value);
 }
 
 template <>
@@ -125,6 +131,30 @@ template <>
 int nodeRank(const ast::HashWildcardNode& node)
 {
     return 2;
+}
+
+template <>
+int nodeRank(const ast::NotExpressionNode& node)
+{
+    return 3;
+}
+
+template <>
+int nodeRank(const ast::ComparatorExpressionNode& node)
+{
+    return 4;
+}
+
+template <>
+int nodeRank(const ast::AndExpressionNode& node)
+{
+    return 5;
+}
+
+template <>
+int nodeRank(const ast::OrExpressionNode& node)
+{
+    return 6;
 }
 } // anonymous namespace
 }} // namespace jmespath::parser

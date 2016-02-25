@@ -37,6 +37,7 @@ TEST_CASE("ExpressionEvaluator")
     using jmespath::detail::Json;
     using jmespath::detail::String;
     using jmespath::detail::InvalidValue;
+    using jmespath::detail::InvalidAgrument;
     namespace ast = jmespath::ast;
     namespace rng = boost::range;
     using namespace fakeit;
@@ -608,5 +609,477 @@ TEST_CASE("ExpressionEvaluator")
 
         REQUIRE(evaluator.currentContext() == "{\"id1\":\"value2\","
                                               "\"id3\":\"value4\"}"_json);
+    }
+
+    SECTION("evaluates child expression of not expression")
+    {
+        ast::NotExpressionNode node;
+        Mock<ExpressionEvaluator> evaluatorMock(evaluator);
+        When(OverloadedMethod(evaluatorMock, visit,
+                              void(ast::ExpressionNode*))).AlwaysReturn();
+
+        evaluatorMock.get().visit(&node);
+
+        Verify(OverloadedMethod(evaluatorMock, visit,
+                                void(ast::ExpressionNode*))
+               .Using(&node.expression)).Once();
+        VerifyNoOtherInvocations(evaluatorMock);
+    }
+
+    SECTION("evaluates not expression on false to true")
+    {
+        ast::NotExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id"}}};
+        evaluator.setContext("{\"id\":false}"_json);
+        Json expectedResult = true;
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates not expression on true to false")
+    {
+        ast::NotExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id"}}};
+        evaluator.setContext("{\"id\":true}"_json);
+        Json expectedResult = false;
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates not expression on null to true")
+    {
+        ast::NotExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id"}}};
+        evaluator.setContext("{\"id\":null}"_json);
+        Json expectedResult = true;
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates not expression on all numbers to false")
+    {
+        ast::NotExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id"}}};
+        Json expectedResult = false;
+
+        evaluator.setContext("{\"id\":5}"_json);
+        evaluator.visit(&node);
+        auto result1 = evaluator.currentContext();
+        evaluator.setContext("{\"id\":0}"_json);
+        evaluator.visit(&node);
+        auto result2 = evaluator.currentContext();
+        evaluator.setContext("{\"id\":-5}"_json);
+        evaluator.visit(&node);
+        auto result3 = evaluator.currentContext();
+
+        REQUIRE(result1 == expectedResult);
+        REQUIRE(result2 == expectedResult);
+        REQUIRE(result3 == expectedResult);
+    }
+
+    SECTION("evaluates not expression on empty string to true")
+    {
+        ast::NotExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id"}}};
+        evaluator.setContext("{\"id\":\"\"}"_json);
+        Json expectedResult = true;
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates not expression on non empty string to false")
+    {
+        ast::NotExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id"}}};
+        evaluator.setContext("{\"id\":\"string\"}"_json);
+        Json expectedResult = false;
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates not expression on empty array to true")
+    {
+        ast::NotExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id"}}};
+        evaluator.setContext("{\"id\":[]}"_json);
+        Json expectedResult = true;
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates not expression on non empty array to false")
+    {
+        ast::NotExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id"}}};
+        evaluator.setContext("{\"id\":[1, 2, 3]}"_json);
+        Json expectedResult = false;
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates not expression on empty object to true")
+    {
+        ast::NotExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id"}}};
+        evaluator.setContext("{\"id\":{}}"_json);
+        Json expectedResult = true;
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates not expression on non empty object to false")
+    {
+        ast::NotExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id"}}};
+        evaluator.setContext("{\"id\":{\"id2\":\"string\"}}"_json);
+        Json expectedResult = false;
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates comparator expression")
+    {
+        ast::ComparatorExpressionNode node{
+            ast::ExpressionNode{
+                ast::LiteralNode{"2"}},
+            ast::ComparatorExpressionNode::Comparator::NotEqual,
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}}};
+        Mock<ExpressionEvaluator> evaluatorMock(evaluator);
+        When(OverloadedMethod(evaluatorMock, visit,
+                              void(ast::ExpressionNode*))).AlwaysReturn();
+
+        evaluatorMock.get().visit(&node);
+
+        Verify(OverloadedMethod(evaluatorMock, visit,
+                                void(ast::ExpressionNode*))
+                    .Using(&node.leftExpression)
+               + OverloadedMethod(evaluatorMock, visit,
+                                void(ast::ExpressionNode*))
+                    .Using(&node.rightExpression)).Once();
+        VerifyNoOtherInvocations(evaluatorMock);
+    }
+
+    SECTION("evaluates comparator expression with less operator")
+    {
+        ast::ComparatorExpressionNode node1{
+            ast::ExpressionNode{
+                ast::LiteralNode{"2"}},
+            ast::ComparatorExpressionNode::Comparator::Less,
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}}};
+        ast::ComparatorExpressionNode node2{
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}},
+            ast::ComparatorExpressionNode::Comparator::Less,
+            ast::ExpressionNode{
+                ast::LiteralNode{"2"}}};
+        Json trueResult = true;
+
+        evaluator.visit(&node1);
+        Json result1 = evaluator.currentContext();
+        evaluator.visit(&node2);
+        Json result2 = evaluator.currentContext();
+
+        REQUIRE(result1);
+        REQUIRE_FALSE(result2);
+    }
+
+    SECTION("evaluates comparator expression with less or equal operator")
+    {
+        ast::ComparatorExpressionNode node1{
+            ast::ExpressionNode{
+                ast::LiteralNode{"2"}},
+            ast::ComparatorExpressionNode::Comparator::LessOrEqual,
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}}};
+        ast::ComparatorExpressionNode node2{
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}},
+            ast::ComparatorExpressionNode::Comparator::LessOrEqual,
+            ast::ExpressionNode{
+                ast::LiteralNode{"2"}}};
+        ast::ComparatorExpressionNode node3{
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}},
+            ast::ComparatorExpressionNode::Comparator::LessOrEqual,
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}}};
+        Json trueResult = true;
+
+        evaluator.visit(&node1);
+        Json result1 = evaluator.currentContext();
+        evaluator.visit(&node2);
+        Json result2 = evaluator.currentContext();
+        evaluator.visit(&node3);
+        Json result3 = evaluator.currentContext();
+
+        REQUIRE(result1);
+        REQUIRE_FALSE(result2);
+        REQUIRE(result3);
+    }
+
+    SECTION("evaluates comparator expression with equal operator")
+    {
+        ast::ComparatorExpressionNode node1{
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}},
+            ast::ComparatorExpressionNode::Comparator::Equal,
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}}};
+        ast::ComparatorExpressionNode node2{
+            ast::ExpressionNode{
+                ast::LiteralNode{"2"}},
+            ast::ComparatorExpressionNode::Comparator::Equal,
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}}};
+        Json trueResult = true;
+
+        evaluator.visit(&node1);
+        Json result1 = evaluator.currentContext();
+        evaluator.visit(&node2);
+        Json result2 = evaluator.currentContext();
+
+        REQUIRE(result1);
+        REQUIRE_FALSE(result2);
+    }
+
+    SECTION("evaluates comparator expression with greater or equal operator")
+    {
+        ast::ComparatorExpressionNode node1{
+            ast::ExpressionNode{
+                ast::LiteralNode{"2"}},
+            ast::ComparatorExpressionNode::Comparator::GreaterOrEqual,
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}}};
+        ast::ComparatorExpressionNode node2{
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}},
+            ast::ComparatorExpressionNode::Comparator::GreaterOrEqual,
+            ast::ExpressionNode{
+                ast::LiteralNode{"2"}}};
+        ast::ComparatorExpressionNode node3{
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}},
+            ast::ComparatorExpressionNode::Comparator::GreaterOrEqual,
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}}};
+        Json trueResult = true;
+
+        evaluator.visit(&node1);
+        Json result1 = evaluator.currentContext();
+        evaluator.visit(&node2);
+        Json result2 = evaluator.currentContext();
+        evaluator.visit(&node3);
+        Json result3 = evaluator.currentContext();
+
+        REQUIRE_FALSE(result1);
+        REQUIRE(result2);
+        REQUIRE(result3);
+    }
+
+    SECTION("evaluates comparator expression with greater operator")
+    {
+        ast::ComparatorExpressionNode node1{
+            ast::ExpressionNode{
+                ast::LiteralNode{"2"}},
+            ast::ComparatorExpressionNode::Comparator::Greater,
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}}};
+        ast::ComparatorExpressionNode node2{
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}},
+            ast::ComparatorExpressionNode::Comparator::Greater,
+            ast::ExpressionNode{
+                ast::LiteralNode{"2"}}};
+        Json trueResult = true;
+
+        evaluator.visit(&node1);
+        Json result1 = evaluator.currentContext();
+        evaluator.visit(&node2);
+        Json result2 = evaluator.currentContext();
+
+        REQUIRE_FALSE(result1);
+        REQUIRE(result2);
+    }
+
+    SECTION("evaluates comparator expression with not equal operator")
+    {
+        ast::ComparatorExpressionNode node1{
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}},
+            ast::ComparatorExpressionNode::Comparator::NotEqual,
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}}};
+        ast::ComparatorExpressionNode node2{
+            ast::ExpressionNode{
+                ast::LiteralNode{"2"}},
+            ast::ComparatorExpressionNode::Comparator::NotEqual,
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}}};
+        Json trueResult = true;
+
+        evaluator.visit(&node1);
+        Json result1 = evaluator.currentContext();
+        evaluator.visit(&node2);
+        Json result2 = evaluator.currentContext();
+
+        REQUIRE_FALSE(result1);
+        REQUIRE(result2);
+    }
+
+    SECTION("throws exception on evaluating comparator expression with "
+            "unknown operator")
+    {
+        ast::ComparatorExpressionNode node;
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node), InvalidAgrument);
+    }
+
+    SECTION("evaluates or expression")
+    {
+        ast::OrExpressionNode node{
+            ast::ExpressionNode{},
+            ast::ExpressionNode{}};
+        Mock<ExpressionEvaluator> evaluatorMock(evaluator);
+        When(OverloadedMethod(evaluatorMock, visit,
+                              void(ast::ExpressionNode*))).AlwaysReturn();
+
+        evaluatorMock.get().visit(&node);
+
+        Verify(OverloadedMethod(evaluatorMock, visit,
+                                void(ast::ExpressionNode*))
+                    .Using(&node.leftExpression)
+               + OverloadedMethod(evaluatorMock, visit,
+                                void(ast::ExpressionNode*))
+                    .Using(&node.rightExpression)).Once();
+        VerifyNoOtherInvocations(evaluatorMock);
+    }
+
+    SECTION("evaluates or expression to left expression's result if it's true")
+    {
+        ast::OrExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id1"}},
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id2"}}};
+        evaluator.setContext("{\"id1\": \"value1\", \"id2\": \"value2\"}"_json);
+        Json expectedResult = "value1";
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates or expression to right expression's result if left "
+            "expression's result is false")
+    {
+        ast::OrExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id1"}},
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id2"}}};
+        evaluator.setContext("{\"id1\": \"\", \"id2\": \"value2\"}"_json);
+        Json expectedResult = "value2";
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates and expression")
+    {
+        ast::AndExpressionNode node{
+            ast::ExpressionNode{},
+            ast::ExpressionNode{}};
+        Mock<ExpressionEvaluator> evaluatorMock(evaluator);
+        When(OverloadedMethod(evaluatorMock, visit,
+                              void(ast::ExpressionNode*))).AlwaysReturn();
+        evaluatorMock.get().setContext("true"_json);
+
+        evaluatorMock.get().visit(&node);
+
+        Verify(OverloadedMethod(evaluatorMock, visit,
+                                void(ast::ExpressionNode*))
+                    .Using(&node.leftExpression)
+               + OverloadedMethod(evaluatorMock, visit,
+                                void(ast::ExpressionNode*))
+                    .Using(&node.rightExpression)).Once();
+        VerifyNoOtherInvocations(evaluatorMock);
+    }
+
+    SECTION("evaluates and expression to right expression's result if left "
+            "expression's result is true")
+    {
+        ast::AndExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id1"}},
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id2"}}};
+        evaluator.setContext("{\"id1\": \"value1\", \"id2\": \"value2\"}"_json);
+        Json expectedResult = "value2";
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates and expression to left expression's result if left "
+            "expression's result is false")
+    {
+        ast::AndExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id1"}},
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id2"}}};
+        evaluator.setContext("{\"id1\": [], \"id2\": \"value2\"}"_json);
+        Json expectedResult = "[]"_json;
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates child expression of paren expression")
+    {
+        ast::ParenExpressionNode node;
+        Mock<ExpressionEvaluator> evaluatorMock(evaluator);
+        When(OverloadedMethod(evaluatorMock, visit,
+                              void(ast::ExpressionNode*))).AlwaysReturn();
+
+        evaluatorMock.get().visit(&node);
+
+        Verify(OverloadedMethod(evaluatorMock, visit,
+                                void(ast::ExpressionNode*))
+               .Using(&node.expression)).Once();
+        VerifyNoOtherInvocations(evaluatorMock);
     }
 }

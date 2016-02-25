@@ -25,28 +25,46 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef ALLNODES_H
-#define ALLNODES_H
-#include "jmespath/ast/abstractnode.h"
-#include "jmespath/ast/expressionnode.h"
-#include "jmespath/ast/identifiernode.h"
-#include "jmespath/ast/rawstringnode.h"
-#include "jmespath/ast/literalnode.h"
-#include "jmespath/ast/subexpressionnode.h"
-#include "jmespath/ast/indexexpressionnode.h"
-#include "jmespath/ast/arrayitemnode.h"
-#include "jmespath/ast/variantnode.h"
-#include "jmespath/ast/binaryexpressionnode.h"
-#include "jmespath/ast/flattenoperatornode.h"
-#include "jmespath/ast/bracketspecifiernode.h"
-#include "jmespath/ast/sliceexpressionnode.h"
-#include "jmespath/ast/listwildcardnode.h"
-#include "jmespath/ast/hashwildcardnode.h"
-#include "jmespath/ast/multiselectlistnode.h"
-#include "jmespath/ast/multiselecthashnode.h"
-#include "jmespath/ast/notexpressionnode.h"
-#include "jmespath/ast/comparatorexpressionnode.h"
-#include "jmespath/ast/orexpressionnode.h"
-#include "jmespath/ast/andexpressionnode.h"
-#include "jmespath/ast/parenexpressionnode.h"
-#endif // ALLNODES_H
+#include "fakeit.hpp"
+#include "jmespath/detail/types.h"
+#include "jmespath/parser/nodechildextractionpolicy.h"
+#include "jmespath/ast/allnodes.h"
+
+TEST_CASE("LeftChildPolicy")
+{
+    using namespace jmespath::parser;
+    using namespace jmespath::detail;
+    namespace ast = jmespath::ast;
+    using namespace fakeit;
+
+    NodeChildExtractionPolicy policy;
+
+    SECTION("Returns left child of binary expression node")
+    {
+        ast::ExpressionNode node{
+            ast::SubexpressionNode{
+                ast::ExpressionNode{
+                    ast::IdentifierNode{"id1"}},
+                ast::ExpressionNode{
+                    ast::IdentifierNode{"id2"}}}};
+
+        REQUIRE(policy(&node)
+                == &(boost::get<ast::SubexpressionNode>(
+                    &node.value)->leftExpression));
+    }
+
+    SECTION("Returns nullptr for non binary expression node")
+    {
+        ast::ExpressionNode node{
+            ast::IdentifierNode{}};
+
+        REQUIRE(policy(&node) == nullptr);
+    }
+
+    SECTION("Returns nullptr for empty expression")
+    {
+        ast::ExpressionNode node{};
+
+        REQUIRE(policy(&node) == nullptr);
+    }
+}

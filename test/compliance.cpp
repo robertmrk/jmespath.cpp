@@ -62,7 +62,17 @@ protected:
                 }
                 else
                 {
-                    REQUIRE(search(expression, document) == expectedResult);
+                    Json result = search(expression, document);
+                    if (result == expectedResult)
+                    {
+                        SUCCEED();
+                    }
+                    else
+                    {
+                        FAIL("Expression: " + expression
+                             + "\nExpected result: " + expectedResult.dump()
+                             + "\nResult: " + result.dump());
+                    }
                 }
             }
         }
@@ -103,7 +113,7 @@ TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Basic expressions",
 }
 
 TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Boolean expressions",
-                 "[!hide][boolean]")
+                 "[boolean]")
 {
     executeFeatureTest("boolean");
 }

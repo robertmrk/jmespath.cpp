@@ -277,6 +277,85 @@ void ExpressionEvaluator::visit(ast::MultiselectHashNode *node)
     }
 }
 
+void ExpressionEvaluator::visit(ast::NotExpressionNode *node)
+{
+    visit(&node->expression);
+    bool result = !toBoolean(m_context);
+    m_context = Json(Json::value_t::boolean);
+    m_context = result;
+}
+
+void ExpressionEvaluator::visit(ast::ComparatorExpressionNode *node)
+{
+    using Comparator = ast::ComparatorExpressionNode::Comparator;
+
+    if (node->comparator == Comparator::Unknown)
+    {
+        BOOST_THROW_EXCEPTION(detail::InvalidAgrument{});
+    }
+
+    Json childContext = m_context;
+    visit(&node->leftExpression);
+    Json leftResult = m_context;
+
+    m_context = childContext;
+    visit(&node->rightExpression);
+    Json rightResult = m_context;
+
+    m_context = Json(Json::value_t::boolean);
+    if (node->comparator == Comparator::Less)
+    {
+        m_context = leftResult < rightResult;
+    }
+    else if (node->comparator == Comparator::LessOrEqual)
+    {
+        m_context = leftResult <= rightResult;
+    }
+    else if (node->comparator == Comparator::Equal)
+    {
+        m_context = leftResult == rightResult;
+    }
+    else if (node->comparator == Comparator::GreaterOrEqual)
+    {
+        m_context = leftResult >= rightResult;
+    }
+    else if (node->comparator == Comparator::Greater)
+    {
+        m_context = leftResult > rightResult;
+    }
+    else if (node->comparator == Comparator::NotEqual)
+    {
+        m_context = leftResult != rightResult;
+    }
+}
+
+void ExpressionEvaluator::visit(ast::OrExpressionNode *node)
+{
+    Json childContext = m_context;
+    visit(&node->leftExpression);
+    if (!toBoolean(m_context))
+    {
+        m_context = childContext;
+        visit(&node->rightExpression);
+    }
+}
+
+void ExpressionEvaluator::visit(ast::AndExpressionNode *node)
+{
+    Json childContext = m_context;
+    visit(&node->leftExpression);
+    if (toBoolean(m_context))
+    {
+        m_context = childContext;
+        visit(&node->rightExpression);
+    }
+}
+
+void ExpressionEvaluator::visit(ast::ParenExpressionNode *node)
+{
+    visit(&node->expression);
+}
+
 int ExpressionEvaluator::adjustSliceEndpoint(int length,
                                              int endpoint,
                                              int step) const
@@ -294,5 +373,14 @@ int ExpressionEvaluator::adjustSliceEndpoint(int length,
         endpoint = step < 0 ? length - 1: length;
     }
     return endpoint;
+}
+
+bool ExpressionEvaluator::toBoolean(const Json &json) const
+{
+    return json.is_number()
+            || (!json.is_null()
+                && (!json.is_boolean() || (json.get<bool>() != false))
+                && (!json.is_string() || !json.get<std::string>().empty())
+                && ((!json.is_array() && !json.is_object()) || !json.empty()));
 }
 }} // namespace jmespath::interpreter
