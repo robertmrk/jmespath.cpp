@@ -1067,4 +1067,19 @@ TEST_CASE("ExpressionEvaluator")
 
         REQUIRE(evaluator.currentContext() == expectedResult);
     }
+
+    SECTION("evaluates child expression of paren expression")
+    {
+        ast::ParenExpressionNode node;
+        Mock<ExpressionEvaluator> evaluatorMock(evaluator);
+        When(OverloadedMethod(evaluatorMock, visit,
+                              void(ast::ExpressionNode*))).AlwaysReturn();
+
+        evaluatorMock.get().visit(&node);
+
+        Verify(OverloadedMethod(evaluatorMock, visit,
+                                void(ast::ExpressionNode*))
+               .Using(&node.expression)).Once();
+        VerifyNoOtherInvocations(evaluatorMock);
+    }
 }

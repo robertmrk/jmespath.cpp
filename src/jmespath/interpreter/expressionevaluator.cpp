@@ -353,6 +353,7 @@ void ExpressionEvaluator::visit(ast::AndExpressionNode *node)
 
 void ExpressionEvaluator::visit(ast::ParenExpressionNode *node)
 {
+    visit(&node->expression);
 }
 
 int ExpressionEvaluator::adjustSliceEndpoint(int length,
