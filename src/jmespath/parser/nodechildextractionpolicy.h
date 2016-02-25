@@ -54,23 +54,36 @@ public:
     template <typename T>
     ast::ExpressionNode* operator()(T& node) const
     {
-        return leftChild(&node);
+        return childNode(&node);
     }
 
     template <typename T, typename
         std::enable_if<
             !std::is_base_of<ast::BinaryExpressionNode,
+                             T>::value
+            && !std::is_same<ast::NotExpressionNode,
                              T>::value, int>::type = 0>
-    ast::ExpressionNode* leftChild(T*) const
+    ast::ExpressionNode* childNode(T*) const
     {
         return nullptr;
     }
 
     template <typename T, typename
         std::enable_if<
+            !std::is_base_of<ast::BinaryExpressionNode,
+                             T>::value
+            && std::is_same<ast::NotExpressionNode,
+                            T>::value, int>::type = 0>
+    ast::ExpressionNode* childNode(T* node) const
+    {
+        return &node->expression;
+    }
+
+    template <typename T, typename
+        std::enable_if<
             std::is_base_of<ast::BinaryExpressionNode,
                             T>::value, int>::type = 0>
-    ast::ExpressionNode* leftChild(T* node) const
+    ast::ExpressionNode* childNode(T* node) const
     {
         return &node->leftExpression;
     }    

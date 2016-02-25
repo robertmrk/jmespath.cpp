@@ -623,6 +623,18 @@ TEST_CASE("Grammar")
             REQUIRE(parseExpression(grammar, expression) == expectedResult);
         }
 
+        SECTION("recursive not expression")
+        {
+            auto expectedResult = ast::NotExpressionNode{
+                    ast::ExpressionNode{
+                        ast::NotExpressionNode{
+                            ast::ExpressionNode{
+                                ast::IdentifierNode{"id"}}}}};
+            String expression{"!!id"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
+
         SECTION("comparator expression")
         {
             auto expectedResult = ast::ComparatorExpressionNode{
