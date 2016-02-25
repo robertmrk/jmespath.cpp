@@ -665,30 +665,26 @@ TEST_CASE("ExpressionEvaluator")
         REQUIRE(evaluator.currentContext() == expectedResult);
     }
 
-    SECTION("evaluates not expression on 0 to true")
+    SECTION("evaluates not expression on all numbers to false")
     {
         ast::NotExpressionNode node{
             ast::ExpressionNode{
                 ast::IdentifierNode{"id"}}};
-        evaluator.setContext("{\"id\":0}"_json);
-        Json expectedResult = true;
-
-        evaluator.visit(&node);
-
-        REQUIRE(evaluator.currentContext() == expectedResult);
-    }
-
-    SECTION("evaluates not expression on non 0 value to false")
-    {
-        ast::NotExpressionNode node{
-            ast::ExpressionNode{
-                ast::IdentifierNode{"id"}}};
-        evaluator.setContext("{\"id\":5}"_json);
         Json expectedResult = false;
 
+        evaluator.setContext("{\"id\":5}"_json);
         evaluator.visit(&node);
+        auto result1 = evaluator.currentContext();
+        evaluator.setContext("{\"id\":0}"_json);
+        evaluator.visit(&node);
+        auto result2 = evaluator.currentContext();
+        evaluator.setContext("{\"id\":-5}"_json);
+        evaluator.visit(&node);
+        auto result3 = evaluator.currentContext();
 
-        REQUIRE(evaluator.currentContext() == expectedResult);
+        REQUIRE(result1 == expectedResult);
+        REQUIRE(result2 == expectedResult);
+        REQUIRE(result3 == expectedResult);
     }
 
     SECTION("evaluates not expression on empty string to true")
