@@ -331,6 +331,13 @@ void ExpressionEvaluator::visit(ast::ComparatorExpressionNode *node)
 
 void ExpressionEvaluator::visit(ast::OrExpressionNode *node)
 {
+    Json childContext = m_context;
+    visit(&node->leftExpression);
+    if (!toBoolean(m_context))
+    {
+        m_context = childContext;
+        visit(&node->rightExpression);
+    }
 }
 
 int ExpressionEvaluator::adjustSliceEndpoint(int length,

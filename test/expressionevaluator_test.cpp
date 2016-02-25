@@ -967,4 +967,55 @@ TEST_CASE("ExpressionEvaluator")
 
         REQUIRE_THROWS_AS(evaluator.visit(&node), InvalidAgrument);
     }
+
+    SECTION("evaluates or expression")
+    {
+        ast::OrExpressionNode node{
+            ast::ExpressionNode{},
+            ast::ExpressionNode{}};
+        Mock<ExpressionEvaluator> evaluatorMock(evaluator);
+        When(OverloadedMethod(evaluatorMock, visit,
+                              void(ast::ExpressionNode*))).AlwaysReturn();
+
+        evaluatorMock.get().visit(&node);
+
+        Verify(OverloadedMethod(evaluatorMock, visit,
+                                void(ast::ExpressionNode*))
+                    .Using(&node.leftExpression)
+               + OverloadedMethod(evaluatorMock, visit,
+                                void(ast::ExpressionNode*))
+                    .Using(&node.rightExpression)).Once();
+        VerifyNoOtherInvocations(evaluatorMock);
+    }
+
+    SECTION("evaluates or expression to left expression's result if it's true")
+    {
+        ast::OrExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id1"}},
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id2"}}};
+        evaluator.setContext("{\"id1\": \"value1\", \"id2\": \"value2\"}"_json);
+        Json expectedResult = "value1";
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates or expression to right expression's result if left "
+            "expression's result is false")
+    {
+        ast::OrExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id1"}},
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id2"}}};
+        evaluator.setContext("{\"id1\": \"\", \"id2\": \"value2\"}"_json);
+        Json expectedResult = "value2";
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
 }
