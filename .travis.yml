@@ -85,14 +85,14 @@ matrix:
       env: CMAKE_CC=clang
       before_install:
         - brew install cmake
-    - os: osx
-      osx_image: xcode6.4 # clang 3.6
-      compiler: clang
-      env: COMPILER=clang++
-      env: CMAKE_CXX=clang++
-      env: CMAKE_CC=clang
-      before_install: 
-        - brew install cmake
+    # - os: osx
+    #   osx_image: xcode6.4 # clang 3.6
+    #   compiler: clang
+    #   env: COMPILER=clang++
+    #   env: CMAKE_CXX=clang++
+    #   env: CMAKE_CC=clang
+    #   before_install: 
+    #     - brew install cmake
     - os: osx
       osx_image: beta-xcode6.2 # clang 3.5
       compiler: clang
