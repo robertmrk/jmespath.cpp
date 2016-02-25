@@ -113,7 +113,7 @@ TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Basic expressions",
 }
 
 TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Boolean expressions",
-                 "[!hide][boolean]")
+                 "[boolean]")
 {
     executeFeatureTest("boolean");
 }
