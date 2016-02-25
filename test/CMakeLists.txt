@@ -33,6 +33,7 @@ add_executable(${JMESPATH_UNITTEST_TARGET_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/comparatorexpressionnode_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/orexpressionnode_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/andexpressionnode_test.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/parenexpressionnode_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/nodechildextractionpolicy_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/nodeinsertpolicy_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/nodeinsertcondition_test.cpp)

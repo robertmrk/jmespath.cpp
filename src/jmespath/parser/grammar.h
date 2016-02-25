@@ -103,9 +103,9 @@ public:
 
         // match a standalone index expression or hash wildcard expression or
         // not expression identifier or multiselect list or multiselect hash
-        // or literal or a raw string, optionally followed by a subexpression
-        // an index expression a hash wildcard subexpression a comparator
-        // expression an or expression and an and expression
+        // or literal or a raw string or parent expression, optionally followed
+        // by a subexpression an index expression a hash wildcard subexpression
+        // a comparator expression an or expression and an and expression
         m_expressionRule = (m_indexExpressionRule(_val)[insertNode(_val, _1)]
                     | m_hashWildcardRule(_val)[insertNode(_val, _1)]
                     | m_notExpressionRule(_val)[insertNode(_val, _1)]
@@ -113,7 +113,8 @@ public:
                       | m_multiselectListRule
                       | m_multiselectHashRule
                       | m_literalRule
-                      | m_rawStringRule)[_a = _1])
+                      | m_rawStringRule
+                      | m_parenExpressionRule)[_a = _1])
             >> -m_subexpressionRule(_val)[insertNode(_val, _1)]
             >> -m_indexExpressionRule(_val)[insertNode(_val, _1)]
             >> -m_hashWildcardSubexpressionRule(_val)[insertNode(_val, _1)]
@@ -212,6 +213,9 @@ public:
 
         // match an expression preceded by an exclamation mark
         m_notExpressionRule = lit('!') >> m_expressionRule[_r1 = _1];
+
+        // match an expression inside parentheses
+        m_parenExpressionRule = lit('(') >> m_expressionRule >> lit(')');
 
         // match a comparator symbol followed by an expression
         m_comparatorExpressionRule = m_comparatorSymbols[at_c<1>(_val) = _1]
@@ -411,6 +415,9 @@ private:
     qi::rule<Iterator,
              ast::AndExpressionNode(ast::ExpressionNode&),
              Skipper> m_andExpressionRule;
+    qi::rule<Iterator,
+             ast::ParenExpressionNode(),
+             Skipper> m_parenExpressionRule;
     qi::rule<Iterator, ast::IdentifierNode(), Skipper> m_identifierRule;
     qi::rule<Iterator, ast::RawStringNode(), Skipper> m_rawStringRule;
     qi::rule<Iterator, ast::LiteralNode(), Skipper> m_literalRule;

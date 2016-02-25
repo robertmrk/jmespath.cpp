@@ -25,28 +25,51 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef ALLNODES_H
-#define ALLNODES_H
-#include "jmespath/ast/abstractnode.h"
+#ifndef PARENEXPRESSIONNODE_H
+#define PARENEXPRESSIONNODE_H
 #include "jmespath/ast/expressionnode.h"
-#include "jmespath/ast/identifiernode.h"
-#include "jmespath/ast/rawstringnode.h"
-#include "jmespath/ast/literalnode.h"
-#include "jmespath/ast/subexpressionnode.h"
-#include "jmespath/ast/indexexpressionnode.h"
-#include "jmespath/ast/arrayitemnode.h"
-#include "jmespath/ast/variantnode.h"
-#include "jmespath/ast/binaryexpressionnode.h"
-#include "jmespath/ast/flattenoperatornode.h"
-#include "jmespath/ast/bracketspecifiernode.h"
-#include "jmespath/ast/sliceexpressionnode.h"
-#include "jmespath/ast/listwildcardnode.h"
-#include "jmespath/ast/hashwildcardnode.h"
-#include "jmespath/ast/multiselectlistnode.h"
-#include "jmespath/ast/multiselecthashnode.h"
-#include "jmespath/ast/notexpressionnode.h"
-#include "jmespath/ast/comparatorexpressionnode.h"
-#include "jmespath/ast/orexpressionnode.h"
-#include "jmespath/ast/andexpressionnode.h"
-#include "jmespath/ast/parenexpressionnode.h"
-#endif // ALLNODES_H
+#include <boost/fusion/include/adapt_struct.hpp>
+
+namespace jmespath { namespace ast {
+
+/**
+ * @brief The ParenExpressionNode class represents a JMESPath paren expression.
+ */
+class ParenExpressionNode : public AbstractNode
+{
+public:
+    /**
+     * @brief Constructs an emtpy ParenExpressionNode object.
+     */
+    ParenExpressionNode();
+    /**
+     * @brief Constructs a ParenExpressionNode object with the given @a expression
+     * as its child expression.
+     * @param expression The node's child expression.
+     */
+    ParenExpressionNode(const ExpressionNode& expression);
+    /**
+     * @brief Calls the visit method of the given \a visitor with the
+     * dynamic type of the node.
+     * @param visitor A visitor implementation
+     */
+    void accept(interpreter::AbstractVisitor* visitor) override;
+    /**
+     * @brief Equality compares this node to the \a other
+     * @param other The node that should be compared.
+     * @return Returns true if this object is equal to the \a other, otherwise
+     * false
+     */
+    bool operator==(const ParenExpressionNode& other) const;
+    /**
+     * @brief The node's child expression.
+     */
+    ExpressionNode expression;
+};
+}} // namespace jmespath::ast
+
+BOOST_FUSION_ADAPT_STRUCT(
+    jmespath::ast::ParenExpressionNode,
+    (jmespath::ast::ExpressionNode, expression)
+)
+#endif // PARENEXPRESSIONNODE_H

@@ -635,6 +635,28 @@ TEST_CASE("Grammar")
             REQUIRE(parseExpression(grammar, expression) == expectedResult);
         }
 
+        SECTION("paren expression")
+        {
+            auto expectedResult = ast::ParenExpressionNode{
+                    ast::ExpressionNode{
+                        ast::IdentifierNode{"id"}}};
+            String expression{"(id)"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
+
+        SECTION("recursive paren expression")
+        {
+            auto expectedResult = ast::ParenExpressionNode{
+                    ast::ExpressionNode{
+                        ast::ParenExpressionNode{
+                            ast::ExpressionNode{
+                                ast::IdentifierNode{"id"}}}}};
+            String expression{"((id))"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
+
         SECTION("comparator expression")
         {
             auto expectedResult = ast::ComparatorExpressionNode{
@@ -720,6 +742,28 @@ TEST_CASE("Grammar")
                     ast::ExpressionNode{
                         ast::IdentifierNode{"id5"}}};
             String expression{"id1 && id2 && id3 && id4 && id5"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
+
+        SECTION("and expression with or expression inside parentheses")
+        {
+            auto expectedResult = ast::AndExpressionNode{
+                ast::ExpressionNode{
+                    ast::AndExpressionNode{
+                        ast::ExpressionNode{
+                            ast::IdentifierNode{"id1"}},
+                        ast::ExpressionNode{
+                            ast::ParenExpressionNode{
+                                ast::ExpressionNode{
+                                    ast::OrExpressionNode{
+                                        ast::ExpressionNode{
+                                            ast::IdentifierNode{"id2"}},
+                                        ast::ExpressionNode{
+                                            ast::IdentifierNode{"id3"}}}}}}}},
+                ast::ExpressionNode{
+                    ast::IdentifierNode{"id4"}}};
+            String expression{"id1 && (id2 || id3) && id4"};
 
             REQUIRE(parseExpression(grammar, expression) == expectedResult);
         }

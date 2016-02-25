@@ -50,6 +50,7 @@ class NotExpressionNode;
 class ComparatorExpressionNode;
 class OrExpressionNode;
 class AndExpressionNode;
+class ParenExpressionNode;
 }} // namespace jmespath::ast
 
 /**
@@ -89,6 +90,7 @@ public:
     virtual void visit(ast::ComparatorExpressionNode* node) = 0;
     virtual void visit(ast::OrExpressionNode* node) = 0;
     virtual void visit(ast::AndExpressionNode* node) = 0;
+    virtual void visit(ast::ParenExpressionNode* node) = 0;
     /** @}*/
 };
 }} // namespace jmespath::interpreter
