@@ -88,6 +88,7 @@ public:
     void visit(ast::NotExpressionNode* node) override;
     void visit(ast::ComparatorExpressionNode* node) override;
     void visit(ast::OrExpressionNode* node) override;
+    void visit(ast::AndExpressionNode* node) override;
 
 private:
     /**

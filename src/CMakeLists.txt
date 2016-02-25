@@ -58,6 +58,8 @@ list(APPEND JMESPATH_SOURCE_FILES
     ${JMESPATH_AST_SOURCE_DIR}/comparatorexpressionnode.cpp
     ${JMESPATH_AST_SOURCE_DIR}/orexpressionnode.h
     ${JMESPATH_AST_SOURCE_DIR}/orexpressionnode.cpp
+    ${JMESPATH_AST_SOURCE_DIR}/andexpressionnode.h
+    ${JMESPATH_AST_SOURCE_DIR}/andexpressionnode.cpp
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/abstractvisitor.h
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/expressionevaluator.h
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/expressionevaluator.cpp)

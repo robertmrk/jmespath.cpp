@@ -1018,4 +1018,57 @@ TEST_CASE("ExpressionEvaluator")
 
         REQUIRE(evaluator.currentContext() == expectedResult);
     }
+
+    SECTION("evaluates and expression")
+    {
+        ast::AndExpressionNode node{
+            ast::ExpressionNode{},
+            ast::ExpressionNode{}};
+        Mock<ExpressionEvaluator> evaluatorMock(evaluator);
+        When(OverloadedMethod(evaluatorMock, visit,
+                              void(ast::ExpressionNode*))).AlwaysReturn();
+        evaluatorMock.get().setContext("true"_json);
+
+        evaluatorMock.get().visit(&node);
+
+        Verify(OverloadedMethod(evaluatorMock, visit,
+                                void(ast::ExpressionNode*))
+                    .Using(&node.leftExpression)
+               + OverloadedMethod(evaluatorMock, visit,
+                                void(ast::ExpressionNode*))
+                    .Using(&node.rightExpression)).Once();
+        VerifyNoOtherInvocations(evaluatorMock);
+    }
+
+    SECTION("evaluates and expression to right expression's result if left "
+            "expression's result is true")
+    {
+        ast::AndExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id1"}},
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id2"}}};
+        evaluator.setContext("{\"id1\": \"value1\", \"id2\": \"value2\"}"_json);
+        Json expectedResult = "value2";
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates and expression to left expression's result if left "
+            "expression's result is false")
+    {
+        ast::AndExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id1"}},
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id2"}}};
+        evaluator.setContext("{\"id1\": [], \"id2\": \"value2\"}"_json);
+        Json expectedResult = "[]"_json;
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
 }

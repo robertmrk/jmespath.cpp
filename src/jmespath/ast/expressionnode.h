@@ -45,6 +45,7 @@ class MultiselectHashNode;
 class NotExpressionNode;
 class ComparatorExpressionNode;
 class OrExpressionNode;
+class AndExpressionNode;
 /**
  * @brief The ExpressionNode class represents a JMESPath expression.
  */
@@ -59,7 +60,8 @@ class ExpressionNode : public VariantNode<
         boost::recursive_wrapper<MultiselectHashNode>,
         boost::recursive_wrapper<NotExpressionNode>,
         boost::recursive_wrapper<ComparatorExpressionNode>,
-        boost::recursive_wrapper<OrExpressionNode> >
+        boost::recursive_wrapper<OrExpressionNode>,
+        boost::recursive_wrapper<AndExpressionNode> >
 {
 public:
     /**

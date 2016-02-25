@@ -340,6 +340,17 @@ void ExpressionEvaluator::visit(ast::OrExpressionNode *node)
     }
 }
 
+void ExpressionEvaluator::visit(ast::AndExpressionNode *node)
+{
+    Json childContext = m_context;
+    visit(&node->leftExpression);
+    if (toBoolean(m_context))
+    {
+        m_context = childContext;
+        visit(&node->rightExpression);
+    }
+}
+
 int ExpressionEvaluator::adjustSliceEndpoint(int length,
                                              int endpoint,
                                              int step) const

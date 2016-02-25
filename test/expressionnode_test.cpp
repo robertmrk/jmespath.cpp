@@ -140,6 +140,15 @@ TEST_CASE("ExpressionNode")
 
             REQUIRE(expression == orExpression);
         }
+
+        SECTION("with and expression")
+        {
+            AndExpressionNode andExpression;
+
+            ExpressionNode expression{andExpression};
+
+            REQUIRE(expression == andExpression);
+        }
     }
 
     SECTION("accepts assignment of another ExpressionNode")

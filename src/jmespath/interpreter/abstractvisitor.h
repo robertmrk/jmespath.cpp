@@ -49,6 +49,7 @@ class MultiselectHashNode;
 class NotExpressionNode;
 class ComparatorExpressionNode;
 class OrExpressionNode;
+class AndExpressionNode;
 }} // namespace jmespath::ast
 
 /**
@@ -87,6 +88,7 @@ public:
     virtual void visit(ast::NotExpressionNode* node) = 0;
     virtual void visit(ast::ComparatorExpressionNode* node) = 0;
     virtual void visit(ast::OrExpressionNode* node) = 0;
+    virtual void visit(ast::AndExpressionNode* node) = 0;
     /** @}*/
 };
 }} // namespace jmespath::interpreter
