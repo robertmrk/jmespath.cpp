@@ -93,11 +93,16 @@ TEST_CASE("nodeRank")
     SECTION("ranks comparator expression node at 4")
     {
         REQUIRE(nodeRank(ComparatorExpressionNode{}) == 4);
+    }    
+
+    SECTION("ranks and expression node at 5")
+    {
+        REQUIRE(nodeRank(AndExpressionNode{}) == 5);
     }
 
-    SECTION("ranks or expression node at 5")
+    SECTION("ranks or expression node at 6")
     {
-        REQUIRE(nodeRank(OrExpressionNode{}) == 5);
+        REQUIRE(nodeRank(OrExpressionNode{}) == 6);
     }
 
     SECTION("ranks bracket specifier node as its expression")

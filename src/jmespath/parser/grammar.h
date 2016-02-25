@@ -105,7 +105,7 @@ public:
         // not expression identifier or multiselect list or multiselect hash
         // or literal or a raw string, optionally followed by a subexpression
         // an index expression a hash wildcard subexpression a comparator
-        // expression or an or expression
+        // expression an or expression and an and expression
         m_expressionRule = (m_indexExpressionRule(_val)[insertNode(_val, _1)]
                     | m_hashWildcardRule(_val)[insertNode(_val, _1)]
                     | m_notExpressionRule(_val)[insertNode(_val, _1)]
@@ -119,12 +119,13 @@ public:
             >> -m_hashWildcardSubexpressionRule(_val)[insertNode(_val, _1)]
             >> -m_comparatorExpressionRule(_val)[insertNode(_val, _1)]
             >> -m_orExpressionRule(_val)[insertNode(_val, _1)]
+            >> -m_andExpressionRule(_val)[insertNode(_val, _1)]
             >> eps[insertNode(_val, _a)];
 
         // match an identifier or multiselect list or multiselect hash preceded
         // by a dot, a subexpression can also be optionally followed by an index
         // expression a hash wildcard subexpression by another subexpression
-        // a comparator expression or an or expression
+        // a comparator expression an or expression and an and expression
         m_subexpressionRule = (lit('.')
             >> (m_identifierRule
                 | m_multiselectListRule
@@ -133,17 +134,19 @@ public:
             >> -m_hashWildcardSubexpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_subexpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_comparatorExpressionRule(_r1)[insertNode(_r1, _1)]
-            >> -m_orExpressionRule(_r1)[insertNode(_r1, _1)];
+            >> -m_orExpressionRule(_r1)[insertNode(_r1, _1)]
+            >> -m_andExpressionRule(_r1)[insertNode(_r1, _1)];
 
         // match a bracket specifier which can be optionally followed by a
         // subexpression a hash wildcard subexpression an index expression
-        // a comparator expression and an or expression
+        // a comparator expression an or expression and an and expression
         m_indexExpressionRule = m_bracketSpecifierRule[at_c<1>(_val) = _1]
             >> -m_subexpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_hashWildcardSubexpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_indexExpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_comparatorExpressionRule(_r1)[insertNode(_r1, _1)]
-            >> -m_orExpressionRule(_r1)[insertNode(_r1, _1)];
+            >> -m_orExpressionRule(_r1)[insertNode(_r1, _1)]
+            >> -m_andExpressionRule(_r1)[insertNode(_r1, _1)];
 
         // match a slice expression or an array item or a list wildcard or a
         // flatten operator
@@ -174,23 +177,25 @@ public:
 
         // match an asterisk optionally followd by a subexpression an
         // index expression a hash wildcard subexpression a comparator
-        // expression and an or expression
+        // expression an or expression and an and expression
         m_hashWildcardRule = eps >> lit("*")
             >> -m_subexpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_indexExpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_hashWildcardSubexpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_comparatorExpressionRule(_r1)[insertNode(_r1, _1)]
-            >> -m_orExpressionRule(_r1)[insertNode(_r1, _1)];
+            >> -m_orExpressionRule(_r1)[insertNode(_r1, _1)]
+            >> -m_andExpressionRule(_r1)[insertNode(_r1, _1)];
 
         // match a dot followd by an asterisk optionally followd by a
         // subexpression an index expression a hash wildcard subexpression
-        // a comparator expression and an or expression
+        // a comparator expression an or expression and an and expression
         m_hashWildcardSubexpressionRule = eps >> lit(".") >> lit("*")
             >> -m_subexpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_indexExpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_hashWildcardSubexpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_comparatorExpressionRule(_r1)[insertNode(_r1, _1)]
-            >> -m_orExpressionRule(_r1)[insertNode(_r1, _1)];
+            >> -m_orExpressionRule(_r1)[insertNode(_r1, _1)]
+            >> -m_andExpressionRule(_r1)[insertNode(_r1, _1)];
 
         // matches an expression enclosed in square brackets, the expression
         // can optionally be followd by more expressions separated with commas
@@ -223,6 +228,9 @@ public:
 
         // match double vertical bars followed by an expression
         m_orExpressionRule = lit("||") >> m_expressionRule[_r1 = _1];
+
+        // match double ampersand followed by an expression
+        m_andExpressionRule = lit("&&") >> m_expressionRule[_r1 = _1];
 
         // match an identifier and an expression separated with a colon
         m_keyValuePairRule = m_identifierRule >> lit(':') >> m_expressionRule;
@@ -400,6 +408,9 @@ private:
     qi::rule<Iterator,
              ast::OrExpressionNode(ast::ExpressionNode&),
              Skipper> m_orExpressionRule;
+    qi::rule<Iterator,
+             ast::AndExpressionNode(ast::ExpressionNode&),
+             Skipper> m_andExpressionRule;
     qi::rule<Iterator, ast::IdentifierNode(), Skipper> m_identifierRule;
     qi::rule<Iterator, ast::RawStringNode(), Skipper> m_rawStringRule;
     qi::rule<Iterator, ast::LiteralNode(), Skipper> m_literalRule;

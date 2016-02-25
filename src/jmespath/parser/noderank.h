@@ -146,9 +146,15 @@ int nodeRank(const ast::ComparatorExpressionNode& node)
 }
 
 template <>
-int nodeRank(const ast::OrExpressionNode& node)
+int nodeRank(const ast::AndExpressionNode& node)
 {
     return 5;
+}
+
+template <>
+int nodeRank(const ast::OrExpressionNode& node)
+{
+    return 6;
 }
 } // anonymous namespace
 }} // namespace jmespath::parser
