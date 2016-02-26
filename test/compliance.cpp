@@ -62,7 +62,19 @@ protected:
                 }
                 else
                 {
-                    Json result = search(expression, document);
+                    Json result;
+                    try
+                    {
+                        result = search(expression, document);
+                    }
+                    catch(std::exception& exc)
+                    {
+                        FAIL("Exception: " + String(exc.what())
+                             + "\nExpression: " + expression
+                             + "\nExpected result: " + expectedResult.dump()
+                             + "\nResult: " + result.dump());
+                    }
+
                     if (result == expectedResult)
                     {
                         SUCCEED();
