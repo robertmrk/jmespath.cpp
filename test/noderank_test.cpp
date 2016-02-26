@@ -85,6 +85,11 @@ TEST_CASE("nodeRank")
         REQUIRE(nodeRank(HashWildcardNode{}) == 2);
     }
 
+    SECTION("ranks filter expression node at 2")
+    {
+        REQUIRE(nodeRank(FilterExpressionNode{}) == 2);
+    }
+
     SECTION("ranks not expression node at 3")
     {
         REQUIRE(nodeRank(NotExpressionNode{}) == 3);

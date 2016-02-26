@@ -53,6 +53,7 @@ class AndExpressionNode;
 class ParenExpressionNode;
 class PipeExpressionNode;
 class CurrentNode;
+class FilterExpressionNode;
 }} // namespace jmespath::ast
 
 /**
@@ -95,6 +96,7 @@ public:
     virtual void visit(ast::ParenExpressionNode* node) = 0;
     virtual void visit(ast::PipeExpressionNode* node) = 0;
     virtual void visit(ast::CurrentNode* node) = 0;
+    virtual void visit(ast::FilterExpressionNode* node) = 0;
     /** @}*/
 };
 }} // namespace jmespath::interpreter

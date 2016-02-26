@@ -66,6 +66,8 @@ list(APPEND JMESPATH_SOURCE_FILES
     ${JMESPATH_AST_SOURCE_DIR}/pipeexpressionnode.cpp
     ${JMESPATH_AST_SOURCE_DIR}/currentnode.h
     ${JMESPATH_AST_SOURCE_DIR}/currentnode.cpp
+    ${JMESPATH_AST_SOURCE_DIR}/filterexpressionnode.h
+    ${JMESPATH_AST_SOURCE_DIR}/filterexpressionnode.cpp
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/abstractvisitor.h
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/expressionevaluator.h
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/expressionevaluator.cpp)

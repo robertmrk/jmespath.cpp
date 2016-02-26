@@ -366,6 +366,26 @@ void ExpressionEvaluator::visit(ast::CurrentNode *)
 {
 }
 
+void ExpressionEvaluator::visit(ast::FilterExpressionNode *node)
+{
+    Json result;
+    if (m_context.is_array())
+    {
+        result = Json(Json::value_t::array);
+        Json contextArray = m_context;
+        for (const auto& item: contextArray)
+        {
+            m_context = item;
+            visit(&node->expression);
+            if (toBoolean(m_context))
+            {
+                result.push_back(item);
+            }
+        }
+    }
+    m_context = result;
+}
+
 int ExpressionEvaluator::adjustSliceEndpoint(int length,
                                              int endpoint,
                                              int step) const
