@@ -25,30 +25,36 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef ALLNODES_H
-#define ALLNODES_H
+#ifndef CURRENTNODE_H
+#define CURRENTNODE_H
 #include "jmespath/ast/abstractnode.h"
-#include "jmespath/ast/expressionnode.h"
-#include "jmespath/ast/identifiernode.h"
-#include "jmespath/ast/rawstringnode.h"
-#include "jmespath/ast/literalnode.h"
-#include "jmespath/ast/subexpressionnode.h"
-#include "jmespath/ast/indexexpressionnode.h"
-#include "jmespath/ast/arrayitemnode.h"
-#include "jmespath/ast/variantnode.h"
-#include "jmespath/ast/binaryexpressionnode.h"
-#include "jmespath/ast/flattenoperatornode.h"
-#include "jmespath/ast/bracketspecifiernode.h"
-#include "jmespath/ast/sliceexpressionnode.h"
-#include "jmespath/ast/listwildcardnode.h"
-#include "jmespath/ast/hashwildcardnode.h"
-#include "jmespath/ast/multiselectlistnode.h"
-#include "jmespath/ast/multiselecthashnode.h"
-#include "jmespath/ast/notexpressionnode.h"
-#include "jmespath/ast/comparatorexpressionnode.h"
-#include "jmespath/ast/orexpressionnode.h"
-#include "jmespath/ast/andexpressionnode.h"
-#include "jmespath/ast/parenexpressionnode.h"
-#include "jmespath/ast/pipeexpressionnode.h"
-#include "jmespath/ast/currentnode.h"
-#endif // ALLNODES_H
+#include <boost/fusion/include/adapt_struct.hpp>
+
+namespace jmespath { namespace ast {
+
+/**
+ * @brief The CurrentNode class represents a JMESPath current node expression.
+ */
+class CurrentNode : public AbstractNode
+{
+public:
+    /**
+     * @brief Constructs an CurrentNode object with an empty name.
+     */
+    CurrentNode();
+    /**
+     * @brief Calls the visit method of the given \a visitor with the
+     * dynamic type of the node.
+     * @param visitor A visitor implementation
+     */
+    void accept(interpreter::AbstractVisitor* visitor) override;
+    /**
+     * @brief Equality compares this node to the \a other
+     * @param other The node that should be compared.
+     * @return Returns true if this object is equal to the \a other, otherwise
+     * false
+     */
+    bool operator==(const CurrentNode&) const;
+};
+}} // namespace jmespath::ast
+#endif // CURRENTNODE_H

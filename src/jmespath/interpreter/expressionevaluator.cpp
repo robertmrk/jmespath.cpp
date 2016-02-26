@@ -362,6 +362,10 @@ void ExpressionEvaluator::visit(ast::PipeExpressionNode *node)
     visit(&node->rightExpression);
 }
 
+void ExpressionEvaluator::visit(ast::CurrentNode *)
+{
+}
+
 int ExpressionEvaluator::adjustSliceEndpoint(int length,
                                              int endpoint,
                                              int step) const
