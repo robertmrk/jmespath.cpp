@@ -1082,4 +1082,38 @@ TEST_CASE("ExpressionEvaluator")
                .Using(&node.expression)).Once();
         VerifyNoOtherInvocations(evaluatorMock);
     }
+
+    SECTION("evaluates pipe expression")
+    {
+        ast::PipeExpressionNode node;
+        Mock<ExpressionEvaluator> evaluatorMock(evaluator);
+        When(OverloadedMethod(evaluatorMock, visit,
+                              void(ast::ExpressionNode*))).AlwaysReturn();
+
+        evaluatorMock.get().visit(&node);
+
+        Verify(OverloadedMethod(evaluatorMock, visit,
+                                void(ast::ExpressionNode*))
+                    .Using(&node.leftExpression)
+               + OverloadedMethod(evaluatorMock, visit,
+                                void(ast::ExpressionNode*))
+                    .Using(&node.rightExpression)).Once();
+        VerifyNoOtherInvocations(evaluatorMock);
+    }
+
+    SECTION("evaluates pipe expression by passing the left expression's result "
+            "to the right expression")
+    {
+        ast::PipeExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id1"}},
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id2"}}};
+        evaluator.setContext("{\"id1\": {\"id2\": \"value\"}}"_json);
+        Json expectedResult = "value";
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
 }
