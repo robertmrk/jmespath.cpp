@@ -158,6 +158,15 @@ TEST_CASE("ExpressionNode")
 
             REQUIRE(expression == parenExpression);
         }
+
+        SECTION("with pipe expression")
+        {
+            PipeExpressionNode pipeExpression;
+
+            ExpressionNode expression{pipeExpression};
+
+            REQUIRE(expression == pipeExpression);
+        }
     }
 
     SECTION("accepts assignment of another ExpressionNode")

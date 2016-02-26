@@ -105,6 +105,11 @@ TEST_CASE("nodeRank")
         REQUIRE(nodeRank(OrExpressionNode{}) == 6);
     }
 
+    SECTION("ranks pipe expression node at 7")
+    {
+        REQUIRE(nodeRank(PipeExpressionNode{}) == 7);
+    }
+
     SECTION("ranks bracket specifier node as its expression")
     {
         ArrayItemNode expression1;

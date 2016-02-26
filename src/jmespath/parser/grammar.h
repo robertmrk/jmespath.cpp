@@ -105,7 +105,8 @@ public:
         // not expression identifier or multiselect list or multiselect hash
         // or literal or a raw string or parent expression, optionally followed
         // by a subexpression an index expression a hash wildcard subexpression
-        // a comparator expression an or expression and an and expression
+        // a pipe expresion a comparator expression an or expression and an
+        // and expression
         m_expressionRule = (m_indexExpressionRule(_val)[insertNode(_val, _1)]
                     | m_hashWildcardRule(_val)[insertNode(_val, _1)]
                     | m_notExpressionRule(_val)[insertNode(_val, _1)]
@@ -118,6 +119,7 @@ public:
             >> -m_subexpressionRule(_val)[insertNode(_val, _1)]
             >> -m_indexExpressionRule(_val)[insertNode(_val, _1)]
             >> -m_hashWildcardSubexpressionRule(_val)[insertNode(_val, _1)]
+            >> -m_pipeExpressionRule(_val)[insertNode(_val, _1)]
             >> -m_comparatorExpressionRule(_val)[insertNode(_val, _1)]
             >> -m_orExpressionRule(_val)[insertNode(_val, _1)]
             >> -m_andExpressionRule(_val)[insertNode(_val, _1)]
@@ -126,7 +128,8 @@ public:
         // match an identifier or multiselect list or multiselect hash preceded
         // by a dot, a subexpression can also be optionally followed by an index
         // expression a hash wildcard subexpression by another subexpression
-        // a comparator expression an or expression and an and expression
+        // a pipe expresion a comparator expression an or expression and an
+        // and expression
         m_subexpressionRule = (lit('.')
             >> (m_identifierRule
                 | m_multiselectListRule
@@ -134,17 +137,20 @@ public:
             >> -m_indexExpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_hashWildcardSubexpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_subexpressionRule(_r1)[insertNode(_r1, _1)]
+            >> -m_pipeExpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_comparatorExpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_orExpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_andExpressionRule(_r1)[insertNode(_r1, _1)];
 
         // match a bracket specifier which can be optionally followed by a
         // subexpression a hash wildcard subexpression an index expression
-        // a comparator expression an or expression and an and expression
+        // a pipe expresion a comparator expression an or expression and an
+        // and expression
         m_indexExpressionRule = m_bracketSpecifierRule[at_c<1>(_val) = _1]
             >> -m_subexpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_hashWildcardSubexpressionRule(_r1)[insertNode(_r1, _1)]
-            >> -m_indexExpressionRule(_r1)[insertNode(_r1, _1)]
+            >> -m_indexExpressionRule(_r1)[insertNode(_r1, _1)]                
+            >> -m_pipeExpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_comparatorExpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_orExpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_andExpressionRule(_r1)[insertNode(_r1, _1)];
@@ -177,23 +183,26 @@ public:
         m_listWildcardRule = eps >> lit("*");
 
         // match an asterisk optionally followd by a subexpression an
-        // index expression a hash wildcard subexpression a comparator
-        // expression an or expression and an and expression
+        // index expression a hash wildcard subexpression a pipe expresion
+        // a comparator expression an or expression and an and expression
         m_hashWildcardRule = eps >> lit("*")
             >> -m_subexpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_indexExpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_hashWildcardSubexpressionRule(_r1)[insertNode(_r1, _1)]
+            >> -m_pipeExpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_comparatorExpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_orExpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_andExpressionRule(_r1)[insertNode(_r1, _1)];
 
         // match a dot followd by an asterisk optionally followd by a
         // subexpression an index expression a hash wildcard subexpression
-        // a comparator expression an or expression and an and expression
+        // a pipe expresion a comparator expression an or expression and an
+        // and expression
         m_hashWildcardSubexpressionRule = eps >> lit(".") >> lit("*")
             >> -m_subexpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_indexExpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_hashWildcardSubexpressionRule(_r1)[insertNode(_r1, _1)]
+            >> -m_pipeExpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_comparatorExpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_orExpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_andExpressionRule(_r1)[insertNode(_r1, _1)];
@@ -229,6 +238,9 @@ public:
             (U">=", ast::ComparatorExpressionNode::Comparator::GreaterOrEqual)
             (U">", ast::ComparatorExpressionNode::Comparator::Greater)
             (U"!=", ast::ComparatorExpressionNode::Comparator::NotEqual);
+
+        // match a single vertical bar followed by an expression
+        m_pipeExpressionRule = lit("|") >> m_expressionRule[_r1 = _1];
 
         // match double vertical bars followed by an expression
         m_orExpressionRule = lit("||") >> m_expressionRule[_r1 = _1];
@@ -403,7 +415,10 @@ private:
              Skipper> m_keyValuePairRule;
     qi::rule<Iterator,
              ast::NotExpressionNode(ast::ExpressionNode&),
-             Skipper> m_notExpressionRule;
+             Skipper> m_notExpressionRule;                
+    qi::rule<Iterator,
+             ast::PipeExpressionNode(ast::ExpressionNode&),
+             Skipper> m_pipeExpressionRule;
     qi::rule<Iterator,
              ast::ComparatorExpressionNode(ast::ExpressionNode&),
              Skipper> m_comparatorExpressionRule;

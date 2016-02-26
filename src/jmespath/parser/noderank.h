@@ -156,6 +156,12 @@ int nodeRank(const ast::OrExpressionNode& node)
 {
     return 6;
 }
+
+template <>
+int nodeRank(const ast::PipeExpressionNode& node)
+{
+    return 7;
+}
 } // anonymous namespace
 }} // namespace jmespath::parser
 #endif // NODERANK_H
