@@ -969,5 +969,59 @@ TEST_CASE("Grammar")
 
             REQUIRE(parseExpression(grammar, expression) == expectedResult);
         }
+
+        SECTION("filter expression")
+        {
+            auto expectedResult = ast::IndexExpressionNode{
+                    ast::ExpressionNode{},
+                    ast::BracketSpecifierNode{
+                        ast::FilterExpressionNode{
+                            ast::ExpressionNode{
+                                ast::IdentifierNode{"id"}}}},
+                    ast::ExpressionNode{}};
+            String expression{"[?id]"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
+
+        SECTION("filter expression with subexpression")
+        {
+            auto expectedResult = ast::IndexExpressionNode{
+                    ast::ExpressionNode{},
+                    ast::BracketSpecifierNode{
+                        ast::FilterExpressionNode{
+                            ast::ExpressionNode{
+                                ast::SubexpressionNode{
+                                    ast::ExpressionNode{
+                                        ast::IdentifierNode{"id1"}},
+                                    ast::ExpressionNode{
+                                        ast::IdentifierNode{"id2"}}}}}},
+                    ast::ExpressionNode{}};
+            String expression{"[?id1.id2]"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
+
+        SECTION("filter expression with projected subexpression")
+        {
+            auto expectedResult = ast::IndexExpressionNode{
+                    ast::ExpressionNode{},
+                    ast::BracketSpecifierNode{
+                        ast::FilterExpressionNode{
+                            ast::ExpressionNode{
+                                ast::IdentifierNode{"id"}}}},
+                    ast::ExpressionNode{
+                        ast::SubexpressionNode{
+                            ast::ExpressionNode{
+                                ast::SubexpressionNode{
+                                    ast::ExpressionNode{},
+                                    ast::ExpressionNode{
+                                        ast::IdentifierNode{"id1"}}}},
+                            ast::ExpressionNode{
+                                ast::IdentifierNode{"id2"}}}}};
+            String expression{"[?id].id1.id2"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
     }
 }

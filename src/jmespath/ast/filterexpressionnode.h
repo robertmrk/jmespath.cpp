@@ -25,58 +25,52 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef BRACKETSPECIFIERNODE_H
-#define BRACKETSPECIFIERNODE_H
-#include "jmespath/ast/variantnode.h"
+#ifndef FILTEREXPRESSIONNODE_H
+#define FILTEREXPRESSIONNODE_H
+#include "jmespath/ast/expressionnode.h"
 #include <boost/fusion/include/adapt_struct.hpp>
 
 namespace jmespath { namespace ast {
 
-class ArrayItemNode;
-class FlattenOperatorNode;
-class SliceExpressionNode;
-class ListWildcardNode;
-class FilterExpressionNode;
 /**
- * @brief The BracketSpecifierNode class represents a JMESPath bracket
- * specifier.
+ * @brief The FilterExpressionNode class represents a JMESPath filter
+ * expression.
  */
-class BracketSpecifierNode : public VariantNode<
-        boost::recursive_wrapper<ArrayItemNode>,
-        boost::recursive_wrapper<FlattenOperatorNode>,
-        boost::recursive_wrapper<SliceExpressionNode>,
-        boost::recursive_wrapper<ListWildcardNode>,
-        boost::recursive_wrapper<FilterExpressionNode> >
+class FilterExpressionNode : public AbstractNode
 {
 public:
     /**
-     * @brief Constructs an empty BracketSpecifierNode object.
+     * @brief Constructs a FilterExpressionNode object.
      */
-    BracketSpecifierNode();
+    FilterExpressionNode();
     /**
-     * @brief Constructs a BracketSpecifierNode object with the given
-     * @a expression as its value.
+     * @brief Constructs a FilterExpressionNode object with the given
+     * @a expression as its child expression.
      * @param expression The node's child expression.
      */
-    BracketSpecifierNode(const ValueType& expression);
+    FilterExpressionNode(const ExpressionNode& expression);
     /**
-     * @brief Returns whather this expression requires the projection of
-     * subsequent expressions.
-     * @return Returns true if projection is required, otherwise returns false.
+     * @brief Calls the visit method of the given \a visitor with the
+     * dynamic type of the node.
+     * @param visitor A visitor implementation
      */
-    bool isProjection() const;
+    void accept(interpreter::AbstractVisitor* visitor) override;
     /**
-     * @brief Reports whether the node should stop an ongoing projection or
-     * not.
-     * @return Returns true if the node should stop an ongoing projection,
-     * otherwise returns false.
+     * @brief Equality compares this node to the \a other
+     * @param other The node that should be compared.
+     * @return Returns true if this object is equal to the \a other, otherwise
+     * false
      */
-    bool stopsProjection() const;
+    bool operator==(const FilterExpressionNode& other) const;
+    /**
+     * @brief The node's child expression.
+     */
+    ExpressionNode expression;
 };
 }} // namespace jmespath::ast
 
 BOOST_FUSION_ADAPT_STRUCT(
-    jmespath::ast::BracketSpecifierNode,
-    (jmespath::ast::BracketSpecifierNode::ValueType, value)
+    jmespath::ast::FilterExpressionNode,
+    (jmespath::ast::ExpressionNode, expression)
 )
-#endif // BRACKETSPECIFIERNODE_H
+#endif // FILTEREXPRESSIONNODE_H

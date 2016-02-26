@@ -92,6 +92,7 @@ public:
     void visit(ast::ParenExpressionNode* node) override;
     void visit(ast::PipeExpressionNode* node) override;
     void visit(ast::CurrentNode*) override;
+    void visit(ast::FilterExpressionNode*) override;
 
 private:
     /**

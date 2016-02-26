@@ -25,31 +25,34 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef ALLNODES_H
-#define ALLNODES_H
-#include "jmespath/ast/abstractnode.h"
-#include "jmespath/ast/expressionnode.h"
-#include "jmespath/ast/identifiernode.h"
-#include "jmespath/ast/rawstringnode.h"
-#include "jmespath/ast/literalnode.h"
-#include "jmespath/ast/subexpressionnode.h"
-#include "jmespath/ast/indexexpressionnode.h"
-#include "jmespath/ast/arrayitemnode.h"
-#include "jmespath/ast/variantnode.h"
-#include "jmespath/ast/binaryexpressionnode.h"
-#include "jmespath/ast/flattenoperatornode.h"
-#include "jmespath/ast/bracketspecifiernode.h"
-#include "jmespath/ast/sliceexpressionnode.h"
-#include "jmespath/ast/listwildcardnode.h"
-#include "jmespath/ast/hashwildcardnode.h"
-#include "jmespath/ast/multiselectlistnode.h"
-#include "jmespath/ast/multiselecthashnode.h"
-#include "jmespath/ast/notexpressionnode.h"
-#include "jmespath/ast/comparatorexpressionnode.h"
-#include "jmespath/ast/orexpressionnode.h"
-#include "jmespath/ast/andexpressionnode.h"
-#include "jmespath/ast/parenexpressionnode.h"
-#include "jmespath/ast/pipeexpressionnode.h"
-#include "jmespath/ast/currentnode.h"
 #include "jmespath/ast/filterexpressionnode.h"
-#endif // ALLNODES_H
+#include "jmespath/ast/allnodes.h"
+#include "jmespath/interpreter/abstractvisitor.h"
+
+namespace jmespath { namespace ast {
+
+FilterExpressionNode::FilterExpressionNode()
+    : AbstractNode()
+{
+}
+
+FilterExpressionNode::FilterExpressionNode(const ExpressionNode &expression)
+    : AbstractNode(),
+      expression(expression)
+{
+
+}
+void FilterExpressionNode::accept(interpreter::AbstractVisitor *visitor)
+{
+    visitor->visit(this);
+}
+
+bool FilterExpressionNode::operator==(const FilterExpressionNode &other) const
+{
+    if (this != &other)
+    {
+        return expression == other.expression;
+    }
+    return true;
+}
+}} // namespace jmespath::ast

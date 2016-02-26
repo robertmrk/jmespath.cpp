@@ -134,6 +134,12 @@ int nodeRank(const ast::HashWildcardNode& node)
 }
 
 template <>
+int nodeRank(const ast::FilterExpressionNode& node)
+{
+    return 2;
+}
+
+template <>
 int nodeRank(const ast::NotExpressionNode& node)
 {
     return 3;

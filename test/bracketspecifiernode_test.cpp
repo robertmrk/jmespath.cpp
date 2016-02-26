@@ -77,6 +77,15 @@ TEST_CASE("BracketSpecifierNode")
 
             REQUIRE(node == listWildcardNode);
         }
+
+        SECTION("with filter expression")
+        {
+            FilterExpressionNode filterNode;
+
+            BracketSpecifierNode node{filterNode};
+
+            REQUIRE(node == filterNode);
+        }
     }
 
     SECTION("can be compared for equality")

@@ -157,11 +157,12 @@ public:
             >> -m_andExpressionRule(_r1)[insertNode(_r1, _1)];
 
         // match a slice expression or an array item or a list wildcard or a
-        // flatten operator
+        // flatten operator or a filter expression
         m_bracketSpecifierRule = (lit("[")
                                   >> (m_sliceExpressionRule
                                       | m_arrayItemRule
-                                      | m_listWildcardRule)
+                                      | m_listWildcardRule
+                                      | m_filterExpressionRule)
                                   >> lit("]"))
                 | m_flattenOperatorRule;
 
@@ -170,6 +171,9 @@ public:
 
         // match a pair of square brackets
         m_flattenOperatorRule = eps >> lit("[]");
+
+        // match an expression preceded by a question mark
+        m_filterExpressionRule = lit('?') >> m_expressionRule;
 
         // match a colon which can be optionally preceded and followed by a
         // single integer, these matches can also be optionally followed by
@@ -401,7 +405,10 @@ private:
              Skipper> m_arrayItemRule;
     qi::rule<Iterator,
              ast::FlattenOperatorNode(),
-             Skipper> m_flattenOperatorRule;
+             Skipper> m_flattenOperatorRule;                
+    qi::rule<Iterator,
+             ast::FilterExpressionNode(),
+             Skipper> m_filterExpressionRule;
     qi::rule<Iterator,
              ast::SliceExpressionNode(),
              Skipper> m_sliceExpressionRule;
