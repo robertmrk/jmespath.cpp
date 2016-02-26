@@ -272,10 +272,8 @@ public:
 
         // match a grave accent preceded by an escape or match a backslash if
         // it's not followed by a grave accent
-        m_literalEscapeRule = (m_escapeRule
-                                >> char_(U'\x60'))
-                               | (char_(U'\\')
-                                  >> & (!lit('`')));
+        m_literalEscapeRule = (m_escapeRule >> char_(U'\x60'))
+                               | (char_(U'\\') >> & (!lit('`')));
 
         // match zero or more raw string characters enclosed in apostrophes
         m_rawStringRule = lexeme[ lit("\'")
@@ -285,15 +283,17 @@ public:
                                                   _1)]
                 >> lit("\'") ];
 
-        // match a single character in the range of 0x20-0x26 or 0x28-0x5B or
-        // 0x5D-0x10FFFF or an escaped apostrophe
-        m_rawStringCharRule = (char_(U'\x20', U'\x26')
+        // match a single character in the range of 0x07-0x0D or 0x20-0x26 or
+        // 0x28-0x5B or 0x5D-0x10FFFF or an escaped apostrophe
+        m_rawStringCharRule = (char_(U'\x07', U'\x0D')
+                               | char_(U'\x20', U'\x26')
                                | char_(U'\x28', U'\x5B')
                                | char_(U'\x5D', U'\U0010FFFF'))
                 | m_rawStringEscapeRule;
 
         // match escaped apostrophes
-        m_rawStringEscapeRule = m_escapeRule >> char_(U'\'');
+        m_rawStringEscapeRule = (m_escapeRule >> char_(U'\''))
+                                | (char_(U'\\') >> & (!lit('`')));
 
         // match unquoted or quoted strings
         m_identifierRule = m_unquotedStringRule | m_quotedStringRule;

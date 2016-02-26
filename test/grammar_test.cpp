@@ -110,6 +110,18 @@ TEST_CASE("Grammar")
                     == ast::RawStringNode{"[ba'z]"});
         }
 
+        SECTION("raw string with newline character")
+        {
+            REQUIRE(parseExpression(grammar, "'newline\n'")
+                    == ast::RawStringNode{"newline\n"});
+        }
+
+        SECTION("raw string with unicode escape")
+        {
+            REQUIRE(parseExpression(grammar, "'\\u03a6'")
+                    == ast::RawStringNode{"\\u03a6"});
+        }
+
         SECTION("literals")
         {
             REQUIRE(parseExpression(grammar, "`\"foo\\`bar\"`")
