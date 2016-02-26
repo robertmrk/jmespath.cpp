@@ -1145,4 +1145,52 @@ TEST_CASE("ExpressionEvaluator")
 
         REQUIRE(evaluator.currentContext() == expectedResult);
     }
+
+    SECTION("evaluates child expression of filter expression")
+    {
+        ast::FilterExpressionNode node;
+        Mock<ExpressionEvaluator> evaluatorMock(evaluator);
+        evaluatorMock.get().setContext("[1, 2, 3]"_json);
+        When(OverloadedMethod(evaluatorMock, visit,
+                              void(ast::ExpressionNode*)))
+                .AlwaysReturn();
+
+        evaluatorMock.get().visit(&node);
+
+        Verify(OverloadedMethod(evaluatorMock, visit,
+                                void(ast::ExpressionNode*))
+                    .Using(&node.expression)).Exactly(3);
+        VerifyNoOtherInvocations(evaluatorMock);
+    }
+
+    SECTION("evaluates filter expression on non array to null")
+    {
+        Json context = "{}"_json;
+        evaluator.setContext(context);
+        ast::FilterExpressionNode node;
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == Json{});
+    }
+
+    SECTION("evaluates filter expression on arrays to an array filtered with "
+            "the filter's subexpression")
+    {
+        Json context = "[{\"id\": 1}, {\"id\": 2}, {\"id\": 3}]"_json;
+        evaluator.setContext(context);
+        ast::FilterExpressionNode node{
+            ast::ExpressionNode{
+                ast::ComparatorExpressionNode{
+                    ast::ExpressionNode{
+                        ast::IdentifierNode{"id"}},
+                    ast::ComparatorExpressionNode::Comparator::GreaterOrEqual,
+                    ast::ExpressionNode{
+                        ast::LiteralNode{"2"}}}}};
+        Json expectedResult = "[{\"id\": 2}, {\"id\": 3}]"_json;
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
 }
