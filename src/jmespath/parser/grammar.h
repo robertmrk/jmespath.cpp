@@ -103,10 +103,10 @@ public:
 
         // match a standalone index expression or hash wildcard expression or
         // not expression identifier or multiselect list or multiselect hash
-        // or literal or a raw string or parent expression, optionally followed
-        // by a subexpression an index expression a hash wildcard subexpression
-        // a pipe expresion a comparator expression an or expression and an
-        // and expression
+        // or literal or a raw string or parent expression or current node
+        // expression, optionally followed by a subexpression an index
+        // expression a hash wildcard subexpression a pipe expresion a
+        // comparator expression an or expression and an and expression
         m_expressionRule = (m_indexExpressionRule(_val)[insertNode(_val, _1)]
                     | m_hashWildcardRule(_val)[insertNode(_val, _1)]
                     | m_notExpressionRule(_val)[insertNode(_val, _1)]
@@ -115,7 +115,8 @@ public:
                       | m_multiselectHashRule
                       | m_literalRule
                       | m_rawStringRule
-                      | m_parenExpressionRule)[_a = _1])
+                      | m_parenExpressionRule
+                      | m_currentNodeRule)[_a = _1])
             >> -m_subexpressionRule(_val)[insertNode(_val, _1)]
             >> -m_indexExpressionRule(_val)[insertNode(_val, _1)]
             >> -m_hashWildcardSubexpressionRule(_val)[insertNode(_val, _1)]
@@ -247,6 +248,9 @@ public:
 
         // match double ampersand followed by an expression
         m_andExpressionRule = lit("&&") >> m_expressionRule[_r1 = _1];
+
+        // match
+        m_currentNodeRule = eps >> lit('@');
 
         // match an identifier and an expression separated with a colon
         m_keyValuePairRule = m_identifierRule >> lit(':') >> m_expressionRule;
@@ -436,6 +440,7 @@ private:
     qi::rule<Iterator, ast::IdentifierNode(), Skipper> m_identifierRule;
     qi::rule<Iterator, ast::RawStringNode(), Skipper> m_rawStringRule;
     qi::rule<Iterator, ast::LiteralNode(), Skipper> m_literalRule;
+    qi::rule<Iterator, ast::CurrentNode()>  m_currentNodeRule;
     qi::rule<Iterator, UnicodeChar()>       m_literalCharRule;
     qi::rule<Iterator, UnicodeChar()>       m_literalEscapeRule;
     qi::rule<Iterator, UnicodeChar()>       m_rawStringCharRule;

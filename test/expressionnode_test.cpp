@@ -167,6 +167,15 @@ TEST_CASE("ExpressionNode")
 
             REQUIRE(expression == pipeExpression);
         }
+
+        SECTION("with current node")
+        {
+            CurrentNode currentNode;
+
+            ExpressionNode expression{currentNode};
+
+            REQUIRE(expression == currentNode);
+        }
     }
 
     SECTION("accepts assignment of another ExpressionNode")

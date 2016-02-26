@@ -949,5 +949,13 @@ TEST_CASE("Grammar")
 
             REQUIRE(parseExpression(grammar, expression) == expectedResult);
         }
+
+        SECTION("current node")
+        {
+            auto expectedResult = ast::CurrentNode{};
+            String expression{"@"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
     }
 }

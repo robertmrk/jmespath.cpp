@@ -1116,4 +1116,33 @@ TEST_CASE("ExpressionEvaluator")
 
         REQUIRE(evaluator.currentContext() == expectedResult);
     }
+
+    SECTION("evaluates current node expression")
+    {
+        ast::CurrentNode node;
+        Mock<ExpressionEvaluator> evaluatorMock(evaluator);
+        When(OverloadedMethod(evaluatorMock, visit,
+                              void(ast::ExpressionNode*))).AlwaysReturn();
+        evaluatorMock.get().setContext("value");
+
+        evaluatorMock.get().visit(&node);
+
+        REQUIRE(evaluatorMock.get().currentContext() == "value");
+        VerifyNoOtherInvocations(evaluatorMock);
+    }
+
+    SECTION("evaluates current node inside subexpression")
+    {
+        ast::SubexpressionNode node{
+            ast::ExpressionNode{
+                ast::CurrentNode{}},
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id"}}};
+        evaluator.setContext("{\"id\": \"value\"}"_json);
+        Json expectedResult = "value";
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == expectedResult);
+    }
 }
