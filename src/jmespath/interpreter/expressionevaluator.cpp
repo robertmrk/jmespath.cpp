@@ -356,6 +356,10 @@ void ExpressionEvaluator::visit(ast::ParenExpressionNode *node)
     visit(&node->expression);
 }
 
+void ExpressionEvaluator::visit(ast::PipeExpressionNode *)
+{
+}
+
 int ExpressionEvaluator::adjustSliceEndpoint(int length,
                                              int endpoint,
                                              int step) const

@@ -140,21 +140,27 @@ int nodeRank(const ast::NotExpressionNode& node)
 }
 
 template <>
-int nodeRank(const ast::ComparatorExpressionNode& node)
+int nodeRank(const ast::PipeExpressionNode& node)
 {
     return 4;
 }
 
 template <>
-int nodeRank(const ast::AndExpressionNode& node)
+int nodeRank(const ast::ComparatorExpressionNode& node)
 {
     return 5;
 }
 
 template <>
-int nodeRank(const ast::OrExpressionNode& node)
+int nodeRank(const ast::AndExpressionNode& node)
 {
     return 6;
+}
+
+template <>
+int nodeRank(const ast::OrExpressionNode& node)
+{
+    return 7;
 }
 } // anonymous namespace
 }} // namespace jmespath::parser

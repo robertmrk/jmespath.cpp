@@ -51,6 +51,7 @@ class ComparatorExpressionNode;
 class OrExpressionNode;
 class AndExpressionNode;
 class ParenExpressionNode;
+class PipeExpressionNode;
 }} // namespace jmespath::ast
 
 /**
@@ -91,6 +92,7 @@ public:
     virtual void visit(ast::OrExpressionNode* node) = 0;
     virtual void visit(ast::AndExpressionNode* node) = 0;
     virtual void visit(ast::ParenExpressionNode* node) = 0;
+    virtual void visit(ast::PipeExpressionNode* node) = 0;
     /** @}*/
 };
 }} // namespace jmespath::interpreter
