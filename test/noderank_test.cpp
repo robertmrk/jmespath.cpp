@@ -90,24 +90,24 @@ TEST_CASE("nodeRank")
         REQUIRE(nodeRank(NotExpressionNode{}) == 3);
     }
 
-    SECTION("ranks pipe expression node at 4")
+    SECTION("ranks comparator expression node at 4")
     {
-        REQUIRE(nodeRank(PipeExpressionNode{}) == 4);
-    }
-
-    SECTION("ranks comparator expression node at 5")
-    {
-        REQUIRE(nodeRank(ComparatorExpressionNode{}) == 5);
+        REQUIRE(nodeRank(ComparatorExpressionNode{}) == 4);
     }    
 
-    SECTION("ranks and expression node at 6")
+    SECTION("ranks and expression node at 5")
     {
-        REQUIRE(nodeRank(AndExpressionNode{}) == 6);
+        REQUIRE(nodeRank(AndExpressionNode{}) == 5);
     }
 
-    SECTION("ranks or expression node at 7")
+    SECTION("ranks or expression node at 6")
     {
-        REQUIRE(nodeRank(OrExpressionNode{}) == 7);
+        REQUIRE(nodeRank(OrExpressionNode{}) == 6);
+    }
+
+    SECTION("ranks pipe expression node at 7")
+    {
+        REQUIRE(nodeRank(PipeExpressionNode{}) == 7);
     }
 
     SECTION("ranks bracket specifier node as its expression")

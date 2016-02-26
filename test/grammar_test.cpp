@@ -662,6 +662,22 @@ TEST_CASE("Grammar")
             REQUIRE(parseExpression(grammar, expression) == expectedResult);
         }
 
+        SECTION("pipe expression with or expression")
+        {
+            auto expectedResult = ast::PipeExpressionNode{
+                    ast::ExpressionNode{
+                        ast::IdentifierNode{"id1"}},
+                    ast::ExpressionNode{
+                        ast::OrExpressionNode{
+                            ast::ExpressionNode{
+                                ast::IdentifierNode{"id2"}},
+                            ast::ExpressionNode{
+                                ast::IdentifierNode{"id3"}}}}};
+            String expression{"id1 | id2 || id3"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
+
         SECTION("not expression")
         {
             auto expectedResult = ast::NotExpressionNode{

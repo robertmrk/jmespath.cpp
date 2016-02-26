@@ -140,25 +140,25 @@ int nodeRank(const ast::NotExpressionNode& node)
 }
 
 template <>
-int nodeRank(const ast::PipeExpressionNode& node)
+int nodeRank(const ast::ComparatorExpressionNode& node)
 {
     return 4;
 }
 
 template <>
-int nodeRank(const ast::ComparatorExpressionNode& node)
+int nodeRank(const ast::AndExpressionNode& node)
 {
     return 5;
 }
 
 template <>
-int nodeRank(const ast::AndExpressionNode& node)
+int nodeRank(const ast::OrExpressionNode& node)
 {
     return 6;
 }
 
 template <>
-int nodeRank(const ast::OrExpressionNode& node)
+int nodeRank(const ast::PipeExpressionNode& node)
 {
     return 7;
 }
