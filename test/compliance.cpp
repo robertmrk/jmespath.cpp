@@ -62,7 +62,19 @@ protected:
                 }
                 else
                 {
-                    Json result = search(expression, document);
+                    Json result;
+                    try
+                    {
+                        result = search(expression, document);
+                    }
+                    catch(std::exception& exc)
+                    {
+                        FAIL("Exception: " + String(exc.what())
+                             + "\nExpression: " + expression
+                             + "\nExpected result: " + expectedResult.dump()
+                             + "\nResult: " + result.dump());
+                    }
+
                     if (result == expectedResult)
                     {
                         SUCCEED();
@@ -100,8 +112,7 @@ TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Identifiers",
     executeFeatureTest("identifiers");
 }
 
-TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Literals",
-                 "[!hide][literals]")
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Literals", "[literals]")
 {
     executeFeatureTest("literal");
 }
@@ -118,8 +129,7 @@ TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Boolean expressions",
     executeFeatureTest("boolean");
 }
 
-TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Current node",
-                 "[!hide][current]")
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Current node", "[current]")
 {
     executeFeatureTest("current");
 }
@@ -148,13 +158,12 @@ TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Index expressions",
 }
 
 TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Multiselect expressions",
-                 "[!hide][multiselect]")
+                 "[multiselect]")
 {
     executeFeatureTest("multiselect");
 }
 
-TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Pipe expressions",
-                 "[!hide][pipe]")
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Pipe expressions", "[pipe]")
 {
     executeFeatureTest("pipe");
 }
