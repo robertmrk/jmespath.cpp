@@ -139,8 +139,7 @@ TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Escapes", "[escape]")
     executeFeatureTest("escape");
 }
 
-TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Filters",
-                 "[!hide][filters]")
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Filters", "[filters]")
 {
     executeFeatureTest("filters");
 }
