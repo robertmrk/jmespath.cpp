@@ -58,22 +58,22 @@ Json ExpressionEvaluator::currentContext() const
 
 void ExpressionEvaluator::evaluateProjection(ast::ExpressionNode *expression)
 {
-    Json contextArray = m_context;
     Json result;
-    if (contextArray.is_array())
+    if (m_context.is_array())
     {
         result = Json(Json::value_t::array);
-        for (auto item: contextArray)
+        Json contextArray = std::move(m_context);
+        for (auto& item: contextArray)
         {
-            m_context = item;
+            m_context = std::move(item);
             visit(expression);
             if (!m_context.is_null())
             {
-                result.push_back(m_context);
+                result.push_back(std::move(m_context));
             }
         }
     }
-    m_context = result;
+    m_context = std::move(result);
 }
 
 void ExpressionEvaluator::visit(ast::AbstractNode *node)
@@ -91,14 +91,14 @@ void ExpressionEvaluator::visit(ast::IdentifierNode *node)
     Json result;
     if (m_context.is_object())
     {
-        result = m_context[node->identifier];
+        result = std::move(m_context[node->identifier]);
     }
-    m_context = result;
+    m_context = std::move(result);
 }
 
 void ExpressionEvaluator::visit(ast::RawStringNode *node)
 {
-    m_context = node->rawString;
+    m_context = std::move(node->rawString);
 }
 
 void ExpressionEvaluator::visit(ast::LiteralNode *node)
@@ -136,37 +136,37 @@ void ExpressionEvaluator::visit(ast::ArrayItemNode *node)
         int arrayIndex = node->index;
         if (arrayIndex < 0)
         {
-            arrayIndex = m_context.size() + arrayIndex;
+            arrayIndex += m_context.size();
         }
-        if ((arrayIndex >= 0 ) && (arrayIndex < m_context.size()))
+        if ((arrayIndex >= 0) && (arrayIndex < m_context.size()))
         {
-            result = m_context[arrayIndex];
+            result = std::move(m_context[arrayIndex]);
         }
     }
-    m_context = result;
+    m_context = std::move(result);
 }
 
-void ExpressionEvaluator::visit(ast::FlattenOperatorNode *node)
+void ExpressionEvaluator::visit(ast::FlattenOperatorNode *)
 {
     Json result;
-    Json contextArray = m_context;
-    if (contextArray.is_array())
+    if (m_context.is_array())
     {
-        Json arrayValue(Json::value_t::array);
-        for (auto const& item: contextArray)
+        result = Json(Json::value_t::array);
+        for (auto& item: m_context)
         {
             if (item.is_array())
             {
-                rng::copy(item, std::back_inserter(arrayValue));
+                std::move(std::begin(item),
+                          std::end(item),
+                          std::back_inserter(result));
             }
             else
             {
-                arrayValue.push_back(item);
+                result.push_back(std::move(item));
             }
         }
-        result = arrayValue;
     }
-    m_context = result;
+    m_context = std::move(result);
 }
 
 void ExpressionEvaluator::visit(ast::BracketSpecifierNode *node)
@@ -177,13 +177,12 @@ void ExpressionEvaluator::visit(ast::BracketSpecifierNode *node)
 void ExpressionEvaluator::visit(ast::SliceExpressionNode *node)
 {
     Json result;
-    Json contextArray = m_context;
-    if (contextArray.is_array())
+    if (m_context.is_array())
     {
         int startIndex = 0;
         int endIndex = 0;
         int step = 1;
-        int length = contextArray.size();
+        int length = m_context.size();
 
         if (node->step)
         {
@@ -211,18 +210,18 @@ void ExpressionEvaluator::visit(ast::SliceExpressionNode *node)
         }
 
         result = Json(Json::value_t::array);
-        auto beginIt = std::begin(contextArray);
+        auto beginIt = std::begin(m_context);
         auto it = beginIt + startIndex;
         auto stopIt = beginIt + endIndex;
 
         while (((step > 0) && (it < stopIt))
                || ((step < 0) && (it > stopIt)))
         {
-            result.push_back(*it);
+            result.push_back(std::move(*it));
             it += step;
         }
     }
-    m_context = result;
+    m_context = std::move(result);
 }
 
 void ExpressionEvaluator::visit(ast::ListWildcardNode *node)
@@ -239,9 +238,11 @@ void ExpressionEvaluator::visit(ast::HashWildcardNode *node)
     Json result;
     if (m_context.is_object())
     {
-        rng::copy(m_context, std::back_inserter(result));
+        std::move(std::begin(m_context),
+                  std::end(m_context),
+                  std::back_inserter(result));
     }
-    m_context = result;
+    m_context = std::move(result);
     evaluateProjection(&node->rightExpression);
 }
 
@@ -250,14 +251,14 @@ void ExpressionEvaluator::visit(ast::MultiselectListNode *node)
     if (!m_context.is_null())
     {
         Json result(Json::value_t::array);
-        Json childContext = m_context;
+        Json childContext = std::move(m_context);
         for (auto& expression: node->expressions)
         {
-            visit(&expression);
-            result.push_back(m_context);
             m_context = childContext;
+            visit(&expression);
+            result.push_back(std::move(m_context));
         }
-        m_context = result;
+        m_context = std::move(result);
     }
 }
 
@@ -266,23 +267,21 @@ void ExpressionEvaluator::visit(ast::MultiselectHashNode *node)
     if (!m_context.is_null())
     {
         Json result(Json::value_t::object);
-        Json childContext = m_context;
+        Json childContext = std::move(m_context);
         for (auto& keyValuePair: node->expressions)
         {
-            visit(&keyValuePair.second);
-            result[keyValuePair.first.identifier] = m_context;
             m_context = childContext;
+            visit(&keyValuePair.second);
+            result[keyValuePair.first.identifier] = std::move(m_context);
         }
-        m_context = result;
+        m_context = std::move(result);
     }
 }
 
 void ExpressionEvaluator::visit(ast::NotExpressionNode *node)
 {
     visit(&node->expression);
-    bool result = !toBoolean(m_context);
-    m_context = Json(Json::value_t::boolean);
-    m_context = result;
+    m_context = !toBoolean(m_context);
 }
 
 void ExpressionEvaluator::visit(ast::ComparatorExpressionNode *node)
@@ -296,13 +295,12 @@ void ExpressionEvaluator::visit(ast::ComparatorExpressionNode *node)
 
     Json childContext = m_context;
     visit(&node->leftExpression);
-    Json leftResult = m_context;
+    Json leftResult = std::move(m_context);
 
-    m_context = childContext;
+    m_context = std::move(childContext);
     visit(&node->rightExpression);
-    Json rightResult = m_context;
+    Json rightResult = std::move(m_context);
 
-    m_context = Json(Json::value_t::boolean);
     if (node->comparator == Comparator::Less)
     {
         m_context = leftResult < rightResult;
@@ -335,7 +333,7 @@ void ExpressionEvaluator::visit(ast::OrExpressionNode *node)
     visit(&node->leftExpression);
     if (!toBoolean(m_context))
     {
-        m_context = childContext;
+        m_context = std::move(childContext);
         visit(&node->rightExpression);
     }
 }
@@ -346,7 +344,7 @@ void ExpressionEvaluator::visit(ast::AndExpressionNode *node)
     visit(&node->leftExpression);
     if (toBoolean(m_context))
     {
-        m_context = childContext;
+        m_context = std::move(childContext);
         visit(&node->rightExpression);
     }
 }
@@ -379,11 +377,11 @@ void ExpressionEvaluator::visit(ast::FilterExpressionNode *node)
             visit(&node->expression);
             if (toBoolean(m_context))
             {
-                result.push_back(item);
+                result.push_back(std::move(item));
             }
         }
     }
-    m_context = result;
+    m_context = std::move(result);
 }
 
 int ExpressionEvaluator::adjustSliceEndpoint(int length,
