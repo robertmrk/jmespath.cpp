@@ -406,9 +406,8 @@ int ExpressionEvaluator::adjustSliceEndpoint(int length,
 bool ExpressionEvaluator::toBoolean(const Json &json) const
 {
     return json.is_number()
-            || (!json.is_null()
-                && (!json.is_boolean() || (json.get<bool>() != false))
-                && (!json.is_string() || !json.get<std::string>().empty())
-                && ((!json.is_array() && !json.is_object()) || !json.empty()));
+            || ((!json.is_boolean() || json.get<bool>())
+                && (!json.is_string() || !json.get_ptr<const std::string*>()->empty())
+                && !json.empty());
 }
 }} // namespace jmespath::interpreter
