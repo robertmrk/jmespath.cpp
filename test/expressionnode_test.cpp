@@ -176,6 +176,15 @@ TEST_CASE("ExpressionNode")
 
             REQUIRE(expression == currentNode);
         }
+
+        SECTION("with function expression")
+        {
+            FunctionExpressionNode functionExpression;
+
+            ExpressionNode expression{functionExpression};
+
+            REQUIRE(expression == functionExpression);
+        }
     }
 
     SECTION("accepts assignment of another ExpressionNode")

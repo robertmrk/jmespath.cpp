@@ -1023,5 +1023,65 @@ TEST_CASE("Grammar")
 
             REQUIRE(parseExpression(grammar, expression) == expectedResult);
         }
+
+        SECTION("function expression without arguments")
+        {
+            auto expectedResult = ast::FunctionExpressionNode{"foo"};
+            String expression{"foo()"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
+
+        SECTION("function expression with a single argument")
+        {
+            auto expectedResult = ast::FunctionExpressionNode{
+                    "foo",
+                    {ast::ExpressionNode{
+                        ast::IdentifierNode{"id"}}}};
+                    String expression{"foo(id)"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
+
+        SECTION("function expression with a single expression argument")
+        {
+            auto expectedResult = ast::FunctionExpressionNode{
+                    "foo",
+                    {ast::ExpressionArgumentNode{
+                        ast::ExpressionNode{
+                            ast::IdentifierNode{"id"}}}}};
+                    String expression{"foo(&id)"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
+
+        SECTION("function expression with multiple arguments")
+        {
+            auto expectedResult = ast::FunctionExpressionNode{
+                    "foo",
+                    {ast::ExpressionNode{
+                            ast::IdentifierNode{"id1"}},
+                    ast::ExpressionArgumentNode{
+                        ast::ExpressionNode{
+                            ast::IdentifierNode{"id2"}}},
+                    ast::ExpressionNode{
+                        ast::IdentifierNode{"id3"}}}};
+            String expression{"foo(id1, &id2, id3)"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
+
+        SECTION("recursive function expression")
+        {
+            auto expectedResult = ast::FunctionExpressionNode{
+                    "foo",
+                    {ast::ExpressionNode{
+                        ast::FunctionExpressionNode{"bar",
+                        {ast::ExpressionNode{
+                            ast::IdentifierNode{"id"}}}}}}};
+                    String expression{"foo(bar(id))"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
     }
 }

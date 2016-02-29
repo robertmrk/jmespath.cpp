@@ -93,6 +93,8 @@ public:
     void visit(ast::PipeExpressionNode* node) override;
     void visit(ast::CurrentNode*) override;
     void visit(ast::FilterExpressionNode* node) override;
+    void visit(ast::FunctionExpressionNode*) override;
+    void visit(ast::ExpressionArgumentNode*) override;
 
 private:
     /**

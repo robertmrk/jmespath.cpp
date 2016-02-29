@@ -102,15 +102,17 @@ public:
                 NodeInsertCondition> > insertNode;
 
         // match a standalone index expression or hash wildcard expression or
-        // not expression identifier or multiselect list or multiselect hash
-        // or literal or a raw string or parent expression or current node
-        // expression, optionally followed by a subexpression an index
-        // expression a hash wildcard subexpression a pipe expresion a
-        // comparator expression an or expression and an and expression
+        // not expression or function expression or identifier or multiselect
+        // list or multiselect hash or literal or a raw string or paren
+        // expression or current node expression, optionally followed by a
+        // subexpression an index expression a hash wildcard subexpression a
+        // pipe expresion a comparator expression an or expression and an and
+        // expression
         m_expressionRule = (m_indexExpressionRule(_val)[insertNode(_val, _1)]
                     | m_hashWildcardRule(_val)[insertNode(_val, _1)]
                     | m_notExpressionRule(_val)[insertNode(_val, _1)]
-                    | (m_identifierRule
+                    | (m_functionExpressionRule
+                      | m_identifierRule
                       | m_multiselectListRule
                       | m_multiselectHashRule
                       | m_literalRule
@@ -255,6 +257,20 @@ public:
 
         // match
         m_currentNodeRule = eps >> lit('@');
+
+        // match an unquoted string which is optionally followed by an argument
+        // list enclosed in parenthesis
+        m_functionExpressionRule = m_unquotedStringRule
+                >> lit('(') >> -m_functionArgumentListRule >> lit(')');
+
+        // match a sequence of function arguments separated with commas
+        m_functionArgumentListRule = m_functionArgumentRule % lit(',');
+
+        // match an expression or an expression argument
+        m_functionArgumentRule = m_expressionRule | m_expressionArgumentRule;
+
+        // match an expression following an ampersand
+        m_expressionArgumentRule = lit('&') >> m_expressionRule;
 
         // match an identifier and an expression separated with a colon
         m_keyValuePairRule = m_identifierRule >> lit(':') >> m_expressionRule;
@@ -444,6 +460,18 @@ private:
     qi::rule<Iterator,
              ast::ParenExpressionNode(),
              Skipper> m_parenExpressionRule;
+    qi::rule<Iterator,
+             ast::FunctionExpressionNode(),
+             Skipper> m_functionExpressionRule;
+    qi::rule<Iterator,
+             std::vector<ast::FunctionExpressionNode::ArgumentType>(),
+             Skipper> m_functionArgumentListRule;
+    qi::rule<Iterator,
+             ast::FunctionExpressionNode::ArgumentType(),
+             Skipper> m_functionArgumentRule;
+    qi::rule<Iterator,
+             ast::ExpressionArgumentNode(),
+             Skipper> m_expressionArgumentRule;
     qi::rule<Iterator, ast::IdentifierNode(), Skipper> m_identifierRule;
     qi::rule<Iterator, ast::RawStringNode(), Skipper> m_rawStringRule;
     qi::rule<Iterator, ast::LiteralNode(), Skipper> m_literalRule;

@@ -384,6 +384,14 @@ void ExpressionEvaluator::visit(ast::FilterExpressionNode *node)
     m_context = std::move(result);
 }
 
+void ExpressionEvaluator::visit(ast::FunctionExpressionNode *)
+{
+}
+
+void ExpressionEvaluator::visit(ast::ExpressionArgumentNode *)
+{
+}
+
 int ExpressionEvaluator::adjustSliceEndpoint(int length,
                                              int endpoint,
                                              int step) const

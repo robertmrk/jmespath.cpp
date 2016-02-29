@@ -49,6 +49,7 @@ class AndExpressionNode;
 class ParenExpressionNode;
 class PipeExpressionNode;
 class CurrentNode;
+class FunctionExpressionNode;
 /**
  * @brief The ExpressionNode class represents a JMESPath expression.
  */
@@ -67,7 +68,8 @@ class ExpressionNode : public VariantNode<
         boost::recursive_wrapper<AndExpressionNode>,
         boost::recursive_wrapper<ParenExpressionNode>,
         boost::recursive_wrapper<PipeExpressionNode>,
-        boost::recursive_wrapper<CurrentNode> >
+        boost::recursive_wrapper<CurrentNode>,
+        boost::recursive_wrapper<FunctionExpressionNode> >
 {
 public:
     /**
