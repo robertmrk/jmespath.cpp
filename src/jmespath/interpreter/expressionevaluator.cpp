@@ -458,7 +458,7 @@ ExpressionEvaluator::evaluateArguments(
         if (expressionArgument)
         {
             auto context = m_context;
-            visit(expressionArgument);
+            this->visit(expressionArgument);
             functionArgument = std::move(m_context);
             m_context = std::move(context);
         }
