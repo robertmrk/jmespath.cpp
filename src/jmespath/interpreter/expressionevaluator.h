@@ -29,6 +29,7 @@
 #define EXPRESSIONEVALUATOR_H
 #include "jmespath/interpreter/abstractvisitor.h"
 #include "jmespath/detail/types.h"
+#include "jmespath/ast/expressionnode.h"
 #include "jmespath/ast/functionexpressionnode.h"
 #include <functional>
 #include <unordered_map>
