@@ -28,6 +28,7 @@
 #include "jmespath/interpreter/expressionevaluator.h"
 #include "jmespath/ast/allnodes.h"
 #include "jmespath/detail/exceptions.h"
+#include <numeric>
 #include <boost/range.hpp>
 #include <boost/range/algorithm.hpp>
 
@@ -38,6 +39,11 @@ namespace rng = boost::range;
 ExpressionEvaluator::ExpressionEvaluator()
     : AbstractVisitor()
 {
+    using std::placeholders::_1;
+    m_functionMap = {
+        {"abs", {1, std::bind(&ExpressionEvaluator::abs, this, _1)}},
+        {"avg", {1, std::bind(&ExpressionEvaluator::avg, this, _1)}}
+    };
 }
 
 ExpressionEvaluator::ExpressionEvaluator(const Json &contextValue)
@@ -384,8 +390,25 @@ void ExpressionEvaluator::visit(ast::FilterExpressionNode *node)
     m_context = std::move(result);
 }
 
-void ExpressionEvaluator::visit(ast::FunctionExpressionNode *)
+void ExpressionEvaluator::visit(ast::FunctionExpressionNode *node)
 {
+    auto it = m_functionMap.find(node->functionName);
+    if (it == m_functionMap.end())
+    {
+        BOOST_THROW_EXCEPTION(detail::UnknownFunction()
+                              << detail::InfoFunctionName(node->functionName));
+    }
+
+    const auto& descriptor = it->second;
+    size_t expectedArgumentCount = descriptor.first;
+    const auto& function = descriptor.second;
+    if (node->arguments.size() != expectedArgumentCount)
+    {
+        BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentArity());
+    }
+
+    FunctionArgumentList argumentList = evaluateArguments(node->arguments);
+    function(argumentList);
 }
 
 void ExpressionEvaluator::visit(ast::ExpressionArgumentNode *)
@@ -418,5 +441,85 @@ bool ExpressionEvaluator::toBoolean(const Json &json) const
                 && (!json.is_string()
                     || !json.get_ptr<const std::string*>()->empty())
                 && !json.empty());
+}
+
+ExpressionEvaluator::FunctionArgumentList
+ExpressionEvaluator::evaluateArguments(
+        const FunctionExpressionArgumentList &arguments)
+{
+    FunctionArgumentList argumentList;
+    rng::transform(arguments, std::back_inserter(argumentList),
+                   [this](auto argument)
+    {
+        FunctionArgument functionArgument;
+
+        ast::ExpressionNode* expressionArgument
+                = boost::get<ast::ExpressionNode>(&argument);
+        if (expressionArgument)
+        {
+            auto context = m_context;
+            visit(expressionArgument);
+            functionArgument = std::move(m_context);
+            m_context = std::move(context);
+        }
+
+        ast::ExpressionArgumentNode* expressionTypeArgument
+                = boost::get<ast::ExpressionArgumentNode>(&argument);
+        if (expressionTypeArgument)
+        {
+            functionArgument = std::move(expressionTypeArgument->expression);
+        }
+
+        return functionArgument;
+    });
+    return argumentList;
+}
+
+Json ExpressionEvaluator::abs(const FunctionArgumentList &arguments) const
+{
+    const Json* value = boost::get<Json>(&arguments[0]);
+    if (!value || !value->is_number())
+    {
+        BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+    }
+    if (value->is_number_integer())
+    {
+        return std::abs(value->get<Json::number_integer_t>());
+    }
+    else
+    {
+        return std::abs(*value->get_ptr<const Json::number_float_t*>());
+    }
+}
+
+Json ExpressionEvaluator::avg(const FunctionArgumentList &arguments) const
+{
+    const Json* items = boost::get<Json>(&arguments[0]);
+    if (items && items->is_array())
+    {
+        double sum = std::accumulate(std::begin(*items),
+                                     std::end(*items),
+                                     0.0,
+                                     [](int sum, const Json& item) -> double
+        {
+            if (item.is_number_integer())
+            {
+                return sum + item.get<Json::number_integer_t>();
+            }
+            else if (item.is_number_float())
+            {
+                return sum + item.get<Json::number_float_t>();
+            }
+            else
+            {
+                BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+            }
+        });
+        return sum / items->size();
+    }
+    else
+    {
+        BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+    }
 }
 }} // namespace jmespath::interpreter

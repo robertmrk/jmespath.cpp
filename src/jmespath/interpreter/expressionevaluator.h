@@ -29,10 +29,15 @@
 #define EXPRESSIONEVALUATOR_H
 #include "jmespath/interpreter/abstractvisitor.h"
 #include "jmespath/detail/types.h"
+#include "jmespath/ast/functionexpressionnode.h"
+#include <functional>
+#include <unordered_map>
+#include <boost/variant.hpp>
 
 namespace jmespath { namespace interpreter {
 
 using detail::Json;
+using detail::String;
 /**
  * @brief The ExpressionEvaluator class evaluates the AST structure.
  */
@@ -93,14 +98,44 @@ public:
     void visit(ast::PipeExpressionNode* node) override;
     void visit(ast::CurrentNode*) override;
     void visit(ast::FilterExpressionNode* node) override;
-    void visit(ast::FunctionExpressionNode*) override;
+    void visit(ast::FunctionExpressionNode* node) override;
     void visit(ast::ExpressionArgumentNode*) override;
 
 private:
     /**
+     * Type of the arguments in FunctionArgumentList.
+     */
+    using FunctionArgument
+        = boost::variant<boost::blank, Json, ast::ExpressionNode>;
+    /**
+     * List of FunctionArgument objects.
+     */
+    using FunctionArgumentList = std::vector<FunctionArgument>;
+    /**
+     * Function wrapper type to which JMESPath built in function implementations
+     * should conform to.
+     */
+    using Function = std::function<Json(FunctionArgumentList)>;
+    /**
+     * Describes a built in function implementation. The pair's first member
+     * stores the number of arguments expected by the function, while the second
+     * member stores the callable functions wrapper.
+     */
+    using FunctionDescriptor = std::pair<size_t, Function>;
+    /**
+     * List of unevaluated function arguments.
+     */
+    using FunctionExpressionArgumentList
+        = std::vector<ast::FunctionExpressionNode::ArgumentType>;
+    /**
      * @brief Stores the evaluation context.
      */
     Json m_context;
+    /**
+     * @brief Maps the JMESPath built in function names to their
+     * implementations.
+     */
+    std::unordered_map<String, FunctionDescriptor> m_functionMap;
     /**
      * @brief Adjust the value of the slice endpoint to make sure it's within
      * the array's bounds and points to the correct item.
@@ -117,6 +152,35 @@ private:
      * list, empty object, empty string, null), otherwise returns true.
      */
     bool toBoolean(const Json& json) const;
+    /**
+     * @brief Evaluate the given function expression @a arguments.
+     *
+     * Evalutate ExpressionNodes on the current context to a JSON value and
+     * evaluate ExpressionTypeNodes to their child ExpressionNode.
+     * @param arguments List of FunctionExpressionNode arguments.
+     * @return List of evaluated function arguments, suitable for passing to
+     * built in functions.
+     */
+    FunctionArgumentList evaluateArguments(
+            const FunctionExpressionArgumentList& arguments);
+    /**
+     * @brief Calculates the absolute value of the first item in the given list
+     * of @a arguments. The first item must be a number JSON value.
+     * @param arguments The list of the function's arguments.
+     * @return Absolute value of the first item in @a arguments.
+     * @throws InvalidFunctionArgumentType
+     */
+    Json abs(const FunctionArgumentList& arguments) const;
+    /**
+     * @brief Calculates the average value of the items in the first item of the
+     * given @a arguments. The first item must be an JSON array and every item
+     * in the array must be a number JSON value.
+     * @param arguments The list of the function's arguments.
+     * @return Average value of the items in the first item of the given
+     * @a arguments
+     * @throws InvalidFunctionArgumentType
+     */
+    Json avg(const FunctionArgumentList& arguments) const;
 };
 }} // namespace jmespath::interpreter
 #endif // EXPRESSIONEVALUATOR_H

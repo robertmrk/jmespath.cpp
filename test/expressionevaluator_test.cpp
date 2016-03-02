@@ -32,15 +32,20 @@
 #define private public
 #include "jmespath/interpreter/expressionevaluator.h"
 
+namespace jmespath { namespace ast {
+
+std::ostream& operator<< (std::ostream& stream, ExpressionNode const&)
+{
+    return stream;
+}
+}} // namespace jmespath::ast
+
 TEST_CASE("ExpressionEvaluator")
 {
-    using jmespath::interpreter::ExpressionEvaluator;
-    using jmespath::detail::Json;
-    using jmespath::detail::String;
-    using jmespath::detail::InvalidValue;
-    using jmespath::detail::InvalidAgrument;
+    using jmespath::interpreter::ExpressionEvaluator;    
     namespace ast = jmespath::ast;
     namespace rng = boost::range;
+    using namespace jmespath::detail;
     using namespace fakeit;
 
     ExpressionEvaluator evaluator;
@@ -1158,5 +1163,121 @@ TEST_CASE("ExpressionEvaluator")
         evaluator.visit(&node);
 
         REQUIRE(evaluator.currentContext() == expectedResult);
+    }
+
+    SECTION("function expression evaluation throws on non existing function "
+            "call")
+    {
+        ast::FunctionExpressionNode node{"foo"};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node), UnknownFunction);
+    }
+
+    SECTION("function expression evaluation throws on invalid argument arity")
+    {
+        ast::FunctionExpressionNode node{"abs"};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node), InvalidFunctionArgumentArity);
+    }
+
+    SECTION("evaluates function arguments")
+    {
+        ExpressionEvaluator::FunctionExpressionArgumentList arguments{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id1"}},
+            ast::ExpressionArgumentNode{
+                ast::ExpressionNode{
+                    ast::IdentifierNode{"id2"}}}};
+        ExpressionEvaluator::FunctionArgumentList expectedResult{
+            "\"value\""_json,
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id2"}}};
+        evaluator.setContext("{\"id1\": \"value\"}"_json);
+
+        auto result = evaluator.evaluateArguments(arguments);
+
+        REQUIRE(result == expectedResult);
+    }
+
+    SECTION("invokes function with evaluated arguments")
+    {
+        ast::FunctionExpressionNode node{
+            "foo",
+            {ast::ExpressionNode{
+                ast::IdentifierNode{"id1"}},
+            ast::ExpressionArgumentNode{
+                ast::ExpressionNode{
+                    ast::IdentifierNode{"id2"}}}}};
+        ExpressionEvaluator::FunctionArgumentList arguments{
+            "\"value\""_json,
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id2"}}};
+        evaluator.setContext("{\"id1\": \"value\"}"_json);
+        bool functionCalled = false;
+        ExpressionEvaluator::Function function = [&](
+                const ExpressionEvaluator::FunctionArgumentList& args)->Json
+        {
+            if (args == arguments)
+            {
+                functionCalled = true;
+            }
+            return {};
+        };
+        ExpressionEvaluator::FunctionDescriptor functionDescriptor
+                = {2, function};
+        evaluator.m_functionMap.insert({"foo", functionDescriptor});
+
+        evaluator.visit(&node);
+
+        REQUIRE(functionCalled);
+    }
+
+    SECTION("evaluates abs function on integer")
+    {
+        ExpressionEvaluator::FunctionArgumentList arguments1{"-3"_json};
+        ExpressionEvaluator::FunctionArgumentList arguments2{"5"_json};
+
+        REQUIRE(evaluator.abs(arguments1) == "3"_json);
+        REQUIRE(evaluator.abs(arguments2) == "5"_json);
+    }
+
+    SECTION("evaluates abs function on float")
+    {
+        ExpressionEvaluator::FunctionArgumentList arguments1{"-3.5"_json};
+        ExpressionEvaluator::FunctionArgumentList arguments2{"5.2"_json};
+
+        REQUIRE(evaluator.abs(arguments1) == "3.5"_json);
+        REQUIRE(evaluator.abs(arguments2) == "5.2"_json);
+    }
+
+    SECTION("abs function throws on inavlid argument type")
+    {
+        ExpressionEvaluator::FunctionArgumentList arguments{"true"_json};
+
+        REQUIRE_THROWS_AS(evaluator.abs(arguments),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("evaluates avg function")
+    {
+        ExpressionEvaluator::FunctionArgumentList arguments{"[3, 2.5]"_json};
+
+        REQUIRE(evaluator.avg(arguments) == "2.75"_json);
+    }
+
+    SECTION("avg function throws on non array type")
+    {
+        ExpressionEvaluator::FunctionArgumentList arguments{"2"_json};
+
+        REQUIRE_THROWS_AS(evaluator.avg(arguments),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("avg function throws on non number item type")
+    {
+        ExpressionEvaluator::FunctionArgumentList arguments{"[true]"_json};
+
+        REQUIRE_THROWS_AS(evaluator.avg(arguments),
+                          InvalidFunctionArgumentType);
     }
 }
