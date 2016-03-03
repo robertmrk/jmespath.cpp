@@ -438,8 +438,7 @@ bool ExpressionEvaluator::toBoolean(const Json &json) const
 {
     return json.is_number()
             || ((!json.is_boolean() || json.get<bool>())
-                && (!json.is_string()
-                    || !json.get_ptr<const std::string*>()->empty())
+                && (!json.is_string() || !json.get_ptr<const std::string*>()->empty())
                 && !json.empty());
 }
 
