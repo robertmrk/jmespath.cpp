@@ -499,8 +499,8 @@ Json ExpressionEvaluator::avg(const FunctionArgumentList &arguments) const
     const Json* items = boost::get<Json>(&arguments[0]);
     if (items && items->is_array())
     {
-        double sum = std::accumulate(std::cbegin(*items),
-                                     std::cend(*items),
+        double sum = std::accumulate(items->cbegin(),
+                                     items->cend(),
                                      0.0,
                                      [](double sum, const Json& item) -> double
         {
