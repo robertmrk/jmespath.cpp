@@ -408,7 +408,7 @@ void ExpressionEvaluator::visit(ast::FunctionExpressionNode *node)
     }
 
     FunctionArgumentList argumentList = evaluateArguments(node->arguments);
-    function(argumentList);
+    m_context = function(argumentList);
 }
 
 void ExpressionEvaluator::visit(ast::ExpressionArgumentNode *)
@@ -438,7 +438,8 @@ bool ExpressionEvaluator::toBoolean(const Json &json) const
 {
     return json.is_number()
             || ((!json.is_boolean() || json.get<bool>())
-                && (!json.is_string() || !json.get_ptr<const std::string*>()->empty())
+                && (!json.is_string()
+                    || !json.get_ptr<const std::string*>()->empty())
                 && !json.empty());
 }
 
@@ -487,7 +488,7 @@ Json ExpressionEvaluator::abs(const FunctionArgumentList &arguments) const
     }
     else
     {
-        return std::abs(*value->get_ptr<const Json::number_float_t*>());
+        return std::abs(value->get<Json::number_float_t>());
     }
 }
 
@@ -496,10 +497,10 @@ Json ExpressionEvaluator::avg(const FunctionArgumentList &arguments) const
     const Json* items = boost::get<Json>(&arguments[0]);
     if (items && items->is_array())
     {
-        double sum = std::accumulate(std::begin(*items),
-                                     std::end(*items),
+        double sum = std::accumulate(std::cbegin(*items),
+                                     std::cend(*items),
                                      0.0,
-                                     [](int sum, const Json& item) -> double
+                                     [](double sum, const Json& item) -> double
         {
             if (item.is_number_integer())
             {
