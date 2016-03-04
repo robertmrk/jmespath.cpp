@@ -31,11 +31,14 @@
 #include <numeric>
 #include <boost/range.hpp>
 #include <boost/range/algorithm.hpp>
+#include <boost/range/numeric.hpp>
+#include <boost/algorithm/cxx11/any_of.hpp>
 #include <boost/algorithm/string.hpp>
 
 namespace jmespath { namespace interpreter {
 
 namespace rng = boost::range;
+namespace alg = boost::algorithm;
 
 ExpressionEvaluator::ExpressionEvaluator()
     : AbstractVisitor()
@@ -44,7 +47,13 @@ ExpressionEvaluator::ExpressionEvaluator()
     m_functionMap = {
         {"abs", {1, std::bind(&ExpressionEvaluator::abs, this, _1)}},
         {"avg", {1, std::bind(&ExpressionEvaluator::avg, this, _1)}},
-        {"contains", {2, std::bind(&ExpressionEvaluator::contains, this, _1)}}
+        {"contains", {2, std::bind(&ExpressionEvaluator::contains, this, _1)}},
+        {"ceil", {1, std::bind(&ExpressionEvaluator::ceil, this, _1)}},
+        {"ends_with", {2, std::bind(&ExpressionEvaluator::endsWith, this, _1)}},
+        {"floor", {1, std::bind(&ExpressionEvaluator::floor, this, _1)}},
+        {"join", {2, std::bind(&ExpressionEvaluator::join, this, _1)}},
+        {"keys", {1, std::bind(&ExpressionEvaluator::keys, this, _1)}},
+        {"length", {1, std::bind(&ExpressionEvaluator::length, this, _1)}}
     };
 }
 
@@ -544,6 +553,110 @@ Json ExpressionEvaluator::contains(const FunctionArgumentList &arguments) const
         auto stringSubject = subject->get_ptr<const String*>();
         auto stringItem = item->get_ptr<const String*>();
         result = boost::contains(*stringSubject, *stringItem);
+    }
+    return result;
+}
+
+Json ExpressionEvaluator::ceil(const FunctionArgumentList &arguments) const
+{
+    const Json* value = boost::get<Json>(&arguments[0]);
+    if (!value || !value->is_number())
+    {
+        BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+    }
+    if (value->is_number_integer())
+    {
+        return *value;
+    }
+    else
+    {
+        return std::ceil(value->get<Json::number_float_t>());
+    }
+}
+
+Json ExpressionEvaluator::endsWith(const FunctionArgumentList &arguments) const
+{
+    const Json* subject = boost::get<Json>(&arguments[0]);
+    const Json* suffix = boost::get<Json>(&arguments[1]);
+    if (!subject || !subject->is_string() || !suffix || !suffix->is_string())
+    {
+        BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+    }
+    auto stringSubject = subject->get_ptr<const String*>();
+    auto stringSuffix = suffix->get_ptr<const String*>();
+    return boost::ends_with(*stringSubject, *stringSuffix);
+}
+
+Json ExpressionEvaluator::floor(const FunctionArgumentList &arguments) const
+{
+    const Json* value = boost::get<Json>(&arguments[0]);
+    if (!value || !value->is_number())
+    {
+        BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+    }
+    if (value->is_number_integer())
+    {
+        return *value;
+    }
+    else
+    {
+        return std::floor(value->get<Json::number_float_t>());
+    }
+}
+
+Json ExpressionEvaluator::join(const FunctionArgumentList &arguments) const
+{
+    const Json* glue = boost::get<Json>(&arguments[0]);
+    const Json* array = boost::get<Json>(&arguments[1]);
+    if (!glue || !glue->is_string() || !array || !array->is_array()
+       || alg::any_of(*array, [](const auto& item) {return !item.is_string();}))
+    {
+        BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+    }
+
+    const String* glueString = glue->get_ptr<const String*>();
+    return boost::accumulate(*array, String{},
+                             [&](auto& string, const auto& value)
+    {
+        return string.empty() ?
+                    value.template get<String>() :
+                    string += *glueString + value.template get<String>();
+    });
+}
+
+Json ExpressionEvaluator::keys(const FunctionArgumentList &arguments) const
+{
+    const Json* object = boost::get<Json>(&arguments[0]);
+    if (!object || !object->is_object())
+    {
+        BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+    }
+
+    Json result(Json::value_t::array);
+    for (auto it = object->cbegin(); it != object->cend(); ++it)
+    {
+        result.push_back(it.key());
+    }
+    return result;
+}
+
+Json ExpressionEvaluator::length(const FunctionArgumentList &arguments) const
+{
+    const Json* subject = boost::get<Json>(&arguments[0]);
+    if (!subject || !(subject->is_array() || subject->is_object()
+                      || subject->is_string()))
+    {
+        BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+    }
+
+    size_t result{};
+    if (subject->is_string())
+    {
+        result = subject->get_ptr<const String*>()->size();
+    }
+    else
+    {
+        result = subject->size();
     }
     return result;
 }

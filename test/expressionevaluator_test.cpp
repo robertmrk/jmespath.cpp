@@ -1402,4 +1402,360 @@ TEST_CASE("ExpressionEvaluator")
         REQUIRE(result1 == "true"_json);
         REQUIRE(result2 == "false"_json);
     }
+
+    SECTION("ceil function throws on invalid number of arguments")
+    {
+        ast::FunctionExpressionNode node1{
+            "ceil",
+            {ast::ExpressionNode{},
+            ast::ExpressionNode{}}};
+        ast::FunctionExpressionNode node2{"ceil"};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node1),
+                          InvalidFunctionArgumentArity);
+        REQUIRE_THROWS_AS(evaluator.visit(&node2),
+                          InvalidFunctionArgumentArity);
+    }
+
+    SECTION("ceil function throws on inavlid argument type")
+    {
+        ast::FunctionExpressionNode node{
+            "ceil",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"true"}}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("evaluates ceil function on integer")
+    {
+        ast::FunctionExpressionNode node1{
+            "ceil",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"-3"}}}};
+        ast::FunctionExpressionNode node2{
+            "ceil",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"5"}}}};
+
+        evaluator.visit(&node1);
+        auto result1 = evaluator.currentContext();
+        evaluator.visit(&node2);
+        auto result2 = evaluator.currentContext();
+
+        REQUIRE(result1 == "-3"_json);
+        REQUIRE(result2 == "5"_json);
+    }
+
+    SECTION("evaluates ceil function on float")
+    {
+        ast::FunctionExpressionNode node1{
+            "ceil",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"-3.7"}}}};
+        ast::FunctionExpressionNode node2{
+            "ceil",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"5.8"}}}};
+
+        evaluator.visit(&node1);
+        auto result1 = evaluator.currentContext();
+        evaluator.visit(&node2);
+        auto result2 = evaluator.currentContext();
+
+        REQUIRE(result1 == "-3"_json);
+        REQUIRE(result2 == "6"_json);
+    }
+
+    SECTION("ends_with function throws on invalid number of arguments")
+    {
+        ast::FunctionExpressionNode node0{"ends_with"};
+        ast::FunctionExpressionNode node1{
+            "ends_with",
+            {ast::ExpressionNode{}}};
+        ast::FunctionExpressionNode node3{
+            "ends_with",
+            {ast::ExpressionNode{},
+            ast::ExpressionNode{},
+            ast::ExpressionNode{}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node0),
+                          InvalidFunctionArgumentArity);
+        REQUIRE_THROWS_AS(evaluator.visit(&node1),
+                          InvalidFunctionArgumentArity);
+        REQUIRE_THROWS_AS(evaluator.visit(&node3),
+                          InvalidFunctionArgumentArity);
+    }
+
+    SECTION("ends_with function throws on non string argument types")
+    {
+        ast::FunctionExpressionNode node1{
+            "ends_with",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"true"}},
+            ast::ExpressionNode{
+                ast::LiteralNode{"true"}}}};
+        ast::FunctionExpressionNode node2{
+            "ends_with",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"\"string\""}},
+            ast::ExpressionNode{
+                ast::LiteralNode{"true"}}}};
+        ast::FunctionExpressionNode node3{
+            "ends_with",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"true"}},
+            ast::ExpressionNode{
+                ast::LiteralNode{"\"string\""}}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node1),
+                          InvalidFunctionArgumentType);
+        REQUIRE_THROWS_AS(evaluator.visit(&node2),
+                          InvalidFunctionArgumentType);
+        REQUIRE_THROWS_AS(evaluator.visit(&node3),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("evaluates ends_with function")
+    {
+        ast::FunctionExpressionNode node1{
+            "ends_with",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"\"The quick brown fox\""}},
+            ast::ExpressionNode{
+                ast::LiteralNode{"\"fox\""}}}};
+        ast::FunctionExpressionNode node2{
+            "ends_with",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"\"The quick brown fox\""}},
+            ast::ExpressionNode{
+                ast::LiteralNode{"\"dog\""}}}};
+
+        evaluator.visit(&node1);
+        auto result1 = evaluator.currentContext();
+        evaluator.visit(&node2);
+        auto result2 = evaluator.currentContext();
+
+        REQUIRE(result1 == "true"_json);
+        REQUIRE(result2 == "false"_json);
+    }
+
+    SECTION("floor function throws on invalid number of arguments")
+    {
+        ast::FunctionExpressionNode node1{
+            "floor",
+            {ast::ExpressionNode{},
+            ast::ExpressionNode{}}};
+        ast::FunctionExpressionNode node2{"floor"};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node1),
+                          InvalidFunctionArgumentArity);
+        REQUIRE_THROWS_AS(evaluator.visit(&node2),
+                          InvalidFunctionArgumentArity);
+    }
+
+    SECTION("floor function throws on inavlid argument type")
+    {
+        ast::FunctionExpressionNode node{
+            "floor",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"true"}}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("evaluates floor function on integer")
+    {
+        ast::FunctionExpressionNode node1{
+            "floor",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"-3"}}}};
+        ast::FunctionExpressionNode node2{
+            "floor",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"5"}}}};
+
+        evaluator.visit(&node1);
+        auto result1 = evaluator.currentContext();
+        evaluator.visit(&node2);
+        auto result2 = evaluator.currentContext();
+
+        REQUIRE(result1 == "-3"_json);
+        REQUIRE(result2 == "5"_json);
+    }
+
+    SECTION("evaluates floor function on float")
+    {
+        ast::FunctionExpressionNode node1{
+            "floor",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"-3.7"}}}};
+        ast::FunctionExpressionNode node2{
+            "floor",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"5.8"}}}};
+
+        evaluator.visit(&node1);
+        auto result1 = evaluator.currentContext();
+        evaluator.visit(&node2);
+        auto result2 = evaluator.currentContext();
+
+        REQUIRE(result1 == "-4"_json);
+        REQUIRE(result2 == "5"_json);
+    }
+
+    SECTION("join function throws on invalid number of arguments")
+    {
+        ast::FunctionExpressionNode node0{"join"};
+        ast::FunctionExpressionNode node1{
+            "join",
+            {ast::ExpressionNode{}}};
+        ast::FunctionExpressionNode node3{
+            "join",
+            {ast::ExpressionNode{},
+            ast::ExpressionNode{},
+            ast::ExpressionNode{}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node0),
+                          InvalidFunctionArgumentArity);
+        REQUIRE_THROWS_AS(evaluator.visit(&node1),
+                          InvalidFunctionArgumentArity);
+        REQUIRE_THROWS_AS(evaluator.visit(&node3),
+                          InvalidFunctionArgumentArity);
+    }
+
+    SECTION("join function throws on non string and string array types")
+    {
+        ast::FunctionExpressionNode node1{
+            "join",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"true"}},
+            ast::ExpressionNode{
+                ast::LiteralNode{"true"}}}};
+        ast::FunctionExpressionNode node2{
+            "join",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"\"string\""}},
+            ast::ExpressionNode{
+                ast::LiteralNode{"true"}}}};
+        ast::FunctionExpressionNode node3{
+            "join",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"true"}},
+            ast::ExpressionNode{
+                ast::LiteralNode{"[\"string\"]"}}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node1),
+                          InvalidFunctionArgumentType);
+        REQUIRE_THROWS_AS(evaluator.visit(&node2),
+                          InvalidFunctionArgumentType);
+        REQUIRE_THROWS_AS(evaluator.visit(&node3),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("evaluates join function")
+    {
+        ast::FunctionExpressionNode node{
+            "join",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"\";\""}},
+            ast::ExpressionNode{
+                ast::LiteralNode{"[\"string1\", \"string2\", \"string3\"]"}}}};
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext()
+                == "\"string1;string2;string3\""_json);
+    }
+
+    SECTION("keys function throws on invalid number of arguments")
+    {
+        ast::FunctionExpressionNode node1{
+            "keys",
+            {ast::ExpressionNode{},
+            ast::ExpressionNode{}}};
+        ast::FunctionExpressionNode node2{"keys"};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node1),
+                          InvalidFunctionArgumentArity);
+        REQUIRE_THROWS_AS(evaluator.visit(&node2),
+                          InvalidFunctionArgumentArity);
+    }
+
+    SECTION("keys function throws on inavlid argument type")
+    {
+        ast::FunctionExpressionNode node{
+            "keys",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"true"}}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("evaluates keys function")
+    {
+        ast::FunctionExpressionNode node{
+            "keys",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"{\"id1\": 1, \"id2\": 2}"}}}};
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == "[\"id1\", \"id2\"]"_json);
+    }
+
+    SECTION("length function throws on invalid number of arguments")
+    {
+        ast::FunctionExpressionNode node1{
+            "length",
+            {ast::ExpressionNode{},
+            ast::ExpressionNode{}}};
+        ast::FunctionExpressionNode node2{"length"};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node1),
+                          InvalidFunctionArgumentArity);
+        REQUIRE_THROWS_AS(evaluator.visit(&node2),
+                          InvalidFunctionArgumentArity);
+    }
+
+    SECTION("length function throws on inavlid argument type")
+    {
+        ast::FunctionExpressionNode node{
+            "length",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"true"}}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("evaluates length function")
+    {
+        ast::FunctionExpressionNode node1{
+            "length",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"{\"id1\": 1, \"id2\": 2}"}}}};
+        ast::FunctionExpressionNode node2{
+            "length",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[1, 2, 3]"}}}};
+        ast::FunctionExpressionNode node3{
+            "length",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"\"string\""}}}};
+
+        evaluator.visit(&node1);
+        auto result1 = evaluator.currentContext();
+        evaluator.visit(&node2);
+        auto result2 = evaluator.currentContext();
+        evaluator.visit(&node3);
+        auto result3 = evaluator.currentContext();
+
+        REQUIRE(result1 == "2"_json);
+        REQUIRE(result2 == "3"_json);
+        REQUIRE(result3 == "6"_json);
+    }
 }

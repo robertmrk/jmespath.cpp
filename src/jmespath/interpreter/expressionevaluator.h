@@ -192,6 +192,56 @@ private:
      * @throws InvalidFunctionArgumentType
      */
     Json contains(const FunctionArgumentList& arguments) const;
+    /**
+     * @brief Rounds up the first item of the given @a arguments to the next
+     * highest integer value. The first item should be a JSON number.
+     * @param arguments The list of the function's arguments.
+     * @return Returns the next highest integer value of the first item.
+     * @throws InvalidFunctionArgumentType
+     */
+    Json ceil(const FunctionArgumentList& arguments) const;
+    /**
+     * @brief Checks whether the first item of the given @a arguments ends with
+     * the second item. The first and second item of @a arguments must be a
+     * JSON string.
+     * @param arguments The list of the function's arguments.
+     * @return
+     * @throws InvalidFunctionArgumentType
+     */
+    Json endsWith(const FunctionArgumentList& arguments) const;
+    /**
+     * @brief Rounds down the first item of the given @a arguments to the next
+     * lowest integer value. The first item should be a JSON number.
+     * @param arguments The list of the function's arguments.
+     * @return Returns the next lowest integer value of the first item.
+     * @throws InvalidFunctionArgumentType
+     */
+    Json floor(const FunctionArgumentList& arguments) const;
+    /**
+     * @brief Joins every item in the array provided as the second item of the
+     * given @a arguments with the first item as a separator. The first item
+     * must be a string and the second item must be an array of strings.
+     * @param arguments The list of the function's arguments.
+     * @return Returns the joined value.
+     * @throws InvalidFunctionArgumentType
+     */
+    Json join(const FunctionArgumentList& arguments) const;
+    /**
+     * @brief Extracts the keys from the object provided as the first item of
+     * the given @a arguments.
+     * @param arguments The list of the function's arguments.
+     * @return Returns the array of keys.
+     * @throws InvalidFunctionArgumentType
+     */
+    Json keys(const FunctionArgumentList& arguments) const;
+    /**
+     * @brief Returns the length of the first item in the given @a arguments.
+     * The first item must be either an array a string or an object.
+     * @param arguments The list of the function's arguments.
+     * @return Returns the length.
+     * @throws InvalidFunctionArgumentType
+     */
+    Json length(const FunctionArgumentList& arguments) const;
 };
 }} // namespace jmespath::interpreter
 #endif // EXPRESSIONEVALUATOR_H
