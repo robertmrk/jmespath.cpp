@@ -616,11 +616,11 @@ Json ExpressionEvaluator::join(const FunctionArgumentList &arguments) const
 
     const String* glueString = glue->get_ptr<const String*>();
     return boost::accumulate(*array, String{},
-                             [&](auto& string, const auto& value)
+                             [&](auto& string, const Json& value)
     {
         return string.empty() ?
-                    value.template get<String>() :
-                    string += *glueString + value.template get<String>();
+                    value.get<String>() :
+                    string += *glueString + value.get<String>();
     });
 }
 
