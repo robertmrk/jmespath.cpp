@@ -1321,4 +1321,85 @@ TEST_CASE("ExpressionEvaluator")
 
         REQUIRE(evaluator.currentContext() == "-1"_json);
     }
+
+    SECTION("contains function throws on invalid number of arguments")
+    {
+        ast::FunctionExpressionNode node0{"contains"};
+        ast::FunctionExpressionNode node1{
+            "contains",
+            {ast::ExpressionNode{}}};
+        ast::FunctionExpressionNode node3{
+            "contains",
+            {ast::ExpressionNode{},
+            ast::ExpressionNode{},
+            ast::ExpressionNode{}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node0),
+                          InvalidFunctionArgumentArity);
+        REQUIRE_THROWS_AS(evaluator.visit(&node1),
+                          InvalidFunctionArgumentArity);
+        REQUIRE_THROWS_AS(evaluator.visit(&node3),
+                          InvalidFunctionArgumentArity);
+    }
+
+    SECTION("contains function throws on non array or non string argument type")
+    {
+        ast::FunctionExpressionNode node{
+            "contains",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"true"}},
+            ast::ExpressionNode{
+                ast::LiteralNode{"true"}}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("evaluates contains function on arrays")
+    {
+        ast::FunctionExpressionNode node1{
+            "contains",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[2, 7.5, 4.3, -17.8]"}},
+            ast::ExpressionNode{
+                ast::LiteralNode{"2"}}}};
+        ast::FunctionExpressionNode node2{
+            "contains",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[2, 7.5, 4.3, -17.8]"}},
+            ast::ExpressionNode{
+                ast::LiteralNode{"3"}}}};
+
+        evaluator.visit(&node1);
+        auto result1 = evaluator.currentContext();
+        evaluator.visit(&node2);
+        auto result2 = evaluator.currentContext();
+
+        REQUIRE(result1 == "true"_json);
+        REQUIRE(result2 == "false"_json);
+    }
+
+    SECTION("evaluates contains function on strings")
+    {
+        ast::FunctionExpressionNode node1{
+            "contains",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"\"The quick brown fox...\""}},
+            ast::ExpressionNode{
+                ast::LiteralNode{"\"fox\""}}}};
+        ast::FunctionExpressionNode node2{
+            "contains",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"\"The quick brown fox...\""}},
+            ast::ExpressionNode{
+                ast::LiteralNode{"\"dog\""}}}};
+
+        evaluator.visit(&node1);
+        auto result1 = evaluator.currentContext();
+        evaluator.visit(&node2);
+        auto result2 = evaluator.currentContext();
+
+        REQUIRE(result1 == "true"_json);
+        REQUIRE(result2 == "false"_json);
+    }
 }

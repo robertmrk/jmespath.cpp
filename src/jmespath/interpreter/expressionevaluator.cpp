@@ -31,6 +31,7 @@
 #include <numeric>
 #include <boost/range.hpp>
 #include <boost/range/algorithm.hpp>
+#include <boost/algorithm/string.hpp>
 
 namespace jmespath { namespace interpreter {
 
@@ -42,7 +43,8 @@ ExpressionEvaluator::ExpressionEvaluator()
     using std::placeholders::_1;
     m_functionMap = {
         {"abs", {1, std::bind(&ExpressionEvaluator::abs, this, _1)}},
-        {"avg", {1, std::bind(&ExpressionEvaluator::avg, this, _1)}}
+        {"avg", {1, std::bind(&ExpressionEvaluator::avg, this, _1)}},
+        {"contains", {2, std::bind(&ExpressionEvaluator::contains, this, _1)}}
     };
 }
 
@@ -521,5 +523,28 @@ Json ExpressionEvaluator::avg(const FunctionArgumentList &arguments) const
     {
         BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
     }
+}
+
+Json ExpressionEvaluator::contains(const FunctionArgumentList &arguments) const
+{
+    const Json* subject = boost::get<Json>(&arguments[0]);
+    const Json* item = boost::get<Json>(&arguments[1]);
+    if (!subject || (!subject->is_array() && !subject->is_string()) || !item)
+    {
+        BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+    }
+    bool result = false;
+    if (subject->is_array())
+    {
+        auto it = rng::find(*subject, *item);
+        result = (it != std::end(*subject));
+    }
+    else if (subject->is_string())
+    {
+        auto stringSubject = subject->get_ptr<const String*>();
+        auto stringItem = item->get_ptr<const String*>();
+        result = boost::contains(*stringSubject, *stringItem);
+    }
+    return result;
 }
 }} // namespace jmespath::interpreter

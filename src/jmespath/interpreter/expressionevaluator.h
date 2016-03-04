@@ -182,6 +182,16 @@ private:
      * @throws InvalidFunctionArgumentType
      */
     Json avg(const FunctionArgumentList& arguments) const;
+    /**
+     * @brief Checks whether the first item in the given @a arguments contains
+     * the second item. The first item should be either an array or string the
+     * second item can be any JSON type.
+     * @param arguments The list of the function's arguments.
+     * @return Returns true if the first item contains the second, otherwise
+     * returns false.
+     * @throws InvalidFunctionArgumentType
+     */
+    Json contains(const FunctionArgumentList& arguments) const;
 };
 }} // namespace jmespath::interpreter
 #endif // EXPRESSIONEVALUATOR_H
