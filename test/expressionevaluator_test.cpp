@@ -1758,4 +1758,1059 @@ TEST_CASE("ExpressionEvaluator")
         REQUIRE(result2 == "3"_json);
         REQUIRE(result3 == "6"_json);
     }
+
+    SECTION("map function throws on invalid number of arguments")
+    {
+        ast::FunctionExpressionNode node0{"map"};
+        ast::FunctionExpressionNode node1{
+            "map",
+            {ast::ExpressionNode{}}};
+        ast::FunctionExpressionNode node3{
+            "map",
+            {ast::ExpressionNode{},
+            ast::ExpressionNode{},
+            ast::ExpressionNode{}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node0),
+                          InvalidFunctionArgumentArity);
+        REQUIRE_THROWS_AS(evaluator.visit(&node1),
+                          InvalidFunctionArgumentArity);
+        REQUIRE_THROWS_AS(evaluator.visit(&node3),
+                          InvalidFunctionArgumentArity);
+    }
+
+    SECTION("map function throws on invalid argument types")
+    {
+        ast::FunctionExpressionNode node1{
+            "map",
+            {ast::ExpressionNode{},
+            ast::ExpressionNode{
+                ast::LiteralNode{"true"}}}};
+        ast::FunctionExpressionNode node2{
+            "map",
+            {ast::ExpressionArgumentNode{
+                ast::ExpressionNode{}},
+            ast::ExpressionNode{
+                ast::LiteralNode{"true"}}}};
+        ast::FunctionExpressionNode node3{
+            "map",
+            {ast::ExpressionNode{},
+            ast::ExpressionNode{
+                ast::LiteralNode{"[]"}}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node1),
+                          InvalidFunctionArgumentType);
+        REQUIRE_THROWS_AS(evaluator.visit(&node2),
+                          InvalidFunctionArgumentType);
+        REQUIRE_THROWS_AS(evaluator.visit(&node3),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("evaluates map function")
+    {
+        ast::FunctionExpressionNode node{
+            "map",
+            {ast::ExpressionArgumentNode{
+                ast::ExpressionNode{
+                    ast::IdentifierNode{"id"}}},
+            ast::ExpressionNode{
+                ast::LiteralNode{"[{\"id\": 1}, {\"id\": 2}, {\"id2\": 3}]"}}}};
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == "[1, 2, null]"_json);
+    }
+
+    SECTION("max function throws on invalid number of arguments")
+    {
+        ast::FunctionExpressionNode node1{
+            "max",
+            {ast::ExpressionNode{},
+            ast::ExpressionNode{}}};
+        ast::FunctionExpressionNode node2{"max"};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node1),
+                          InvalidFunctionArgumentArity);
+        REQUIRE_THROWS_AS(evaluator.visit(&node2),
+                          InvalidFunctionArgumentArity);
+    }
+
+    SECTION("max function throws on inavlid argument type")
+    {
+        ast::FunctionExpressionNode node{
+            "max",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"true"}}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("max function throws on array argument invalid item type")
+    {
+        ast::FunctionExpressionNode node{
+            "max",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[true, false]"}}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("max function throws on array argument heterogeneous item types")
+    {
+        ast::FunctionExpressionNode node{
+            "max",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[1, \"string\"]"}}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("evaluates max function on number array")
+    {
+        ast::FunctionExpressionNode node{
+            "max",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[2, 3, 1]"}}}};
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == "3"_json);
+    }
+
+    SECTION("evaluates max function on string array")
+    {
+        ast::FunctionExpressionNode node{
+            "max",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[\"bar\", \"foo\", \"baz\"]"}}}};
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == "\"foo\""_json);
+    }
+
+    SECTION("max_by function throws on invalid number of arguments")
+    {
+        ast::FunctionExpressionNode node0{"max_by"};
+        ast::FunctionExpressionNode node1{
+            "max_by",
+            {ast::ExpressionNode{}}};
+        ast::FunctionExpressionNode node3{
+            "max_by",
+            {ast::ExpressionNode{},
+            ast::ExpressionNode{},
+            ast::ExpressionNode{}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node0),
+                          InvalidFunctionArgumentArity);
+        REQUIRE_THROWS_AS(evaluator.visit(&node1),
+                          InvalidFunctionArgumentArity);
+        REQUIRE_THROWS_AS(evaluator.visit(&node3),
+                          InvalidFunctionArgumentArity);
+    }
+
+    SECTION("max_by function throws on invalid argument types")
+    {
+        ast::FunctionExpressionNode node1{
+            "max_by",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"true"}},
+            ast::ExpressionNode{}}};
+        ast::FunctionExpressionNode node2{
+            "max_by",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[1, 2, 3]"}},
+            ast::ExpressionNode{}}};
+        ast::FunctionExpressionNode node3{
+            "max_by",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"true"}},
+            ast::ExpressionArgumentNode{
+                ast::ExpressionNode{}}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node1),
+                          InvalidFunctionArgumentType);
+        REQUIRE_THROWS_AS(evaluator.visit(&node2),
+                          InvalidFunctionArgumentType);
+        REQUIRE_THROWS_AS(evaluator.visit(&node3),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("max_by function throws on invalid expression result type")
+    {
+        ast::FunctionExpressionNode node{
+            "max_by",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[1, 2, 3]"}},
+            ast::ExpressionArgumentNode{
+                ast::ExpressionNode{
+                    ast::IdentifierNode{"id"}}}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("evaluates max_by function")
+    {
+        ast::FunctionExpressionNode node{
+            "max_by",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[{\"id\": 3}, {\"id\": 5}, {\"id\": 1}]"}},
+            ast::ExpressionArgumentNode{
+                ast::ExpressionNode{
+                    ast::IdentifierNode{"id"}}}}};
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == "{\"id\": 5}"_json);
+    }
+
+    SECTION("merge function throws on non object argument types")
+    {
+        ast::FunctionExpressionNode node{
+            "merge",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"{\"id\": 2}"}},
+            ast::ExpressionNode{
+                ast::LiteralNode{"true"}}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("evaluates merge function on objects")
+    {
+        ast::FunctionExpressionNode node{
+            "merge",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"{\"id1\": 0, \"id2\": 2}"}},
+            ast::ExpressionNode{
+                ast::LiteralNode{"{\"id1\": 1, \"id3\": 3}"}}}};
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext()
+                == "{\"id1\": 1, \"id2\":2, \"id3\": 3}"_json);
+    }
+
+    SECTION("min function throws on invalid number of arguments")
+    {
+        ast::FunctionExpressionNode node1{
+            "min",
+            {ast::ExpressionNode{},
+            ast::ExpressionNode{}}};
+        ast::FunctionExpressionNode node2{"min"};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node1),
+                          InvalidFunctionArgumentArity);
+        REQUIRE_THROWS_AS(evaluator.visit(&node2),
+                          InvalidFunctionArgumentArity);
+    }
+
+    SECTION("min function throws on inavlid argument type")
+    {
+        ast::FunctionExpressionNode node{
+            "min",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"true"}}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("min function throws on array argument invalid item type")
+    {
+        ast::FunctionExpressionNode node{
+            "min",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[true, false]"}}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("min function throws on array argument heterogeneous item types")
+    {
+        ast::FunctionExpressionNode node{
+            "min",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[1, \"string\"]"}}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("evaluates min function on number array")
+    {
+        ast::FunctionExpressionNode node{
+            "min",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[2, 3, 1]"}}}};
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == "1"_json);
+    }
+
+    SECTION("evaluates min function on string array")
+    {
+        ast::FunctionExpressionNode node{
+            "min",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[\"bar\", \"foo\", \"baz\"]"}}}};
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == "\"bar\""_json);
+    }
+
+    SECTION("min_by function throws on invalid number of arguments")
+    {
+        ast::FunctionExpressionNode node0{"min_by"};
+        ast::FunctionExpressionNode node1{
+            "min_by",
+            {ast::ExpressionNode{}}};
+        ast::FunctionExpressionNode node3{
+            "min_by",
+            {ast::ExpressionNode{},
+            ast::ExpressionNode{},
+            ast::ExpressionNode{}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node0),
+                          InvalidFunctionArgumentArity);
+        REQUIRE_THROWS_AS(evaluator.visit(&node1),
+                          InvalidFunctionArgumentArity);
+        REQUIRE_THROWS_AS(evaluator.visit(&node3),
+                          InvalidFunctionArgumentArity);
+    }
+
+    SECTION("min_by function throws on invalid argument types")
+    {
+        ast::FunctionExpressionNode node1{
+            "min_by",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"true"}},
+            ast::ExpressionNode{}}};
+        ast::FunctionExpressionNode node2{
+            "min_by",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[1, 2, 3]"}},
+            ast::ExpressionNode{}}};
+        ast::FunctionExpressionNode node3{
+            "min_by",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"true"}},
+            ast::ExpressionArgumentNode{
+                ast::ExpressionNode{}}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node1),
+                          InvalidFunctionArgumentType);
+        REQUIRE_THROWS_AS(evaluator.visit(&node2),
+                          InvalidFunctionArgumentType);
+        REQUIRE_THROWS_AS(evaluator.visit(&node3),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("min_by function throws on invalid expression result type")
+    {
+        ast::FunctionExpressionNode node{
+            "min_by",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[1, 2, 3]"}},
+            ast::ExpressionArgumentNode{
+                ast::ExpressionNode{
+                    ast::IdentifierNode{"id"}}}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("evaluates min_by function")
+    {
+        ast::FunctionExpressionNode node{
+            "min_by",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[{\"id\": 3}, {\"id\": 5}, {\"id\": 1}]"}},
+            ast::ExpressionArgumentNode{
+                ast::ExpressionNode{
+                    ast::IdentifierNode{"id"}}}}};
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == "{\"id\": 1}"_json);
+    }
+
+    SECTION("not_null function throws on invalid number of arguments")
+    {
+        ast::FunctionExpressionNode node0{"not_null"};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node0),
+                          InvalidFunctionArgumentArity);
+    }
+
+    SECTION("not_null function throws on non JSON argument type")
+    {
+        ast::FunctionExpressionNode node{
+            "not_null",
+            {ast::ExpressionArgumentNode{
+                ast::ExpressionNode{}}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("evaluates not_null function")
+    {
+        ast::FunctionExpressionNode node{
+            "not_null",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"null"}},
+            ast::ExpressionNode{
+                ast::LiteralNode{"[]"}},
+            ast::ExpressionNode{
+                ast::LiteralNode{"null"}}}};
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == "[]"_json);
+    }
+
+    SECTION("reverse function throws on invalid number of arguments")
+    {
+        ast::FunctionExpressionNode node0{"reverse"};
+        ast::FunctionExpressionNode node2{
+            "reverse",
+            {ast::ExpressionNode{},
+            ast::ExpressionNode{}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node0),
+                          InvalidFunctionArgumentArity);
+        REQUIRE_THROWS_AS(evaluator.visit(&node2),
+                          InvalidFunctionArgumentArity);
+    }
+
+    SECTION("reverse function throws on non array or non string argument type")
+    {
+        ast::FunctionExpressionNode node{
+            "reverse",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"true"}}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("evaluates reverse function on array")
+    {
+        ast::FunctionExpressionNode node{
+            "reverse",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[1, 2, 3]"}}}};
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == "[3, 2, 1]"_json);
+    }
+
+    SECTION("evaluates reverse function on strings")
+    {
+        ast::FunctionExpressionNode node{
+            "reverse",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"\"abc\""}}}};
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == "\"cba\""_json);
+    }
+
+    SECTION("sort function throws on invalid number of arguments")
+    {
+        ast::FunctionExpressionNode node0{"sort"};
+        ast::FunctionExpressionNode node2{
+            "sort",
+            {ast::ExpressionNode{},
+            ast::ExpressionNode{}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node0),
+                          InvalidFunctionArgumentArity);
+        REQUIRE_THROWS_AS(evaluator.visit(&node2),
+                          InvalidFunctionArgumentArity);
+    }
+
+    SECTION("sort function throws on non array type")
+    {
+        ast::FunctionExpressionNode node{
+            "sort",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"true"}}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("sort function throws on non number or string item type")
+    {
+        ast::FunctionExpressionNode node{
+            "sort",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[true, false]"}}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("evaluates sort function on array of numbers")
+    {
+        ast::FunctionExpressionNode node{
+            "sort",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[3, 1, 2]"}}}};
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == "[1, 2, 3]"_json);
+    }
+
+    SECTION("evaluates sort function on array of strings")
+    {
+        ast::FunctionExpressionNode node{
+            "sort",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[\"b\", \"c\", \"a\"]"}}}};
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == "[\"a\", \"b\", \"c\"]"_json);
+    }
+
+    SECTION("sort_by function throws on invalid number of arguments")
+    {
+        ast::FunctionExpressionNode node0{"sort_by"};
+        ast::FunctionExpressionNode node1{
+            "sort_by",
+            {ast::ExpressionNode{}}};
+        ast::FunctionExpressionNode node3{
+            "sort_by",
+            {ast::ExpressionNode{},
+            ast::ExpressionNode{},
+            ast::ExpressionNode{}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node0),
+                          InvalidFunctionArgumentArity);
+        REQUIRE_THROWS_AS(evaluator.visit(&node1),
+                          InvalidFunctionArgumentArity);
+        REQUIRE_THROWS_AS(evaluator.visit(&node3),
+                          InvalidFunctionArgumentArity);
+    }
+
+    SECTION("sort_by function throws on invalid argument types")
+    {
+        ast::FunctionExpressionNode node1{
+            "sort_by",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"true"}},
+            ast::ExpressionNode{}}};
+        ast::FunctionExpressionNode node2{
+            "sort_by",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[1, 2, 3]"}},
+            ast::ExpressionNode{}}};
+        ast::FunctionExpressionNode node3{
+            "sort_by",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"true"}},
+            ast::ExpressionArgumentNode{
+                ast::ExpressionNode{}}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node1),
+                          InvalidFunctionArgumentType);
+        REQUIRE_THROWS_AS(evaluator.visit(&node2),
+                          InvalidFunctionArgumentType);
+        REQUIRE_THROWS_AS(evaluator.visit(&node3),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("sort_by function throws on invalid expression result type")
+    {
+        ast::FunctionExpressionNode node{
+            "sort_by",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[1, 2, 3]"}},
+            ast::ExpressionArgumentNode{
+                ast::ExpressionNode{
+                    ast::IdentifierNode{"id"}}}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("evaluates sort_by function")
+    {
+        ast::FunctionExpressionNode node{
+            "sort_by",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[{\"id\": 3}, {\"id\": 5}, {\"id\": 1}]"}},
+            ast::ExpressionArgumentNode{
+                ast::ExpressionNode{
+                    ast::IdentifierNode{"id"}}}}};
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext()
+                == "[{\"id\": 1}, {\"id\": 3}, {\"id\": 5}]"_json);
+    }
+
+    SECTION("starts_with function throws on invalid number of arguments")
+    {
+        ast::FunctionExpressionNode node0{"starts_with"};
+        ast::FunctionExpressionNode node1{
+            "starts_with",
+            {ast::ExpressionNode{}}};
+        ast::FunctionExpressionNode node3{
+            "starts_with",
+            {ast::ExpressionNode{},
+            ast::ExpressionNode{},
+            ast::ExpressionNode{}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node0),
+                          InvalidFunctionArgumentArity);
+        REQUIRE_THROWS_AS(evaluator.visit(&node1),
+                          InvalidFunctionArgumentArity);
+        REQUIRE_THROWS_AS(evaluator.visit(&node3),
+                          InvalidFunctionArgumentArity);
+    }
+
+    SECTION("starts_with function throws on non string argument types")
+    {
+        ast::FunctionExpressionNode node1{
+            "starts_with",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"true"}},
+            ast::ExpressionNode{
+                ast::LiteralNode{"true"}}}};
+        ast::FunctionExpressionNode node2{
+            "starts_with",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"\"string\""}},
+            ast::ExpressionNode{
+                ast::LiteralNode{"true"}}}};
+        ast::FunctionExpressionNode node3{
+            "starts_with",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"true"}},
+            ast::ExpressionNode{
+                ast::LiteralNode{"\"string\""}}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node1),
+                          InvalidFunctionArgumentType);
+        REQUIRE_THROWS_AS(evaluator.visit(&node2),
+                          InvalidFunctionArgumentType);
+        REQUIRE_THROWS_AS(evaluator.visit(&node3),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("evaluates starts_with function")
+    {
+        ast::FunctionExpressionNode node1{
+            "starts_with",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"\"The quick brown fox\""}},
+            ast::ExpressionNode{
+                ast::LiteralNode{"\"The\""}}}};
+        ast::FunctionExpressionNode node2{
+            "starts_with",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"\"The quick brown fox\""}},
+            ast::ExpressionNode{
+                ast::LiteralNode{"\"fox\""}}}};
+
+        evaluator.visit(&node1);
+        auto result1 = evaluator.currentContext();
+        evaluator.visit(&node2);
+        auto result2 = evaluator.currentContext();
+
+        REQUIRE(result1 == "true"_json);
+        REQUIRE(result2 == "false"_json);
+    }
+
+    SECTION("sum function throws on invalid number of arguments")
+    {
+        ast::FunctionExpressionNode node1{
+            "sum",
+            {ast::ExpressionNode{},
+            ast::ExpressionNode{}}};
+        ast::FunctionExpressionNode node2{"sum"};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node1),
+                          InvalidFunctionArgumentArity);
+        REQUIRE_THROWS_AS(evaluator.visit(&node2),
+                          InvalidFunctionArgumentArity);
+    }
+
+    SECTION("sum function throws on non array argument type")
+    {
+        ast::FunctionExpressionNode node{
+            "sum",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"true"}}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("sum function throws on array argument non number item type")
+    {
+        ast::FunctionExpressionNode node{
+            "sum",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[true, false]"}}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("evaluates sum function")
+    {
+        ast::FunctionExpressionNode node{
+            "sum",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[2, 7.5, 4.3, -17.8]"}}}};
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == "-4"_json);
+    }
+
+    SECTION("to_array function throws on invalid number of arguments")
+    {
+        ast::FunctionExpressionNode node1{
+            "to_array",
+            {ast::ExpressionNode{},
+            ast::ExpressionNode{}}};
+        ast::FunctionExpressionNode node2{"to_array"};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node1),
+                          InvalidFunctionArgumentArity);
+        REQUIRE_THROWS_AS(evaluator.visit(&node2),
+                          InvalidFunctionArgumentArity);
+    }
+
+    SECTION("to_array function throws on non JSON argument type")
+    {
+        ast::FunctionExpressionNode node{
+            "to_array",
+            {ast::ExpressionArgumentNode{}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("evaluates to_array function on array to the array itself")
+    {
+        ast::FunctionExpressionNode node{
+            "to_array",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[1, 2, 3]"}}}};
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == "[1, 2, 3]"_json);
+    }
+
+    SECTION("evaluates to_array function on non array to a single element "
+            "array")
+    {
+        ast::FunctionExpressionNode node1{
+            "to_array",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"1"}}}};
+        ast::FunctionExpressionNode node2{
+            "to_array",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"true"}}}};
+        ast::FunctionExpressionNode node3{
+            "to_array",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"\"string\""}}}};
+        ast::FunctionExpressionNode node4{
+            "to_array",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"{\"id\": 1}"}}}};
+
+        evaluator.visit(&node1);
+        auto result1 = evaluator.currentContext();
+        evaluator.visit(&node2);
+        auto result2 = evaluator.currentContext();
+        evaluator.visit(&node3);
+        auto result3 = evaluator.currentContext();
+        evaluator.visit(&node4);
+        auto result4 = evaluator.currentContext();
+
+        REQUIRE(result1 == "[1]"_json);
+        REQUIRE(result2 == "[true]"_json);
+        REQUIRE(result3 == "[\"string\"]"_json);
+        REQUIRE(result4 == "[{\"id\": 1}]"_json);
+    }
+
+    SECTION("to_string function throws on invalid number of arguments")
+    {
+        ast::FunctionExpressionNode node1{
+            "to_string",
+            {ast::ExpressionNode{},
+            ast::ExpressionNode{}}};
+        ast::FunctionExpressionNode node2{"to_string"};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node1),
+                          InvalidFunctionArgumentArity);
+        REQUIRE_THROWS_AS(evaluator.visit(&node2),
+                          InvalidFunctionArgumentArity);
+    }
+
+    SECTION("to_string function throws on non JSON argument type")
+    {
+        ast::FunctionExpressionNode node{
+            "to_string",
+            {ast::ExpressionArgumentNode{}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("evaluates to_string function on string to the string itself")
+    {
+        ast::FunctionExpressionNode node{
+            "to_string",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"\"string\""}}}};
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == "\"string\""_json);
+    }
+
+    SECTION("evaluates to_string function on non string to the string "
+            "representation of argument")
+    {
+        ast::FunctionExpressionNode node1{
+            "to_string",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"1"}}}};
+        ast::FunctionExpressionNode node2{
+            "to_string",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"true"}}}};
+        ast::FunctionExpressionNode node3{
+            "to_string",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[1, 2, 3]"}}}};
+        ast::FunctionExpressionNode node4{
+            "to_string",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"{\"id1\": 1, \"id2\": 2}"}}}};
+
+        evaluator.visit(&node1);
+        auto result1 = evaluator.currentContext();
+        evaluator.visit(&node2);
+        auto result2 = evaluator.currentContext();
+        evaluator.visit(&node3);
+        auto result3 = evaluator.currentContext();
+        evaluator.visit(&node4);
+        auto result4 = evaluator.currentContext();
+
+        REQUIRE(result1 == "\"1\""_json);
+        REQUIRE(result2 == "\"true\""_json);
+        REQUIRE(result3 == "\"[1,2,3]\""_json);
+        REQUIRE(result4 == "\"{\\\"id1\\\":1,\\\"id2\\\":2}\""_json);
+    }
+
+    SECTION("to_number function throws on invalid number of arguments")
+    {
+        ast::FunctionExpressionNode node1{
+            "to_number",
+            {ast::ExpressionNode{},
+            ast::ExpressionNode{}}};
+        ast::FunctionExpressionNode node2{"to_number"};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node1),
+                          InvalidFunctionArgumentArity);
+        REQUIRE_THROWS_AS(evaluator.visit(&node2),
+                          InvalidFunctionArgumentArity);
+    }
+
+    SECTION("to_number function throws on non JSON argument type")
+    {
+        ast::FunctionExpressionNode node{
+            "to_number",
+            {ast::ExpressionArgumentNode{}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("evaluates to_number function on number and string to number")
+    {
+        ast::FunctionExpressionNode node1{
+            "to_number",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"1.2"}}}};
+        ast::FunctionExpressionNode node2{
+            "to_number",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"\"-2.7\""}}}};
+        ast::FunctionExpressionNode node3{
+            "to_number",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"\"not a number\""}}}};
+
+        evaluator.visit(&node1);
+        auto result1 = evaluator.currentContext();
+        evaluator.visit(&node2);
+        auto result2 = evaluator.currentContext();
+        evaluator.visit(&node3);
+        auto result3 = evaluator.currentContext();
+
+        REQUIRE(result1 == "1.2"_json);
+        REQUIRE(result2 == "-2.7"_json);
+        REQUIRE(result3 == "null"_json);
+    }
+
+    SECTION("evaluates to_number function on non numbers and strings to null")
+    {
+        ast::FunctionExpressionNode node1{
+            "to_number",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"true"}}}};
+        ast::FunctionExpressionNode node2{
+            "to_number",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[1, 2, 3]"}}}};
+        ast::FunctionExpressionNode node3{
+            "to_number",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"{\"id1\": 1, \"id2\": 2}"}}}};
+
+        evaluator.visit(&node1);
+        auto result1 = evaluator.currentContext();
+        evaluator.visit(&node2);
+        auto result2 = evaluator.currentContext();
+        evaluator.visit(&node3);
+        auto result3 = evaluator.currentContext();
+
+        REQUIRE(result1 == "null"_json);
+        REQUIRE(result2 == "null"_json);
+        REQUIRE(result3 == "null"_json);
+    }
+
+    SECTION("type function throws on invalid number of arguments")
+    {
+        ast::FunctionExpressionNode node1{
+            "type",
+            {ast::ExpressionNode{},
+            ast::ExpressionNode{}}};
+        ast::FunctionExpressionNode node2{"type"};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node1),
+                          InvalidFunctionArgumentArity);
+        REQUIRE_THROWS_AS(evaluator.visit(&node2),
+                          InvalidFunctionArgumentArity);
+    }
+
+    SECTION("type function throws on non JSON argument type")
+    {
+        ast::FunctionExpressionNode node{
+            "type",
+            {ast::ExpressionArgumentNode{}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("evaluates type function to the name of the JSON value type")
+    {
+        ast::FunctionExpressionNode node1{
+            "type",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"1.2"}}}};
+        ast::FunctionExpressionNode node2{
+            "type",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"\"string\""}}}};
+        ast::FunctionExpressionNode node3{
+            "type",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"true"}}}};
+        ast::FunctionExpressionNode node4{
+            "type",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[1, 2, 3]"}}}};
+        ast::FunctionExpressionNode node5{
+            "type",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"{\"id\": 1}"}}}};
+        ast::FunctionExpressionNode node6{
+            "type",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"null"}}}};
+
+        evaluator.visit(&node1);
+        auto result1 = evaluator.currentContext();
+        evaluator.visit(&node2);
+        auto result2 = evaluator.currentContext();
+        evaluator.visit(&node3);
+        auto result3 = evaluator.currentContext();
+        evaluator.visit(&node4);
+        auto result4 = evaluator.currentContext();
+        evaluator.visit(&node5);
+        auto result5 = evaluator.currentContext();
+        evaluator.visit(&node6);
+        auto result6 = evaluator.currentContext();
+
+        REQUIRE(result1 == "\"number\""_json);
+        REQUIRE(result2 == "\"string\""_json);
+        REQUIRE(result3 == "\"boolean\""_json);
+        REQUIRE(result4 == "\"array\""_json);
+        REQUIRE(result5 == "\"object\""_json);
+        REQUIRE(result6 == "\"null\""_json);
+    }
+
+    SECTION("values function throws on invalid number of arguments")
+    {
+        ast::FunctionExpressionNode node1{
+            "values",
+            {ast::ExpressionNode{},
+            ast::ExpressionNode{}}};
+        ast::FunctionExpressionNode node2{"values"};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node1),
+                          InvalidFunctionArgumentArity);
+        REQUIRE_THROWS_AS(evaluator.visit(&node2),
+                          InvalidFunctionArgumentArity);
+    }
+
+    SECTION("values function throws on inavlid argument type")
+    {
+        ast::FunctionExpressionNode node{
+            "values",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"true"}}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("evaluates values function")
+    {
+        ast::FunctionExpressionNode node{
+            "values",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"{\"id1\": 1, \"id2\": 2}"}}}};
+
+        evaluator.visit(&node);
+
+        REQUIRE(evaluator.currentContext() == "[1, 2]"_json);
+    }
 }

@@ -32,6 +32,7 @@
 #include "jmespath/ast/expressionnode.h"
 #include "jmespath/ast/functionexpressionnode.h"
 #include <functional>
+#include <tuple>
 #include <unordered_map>
 #include <boost/variant.hpp>
 
@@ -46,19 +47,11 @@ class ExpressionEvaluator : public AbstractVisitor
 {
 public:
     /**
-     * @brief Constructs an empty ExpressionEvaluator object.
-     *
-     * Before calling any of the visit functions the object should be
-     * initialized by setting the evaluation context with the \sa setContext
-     * method.
-     */
-    ExpressionEvaluator();
-    /**
      * @brief Constructs an ExpressionEvaluator object with the given
      * @a document as the context for the evaluation of the AST.
      * @param document JSON document on which the AST will be evaluated
      */
-    ExpressionEvaluator(const Json& contextValue);
+    ExpressionEvaluator(const Json& contextValue = {});
     /**
      * @brief Sets the context of the evaluation.
      * @param value JSON document to be used as the context.
@@ -116,13 +109,23 @@ private:
      * Function wrapper type to which JMESPath built in function implementations
      * should conform to.
      */
-    using Function = std::function<Json(FunctionArgumentList)>;
+    using Function = std::function<Json(FunctionArgumentList&)>;
     /**
-     * Describes a built in function implementation. The pair's first member
-     * stores the number of arguments expected by the function, while the second
-     * member stores the callable functions wrapper.
+     * The type of comparator functions used for comparing JSON values.
      */
-    using FunctionDescriptor = std::pair<size_t, Function>;
+    using JsonComparator = std::function<bool(const Json&, const Json&)>;
+    /**
+     * The type of comparator functions used for comparing size_t values
+     */
+    using SizeComparator = std::function<bool(const size_t&, const size_t&)>;
+    /**
+     * Describes a built in function implementation. The tuple's first item
+     * stores the number of arguments expected by the function, the second
+     * item is the comparator function used for comparing the actual number
+     * of arguments with the expected argument count, while the third item
+     * stores the callable functions wrapper.
+     */
+    using FunctionDescriptor = std::tuple<size_t, SizeComparator, Function>;
     /**
      * List of unevaluated function arguments.
      */
@@ -242,6 +245,177 @@ private:
      * @throws InvalidFunctionArgumentType
      */
     Json length(const FunctionArgumentList& arguments) const;
+    /**
+     * @brief Applies the expression provided as the first item in the given
+     * @a arguments to every item in the array provided as the second item in
+     * @a arguments.
+     * @param arguments The list of the function's arguments.
+     * @return Returns the array of results.
+     * @throws InvalidFunctionArgumentType
+     */
+    Json map(FunctionArgumentList& arguments);
+    /**
+     * @brief Finds the largest item in the array provided as the first item
+     * in the @a arguments, it must either be an array of numbers or an array
+     * of strings.
+     * @param arguments The list of the function's arguments.
+     * @return Returns the largest item.
+     * @throws InvalidFunctionArgumentType
+     */
+    Json max(const FunctionArgumentList& arguments) const;
+    /**
+     * @brief Finds the largest item in the array provided as the first item
+     * in the @a arguments, which must either be an array of numbers or an array
+     * of strings, using the expression provided as the second item in @a
+     * arguments as a key for comparison.
+     * @param arguments The list of the function's arguments.
+     * @return Returns the largest item.
+     * @throws InvalidFunctionArgumentType
+     */
+    Json maxBy(FunctionArgumentList& arguments);
+    /**
+     * @brief Accepts zero or more objects in the given @a arguments, and
+     * returns a single object with subsequent objects merged. Each subsequent
+     * object’s key/value pairs are added to the preceding object.
+     * @param arguments The list of the function's arguments.
+     * @return Returns the merged object.
+     * @throws InvalidFunctionArgumentType
+     */
+    Json merge(FunctionArgumentList& arguments) const;
+    /**
+     * @brief Finds the item with the lowest value in the array provided as the
+     * first item in the @a arguments, it must either be an array of numbers or
+     * an array of strings.
+     * @param arguments The list of the function's arguments.
+     * @return Returns the item with the lowest value.
+     * @throws InvalidFunctionArgumentType
+     */
+    Json min(const FunctionArgumentList& arguments) const;
+    /**
+     * @brief Finds the item with the lowest value in the array provided as the
+     * first item in the @a arguments, which must either be an array of numbers
+     * or an array of strings, using the expression provided as the second item
+     * in @a arguments as a key for comparison.
+     * @param arguments The list of the function's arguments.
+     * @return Returns the item with the lowest value.
+     * @throws InvalidFunctionArgumentType
+     */
+    Json minBy(FunctionArgumentList& arguments);
+    /**
+     * @brief Accepts one or more items in @a arguments, and will evaluate them
+     * in order until a non null argument is encounted.
+     * @param arguments The list of the function's arguments.
+     * @return Returns the first argument that does not resolve to null.
+     * @throws InvalidFunctionArgumentType
+     */
+    Json notNull(FunctionArgumentList& arguments);
+    /**
+     * @brief Reverses the order of the first item in @a arguments. It must
+     * either be an array or a string.
+     * @param arguments The list of the function's arguments.
+     * @return Returns the reversed item.
+     * @throws InvalidFunctionArgumentType
+     */
+    Json reverse(FunctionArgumentList& arguments) const;
+    /**
+     * @brief Sorts the first item in the given @a arguments, which must either
+     * be an array of numbers or an array of strings.
+     * @param arguments The list of the function's arguments.
+     * @return Returns the sorted array.
+     * @throws InvalidFunctionArgumentType
+     */
+    Json sort(FunctionArgumentList& arguments) const;
+    /**
+     * @brief Sorts the first item in the given @a arguments, which must either
+     * be an array of numbers or an array of strings. It uses the expression
+     * provided as the second item in @a arguments as the sort key.
+     * @param arguments The list of the function's arguments.
+     * @return Returns the sorted array.
+     * @throws InvalidFunctionArgumentType
+     */
+    Json sortBy(FunctionArgumentList& arguments);
+    /**
+     * @brief Checks wheather the string provided as the first item in @a
+     * arguments starts with the string provided as the second item in @a
+     * arguments.
+     * @param arguments The list of the function's arguments.
+     * @return Returns true if the first item starts with the second item,
+     * otherwise it returns false.
+     * @throws InvalidFunctionArgumentType
+     */
+    Json startsWith(const FunctionArgumentList& arguments) const;
+    /**
+     * @brief Calculates the sum of the numbers in the array provided as the
+     * first item of @a arguments.
+     * @param arguments The list of the function's arguments.
+     * @return Returns the sum.
+     * @throws InvalidFunctionArgumentType
+     */
+    Json sum(const FunctionArgumentList& arguments) const;
+    /**
+     * @brief Converts the first item of the given @a arguments to a one element
+     * array if it's not already an array.
+     * @param arguments The list of the function's arguments.
+     * @return Returns the resulting array.
+     * @throws InvalidFunctionArgumentType
+     */
+    Json toArray(FunctionArgumentList& arguments) const;
+    /**
+     * @brief Returns the JSON encoded value of the first item in the given
+     * @a arguments as a string if it's not already a string.
+     * @param arguments The list of the function's arguments.
+     * @return Returns the string representation.
+     * @throws InvalidFunctionArgumentType
+     */
+    Json toString(FunctionArgumentList& arguments) const;
+    /**
+     * @brief Converts the string provided as the first item in the given
+     * @a arguments to a number. If it's already a number then the original
+     * value is returned, all other JSON types are converted to null.
+     * @param arguments The list of the function's arguments.
+     * @return Returns the numeric representation.
+     * @throws InvalidFunctionArgumentType
+     */
+    Json toNumber(FunctionArgumentList& arguments) const;
+    /**
+     * @brief Returns the type of the JSON value provided as the first item in
+     * @a arguments.
+     * @param arguments The list of the function's arguments.
+     * @return Returns the string representation of the type.
+     * @throws InvalidFunctionArgumentType
+     */
+    Json type(const FunctionArgumentList& arguments) const;
+    /**
+     * @brief Extracts the values from the object provided as the first item of
+     * the given @a arguments.
+     * @param arguments The list of the function's arguments.
+     * @return Returns the array of values.
+     * @throws InvalidFunctionArgumentType
+     */
+    Json values(FunctionArgumentList& arguments) const;
+    /**
+     * @brief Finds the largest item in the array provided as the first item
+     * in the @a arguments, it must either be an array of numbers or an array
+     * of strings.
+     * @param arguments The list of the function's arguments.
+     * @param comparator The comparator function used for comparing JSON values.
+     * @return Returns the largest item.
+     * @throws InvalidFunctionArgumentType
+     */
+    Json maxElement(const FunctionArgumentList& arguments,
+                    const JsonComparator& comparator = std::less<Json>{}) const;
+    /**
+     * @brief Finds the largest item in the array provided as the first item
+     * in the @a arguments, which must either be an array of numbers or an array
+     * of strings, using the expression provided as the second item in @a
+     * arguments as a key for comparison.
+     * @param arguments The list of the function's arguments.
+     * @param comparator The comparator function used for comparing JSON values.
+     * @return Returns the largest item.
+     * @throws InvalidFunctionArgumentType
+     */
+    Json maxElementBy(FunctionArgumentList& arguments,
+                      const JsonComparator& comparator = std::less<Json>{});
 };
 }} // namespace jmespath::interpreter
 #endif // EXPRESSIONEVALUATOR_H
