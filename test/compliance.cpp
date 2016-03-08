@@ -159,8 +159,7 @@ TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Filters", "[filters]")
     executeFeatureTest("filters");
 }
 
-TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Functions",
-                 "[!hide][functions]")
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Functions", "[functions]")
 {
     executeFeatureTest("functions");
 }
