@@ -109,7 +109,7 @@ private:
      * Function wrapper type to which JMESPath built in function implementations
      * should conform to.
      */
-    using Function = std::function<Json(FunctionArgumentList&)>;
+    using Function = std::function<void(FunctionArgumentList&)>;
     /**
      * The type of comparator functions used for comparing JSON values.
      */
@@ -174,7 +174,7 @@ private:
      * @return Absolute value of the first item in @a arguments.
      * @throws InvalidFunctionArgumentType
      */
-    Json abs(const FunctionArgumentList& arguments) const;
+    void abs(FunctionArgumentList& arguments);
     /**
      * @brief Calculates the average value of the items in the first item of the
      * given @a arguments. The first item must be an JSON array and every item
@@ -184,7 +184,7 @@ private:
      * @a arguments
      * @throws InvalidFunctionArgumentType
      */
-    Json avg(const FunctionArgumentList& arguments) const;
+    void avg(FunctionArgumentList& arguments);
     /**
      * @brief Checks whether the first item in the given @a arguments contains
      * the second item. The first item should be either an array or string the
@@ -194,7 +194,7 @@ private:
      * returns false.
      * @throws InvalidFunctionArgumentType
      */
-    Json contains(const FunctionArgumentList& arguments) const;
+    void contains(FunctionArgumentList& arguments);
     /**
      * @brief Rounds up the first item of the given @a arguments to the next
      * highest integer value. The first item should be a JSON number.
@@ -202,7 +202,7 @@ private:
      * @return Returns the next highest integer value of the first item.
      * @throws InvalidFunctionArgumentType
      */
-    Json ceil(const FunctionArgumentList& arguments) const;
+    void ceil(FunctionArgumentList& arguments);
     /**
      * @brief Checks whether the first item of the given @a arguments ends with
      * the second item. The first and second item of @a arguments must be a
@@ -211,7 +211,7 @@ private:
      * @return
      * @throws InvalidFunctionArgumentType
      */
-    Json endsWith(const FunctionArgumentList& arguments) const;
+    void endsWith(FunctionArgumentList& arguments);
     /**
      * @brief Rounds down the first item of the given @a arguments to the next
      * lowest integer value. The first item should be a JSON number.
@@ -219,7 +219,7 @@ private:
      * @return Returns the next lowest integer value of the first item.
      * @throws InvalidFunctionArgumentType
      */
-    Json floor(const FunctionArgumentList& arguments) const;
+    void floor(FunctionArgumentList& arguments);
     /**
      * @brief Joins every item in the array provided as the second item of the
      * given @a arguments with the first item as a separator. The first item
@@ -228,7 +228,7 @@ private:
      * @return Returns the joined value.
      * @throws InvalidFunctionArgumentType
      */
-    Json join(const FunctionArgumentList& arguments) const;
+    void join(FunctionArgumentList& arguments);
     /**
      * @brief Extracts the keys from the object provided as the first item of
      * the given @a arguments.
@@ -236,7 +236,7 @@ private:
      * @return Returns the array of keys.
      * @throws InvalidFunctionArgumentType
      */
-    Json keys(const FunctionArgumentList& arguments) const;
+    void keys(FunctionArgumentList& arguments);
     /**
      * @brief Returns the length of the first item in the given @a arguments.
      * The first item must be either an array a string or an object.
@@ -244,7 +244,7 @@ private:
      * @return Returns the length.
      * @throws InvalidFunctionArgumentType
      */
-    Json length(const FunctionArgumentList& arguments) const;
+    void length(FunctionArgumentList& arguments);
     /**
      * @brief Applies the expression provided as the first item in the given
      * @a arguments to every item in the array provided as the second item in
@@ -253,7 +253,7 @@ private:
      * @return Returns the array of results.
      * @throws InvalidFunctionArgumentType
      */
-    Json map(FunctionArgumentList& arguments);
+    void map(FunctionArgumentList& arguments);
     /**
      * @brief Finds the largest item in the array provided as the first item
      * in the @a arguments, it must either be an array of numbers or an array
@@ -262,7 +262,7 @@ private:
      * @return Returns the largest item.
      * @throws InvalidFunctionArgumentType
      */
-    Json max(const FunctionArgumentList& arguments) const;
+    void max(FunctionArgumentList& arguments);
     /**
      * @brief Finds the largest item in the array provided as the first item
      * in the @a arguments, which must either be an array of numbers or an array
@@ -272,7 +272,7 @@ private:
      * @return Returns the largest item.
      * @throws InvalidFunctionArgumentType
      */
-    Json maxBy(FunctionArgumentList& arguments);
+    void maxBy(FunctionArgumentList& arguments);
     /**
      * @brief Accepts zero or more objects in the given @a arguments, and
      * returns a single object with subsequent objects merged. Each subsequent
@@ -281,7 +281,7 @@ private:
      * @return Returns the merged object.
      * @throws InvalidFunctionArgumentType
      */
-    Json merge(FunctionArgumentList& arguments) const;
+    void merge(FunctionArgumentList& arguments);
     /**
      * @brief Finds the item with the lowest value in the array provided as the
      * first item in the @a arguments, it must either be an array of numbers or
@@ -290,7 +290,7 @@ private:
      * @return Returns the item with the lowest value.
      * @throws InvalidFunctionArgumentType
      */
-    Json min(const FunctionArgumentList& arguments) const;
+    void min(FunctionArgumentList& arguments);
     /**
      * @brief Finds the item with the lowest value in the array provided as the
      * first item in the @a arguments, which must either be an array of numbers
@@ -300,7 +300,7 @@ private:
      * @return Returns the item with the lowest value.
      * @throws InvalidFunctionArgumentType
      */
-    Json minBy(FunctionArgumentList& arguments);
+    void minBy(FunctionArgumentList& arguments);
     /**
      * @brief Accepts one or more items in @a arguments, and will evaluate them
      * in order until a non null argument is encounted.
@@ -308,7 +308,7 @@ private:
      * @return Returns the first argument that does not resolve to null.
      * @throws InvalidFunctionArgumentType
      */
-    Json notNull(FunctionArgumentList& arguments);
+    void notNull(FunctionArgumentList& arguments);
     /**
      * @brief Reverses the order of the first item in @a arguments. It must
      * either be an array or a string.
@@ -316,7 +316,7 @@ private:
      * @return Returns the reversed item.
      * @throws InvalidFunctionArgumentType
      */
-    Json reverse(FunctionArgumentList& arguments) const;
+    void reverse(FunctionArgumentList& arguments);
     /**
      * @brief Sorts the first item in the given @a arguments, which must either
      * be an array of numbers or an array of strings.
@@ -324,7 +324,7 @@ private:
      * @return Returns the sorted array.
      * @throws InvalidFunctionArgumentType
      */
-    Json sort(FunctionArgumentList& arguments) const;
+    void sort(FunctionArgumentList& arguments);
     /**
      * @brief Sorts the first item in the given @a arguments, which must either
      * be an array of numbers or an array of strings. It uses the expression
@@ -333,7 +333,7 @@ private:
      * @return Returns the sorted array.
      * @throws InvalidFunctionArgumentType
      */
-    Json sortBy(FunctionArgumentList& arguments);
+    void sortBy(FunctionArgumentList& arguments);
     /**
      * @brief Checks wheather the string provided as the first item in @a
      * arguments starts with the string provided as the second item in @a
@@ -343,7 +343,7 @@ private:
      * otherwise it returns false.
      * @throws InvalidFunctionArgumentType
      */
-    Json startsWith(const FunctionArgumentList& arguments) const;
+    void startsWith(FunctionArgumentList& arguments);
     /**
      * @brief Calculates the sum of the numbers in the array provided as the
      * first item of @a arguments.
@@ -351,7 +351,7 @@ private:
      * @return Returns the sum.
      * @throws InvalidFunctionArgumentType
      */
-    Json sum(const FunctionArgumentList& arguments) const;
+    void sum(FunctionArgumentList& arguments);
     /**
      * @brief Converts the first item of the given @a arguments to a one element
      * array if it's not already an array.
@@ -359,7 +359,7 @@ private:
      * @return Returns the resulting array.
      * @throws InvalidFunctionArgumentType
      */
-    Json toArray(FunctionArgumentList& arguments) const;
+    void toArray(FunctionArgumentList& arguments);
     /**
      * @brief Returns the JSON encoded value of the first item in the given
      * @a arguments as a string if it's not already a string.
@@ -367,7 +367,7 @@ private:
      * @return Returns the string representation.
      * @throws InvalidFunctionArgumentType
      */
-    Json toString(FunctionArgumentList& arguments) const;
+    void toString(FunctionArgumentList& arguments);
     /**
      * @brief Converts the string provided as the first item in the given
      * @a arguments to a number. If it's already a number then the original
@@ -376,7 +376,7 @@ private:
      * @return Returns the numeric representation.
      * @throws InvalidFunctionArgumentType
      */
-    Json toNumber(FunctionArgumentList& arguments) const;
+    void toNumber(FunctionArgumentList& arguments);
     /**
      * @brief Returns the type of the JSON value provided as the first item in
      * @a arguments.
@@ -384,7 +384,7 @@ private:
      * @return Returns the string representation of the type.
      * @throws InvalidFunctionArgumentType
      */
-    Json type(const FunctionArgumentList& arguments) const;
+    void type(FunctionArgumentList& arguments);
     /**
      * @brief Extracts the values from the object provided as the first item of
      * the given @a arguments.
@@ -392,7 +392,7 @@ private:
      * @return Returns the array of values.
      * @throws InvalidFunctionArgumentType
      */
-    Json values(FunctionArgumentList& arguments) const;
+    void values(FunctionArgumentList& arguments);
     /**
      * @brief Finds the largest item in the array provided as the first item
      * in the @a arguments, it must either be an array of numbers or an array
@@ -402,8 +402,8 @@ private:
      * @return Returns the largest item.
      * @throws InvalidFunctionArgumentType
      */
-    Json maxElement(const FunctionArgumentList& arguments,
-                    const JsonComparator& comparator = std::less<Json>{}) const;
+    void maxElement(FunctionArgumentList& arguments,
+                    const JsonComparator& comparator = std::less<Json>{});
     /**
      * @brief Finds the largest item in the array provided as the first item
      * in the @a arguments, which must either be an array of numbers or an array
@@ -414,7 +414,7 @@ private:
      * @return Returns the largest item.
      * @throws InvalidFunctionArgumentType
      */
-    Json maxElementBy(FunctionArgumentList& arguments,
+    void maxElementBy(FunctionArgumentList& arguments,
                       const JsonComparator& comparator = std::less<Json>{});
     /**
      * @brief Checks whether @a array is a homogeneous array which contains

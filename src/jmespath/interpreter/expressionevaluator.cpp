@@ -460,7 +460,7 @@ void ExpressionEvaluator::visit(ast::FunctionExpressionNode *node)
     }
 
     FunctionArgumentList argumentList = evaluateArguments(node->arguments);
-    m_context = function(argumentList);
+    function(argumentList);
 }
 
 void ExpressionEvaluator::visit(ast::ExpressionArgumentNode *)
@@ -527,7 +527,7 @@ ExpressionEvaluator::evaluateArguments(
     return argumentList;
 }
 
-Json ExpressionEvaluator::abs(const FunctionArgumentList &arguments) const
+void ExpressionEvaluator::abs(FunctionArgumentList &arguments)
 {
     const Json* value = boost::get<Json>(&arguments[0]);
     if (!value || !value->is_number())
@@ -536,15 +536,15 @@ Json ExpressionEvaluator::abs(const FunctionArgumentList &arguments) const
     }
     if (value->is_number_integer())
     {
-        return std::abs(value->get<Json::number_integer_t>());
+        m_context = std::abs(value->get<Json::number_integer_t>());
     }
     else
     {
-        return std::abs(value->get<Json::number_float_t>());
+        m_context = std::abs(value->get<Json::number_float_t>());
     }
 }
 
-Json ExpressionEvaluator::avg(const FunctionArgumentList &arguments) const
+void ExpressionEvaluator::avg(FunctionArgumentList &arguments)
 {
     const Json* items = boost::get<Json>(&arguments[0]);
     if (items && items->is_array())
@@ -567,7 +567,7 @@ Json ExpressionEvaluator::avg(const FunctionArgumentList &arguments) const
                 BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
             }
         });
-        return sum / items->size();
+        m_context = sum / items->size();
     }
     else
     {
@@ -575,7 +575,7 @@ Json ExpressionEvaluator::avg(const FunctionArgumentList &arguments) const
     }
 }
 
-Json ExpressionEvaluator::contains(const FunctionArgumentList &arguments) const
+void ExpressionEvaluator::contains(FunctionArgumentList &arguments)
 {
     const Json* subject = boost::get<Json>(&arguments[0]);
     const Json* item = boost::get<Json>(&arguments[1]);
@@ -595,10 +595,10 @@ Json ExpressionEvaluator::contains(const FunctionArgumentList &arguments) const
         auto stringItem = item->get_ptr<const String*>();
         result = boost::contains(*stringSubject, *stringItem);
     }
-    return result;
+    m_context = result;
 }
 
-Json ExpressionEvaluator::ceil(const FunctionArgumentList &arguments) const
+void ExpressionEvaluator::ceil(FunctionArgumentList &arguments)
 {
     const Json* value = boost::get<Json>(&arguments[0]);
     if (!value || !value->is_number())
@@ -607,15 +607,15 @@ Json ExpressionEvaluator::ceil(const FunctionArgumentList &arguments) const
     }
     if (value->is_number_integer())
     {
-        return *value;
+        m_context = std::move(*value);
     }
     else
     {
-        return std::ceil(value->get<Json::number_float_t>());
+        m_context = std::ceil(value->get<Json::number_float_t>());
     }
 }
 
-Json ExpressionEvaluator::endsWith(const FunctionArgumentList &arguments) const
+void ExpressionEvaluator::endsWith(FunctionArgumentList &arguments)
 {
     const Json* subject = boost::get<Json>(&arguments[0]);
     const Json* suffix = boost::get<Json>(&arguments[1]);
@@ -625,10 +625,10 @@ Json ExpressionEvaluator::endsWith(const FunctionArgumentList &arguments) const
     }
     auto stringSubject = subject->get_ptr<const String*>();
     auto stringSuffix = suffix->get_ptr<const String*>();
-    return boost::ends_with(*stringSubject, *stringSuffix);
+    m_context = boost::ends_with(*stringSubject, *stringSuffix);
 }
 
-Json ExpressionEvaluator::floor(const FunctionArgumentList &arguments) const
+void ExpressionEvaluator::floor(FunctionArgumentList &arguments)
 {
     const Json* value = boost::get<Json>(&arguments[0]);
     if (!value || !value->is_number())
@@ -637,15 +637,15 @@ Json ExpressionEvaluator::floor(const FunctionArgumentList &arguments) const
     }
     if (value->is_number_integer())
     {
-        return *value;
+        m_context = std::move(*value);
     }
     else
     {
-        return std::floor(value->get<Json::number_float_t>());
+        m_context = std::floor(value->get<Json::number_float_t>());
     }
 }
 
-Json ExpressionEvaluator::join(const FunctionArgumentList &arguments) const
+void ExpressionEvaluator::join(FunctionArgumentList &arguments)
 {
     const Json* glue = boost::get<Json>(&arguments[0]);
     const Json* array = boost::get<Json>(&arguments[1]);
@@ -656,16 +656,17 @@ Json ExpressionEvaluator::join(const FunctionArgumentList &arguments) const
     }
 
     const String* glueString = glue->get_ptr<const String*>();
-    return boost::accumulate(*array, String{},
-                             [&](auto& string, const Json& value)
+    String result = boost::accumulate(*array, String{},
+                                      [&](auto& string, const Json& value)
     {
         return string.empty() ?
                     value.get<String>() :
                     string += *glueString + value.get<String>();
     });
+    m_context = std::move(result);
 }
 
-Json ExpressionEvaluator::keys(const FunctionArgumentList &arguments) const
+void ExpressionEvaluator::keys(FunctionArgumentList &arguments)
 {
     const Json* object = boost::get<Json>(&arguments[0]);
     if (!object || !object->is_object())
@@ -673,15 +674,14 @@ Json ExpressionEvaluator::keys(const FunctionArgumentList &arguments) const
         BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
     }
 
-    Json result(Json::value_t::array);
+    m_context = Json(Json::value_t::array);
     for (auto it = object->cbegin(); it != object->cend(); ++it)
     {
-        result.push_back(it.key());
+        m_context.push_back(it.key());
     }
-    return result;
 }
 
-Json ExpressionEvaluator::length(const FunctionArgumentList &arguments) const
+void ExpressionEvaluator::length(FunctionArgumentList &arguments)
 {
     const Json* subject = boost::get<Json>(&arguments[0]);
     if (!subject || !(subject->is_array() || subject->is_object()
@@ -690,22 +690,20 @@ Json ExpressionEvaluator::length(const FunctionArgumentList &arguments) const
         BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
     }
 
-    size_t result{};
     if (subject->is_string())
     {
         const String* stringSubject = subject->get_ptr<const String*>();
         auto begin = detail::UnicodeIteratorAdaptor(std::begin(*stringSubject));
         auto end = detail::UnicodeIteratorAdaptor(std::end(*stringSubject));
-        result = std::distance(begin, end);
+        m_context = std::distance(begin, end);
     }
     else
     {
-        result = subject->size();
+        m_context = subject->size();
     }
-    return result;
 }
 
-Json ExpressionEvaluator::map(FunctionArgumentList &arguments)
+void ExpressionEvaluator::map(FunctionArgumentList &arguments)
 {
     ast::ExpressionNode* expression
             = boost::get<ast::ExpressionNode>(&arguments[0]);
@@ -721,50 +719,57 @@ Json ExpressionEvaluator::map(FunctionArgumentList &arguments)
         this->visit(expression);
         item = std::move(m_context);
     });
-    return *array;
+    m_context = std::move(*array);
 }
 
-Json ExpressionEvaluator::max(const FunctionArgumentList &arguments) const
+void ExpressionEvaluator::max(FunctionArgumentList &arguments)
 {
-    return maxElement(arguments);
+    maxElement(arguments);
 }
 
-Json ExpressionEvaluator::maxBy(FunctionArgumentList &arguments)
+void ExpressionEvaluator::maxBy(FunctionArgumentList &arguments)
 {
-    return maxElementBy(arguments);
+    maxElementBy(arguments);
 }
 
-Json ExpressionEvaluator::merge(FunctionArgumentList &arguments) const
+void ExpressionEvaluator::merge(FunctionArgumentList &arguments)
 {
-    Json result(Json::value_t::object);
-    rng::for_each(arguments, [&](auto& argument)
+    m_context = Json(Json::value_t::object);
+    for (auto& argument: arguments)
     {
         Json* object = boost::get<Json>(&argument);
         if (!object || !object->is_object())
         {
             BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
         }
-        for (auto it = std::begin(*object); it != std::end(*object); ++it)
+
+        if (m_context.empty())
         {
-            result[it.key()] = std::move(*it);
+            m_context = std::move(*object);
         }
-    });
-    return result;
+        else
+        {
+            for (auto it = std::begin(*object); it != std::end(*object); ++it)
+            {
+                m_context[it.key()] = std::move(*it);
+            }
+        }
+    };
 }
 
-Json ExpressionEvaluator::min(const FunctionArgumentList &arguments) const
+void ExpressionEvaluator::min(FunctionArgumentList &arguments)
 {
-    return maxElement(arguments, std::greater<Json>{});
+    maxElement(arguments, std::greater<Json>{});
 }
 
-Json ExpressionEvaluator::minBy(FunctionArgumentList &arguments)
+void ExpressionEvaluator::minBy(FunctionArgumentList &arguments)
 {    
-    return maxElementBy(arguments, std::greater<Json>{});
+    maxElementBy(arguments, std::greater<Json>{});
 }
 
-Json ExpressionEvaluator::notNull(FunctionArgumentList &arguments)
+void ExpressionEvaluator::notNull(FunctionArgumentList &arguments)
 {
-    Json result;
+    m_context = {};
     for (auto& argument: arguments)
     {
         Json* item = boost::get<Json>(&argument);
@@ -774,14 +779,13 @@ Json ExpressionEvaluator::notNull(FunctionArgumentList &arguments)
         }
         if (!item->is_null())
         {
-            result = std::move(*item);
+            m_context = std::move(*item);
             break;
         }
     }
-    return result;
 }
 
-Json ExpressionEvaluator::reverse(FunctionArgumentList &arguments) const
+void ExpressionEvaluator::reverse(FunctionArgumentList &arguments)
 {
     Json* subject = boost::get<Json>(&arguments[0]);
     if (!subject || !(subject->is_array() || subject->is_string()))
@@ -797,10 +801,10 @@ Json ExpressionEvaluator::reverse(FunctionArgumentList &arguments) const
     {
         rng::reverse(*subject->get_ptr<String*>());
     }
-    return *subject;
+    m_context = std::move(*subject);
 }
 
-Json ExpressionEvaluator::sort(FunctionArgumentList &arguments) const
+void ExpressionEvaluator::sort(FunctionArgumentList &arguments)
 {
     Json* array = boost::get<Json>(&arguments[0]);
     if (!array || !isComparableArray(*array))
@@ -809,10 +813,10 @@ Json ExpressionEvaluator::sort(FunctionArgumentList &arguments) const
     }
 
     std::sort(std::begin(*array), std::end(*array));
-    return *array;
+    m_context = std::move(*array);
 }
 
-Json ExpressionEvaluator::sortBy(FunctionArgumentList &arguments)
+void ExpressionEvaluator::sortBy(FunctionArgumentList &arguments)
 {
     Json* array = boost::get<Json>(&arguments[0]);
     ast::ExpressionNode* expression
@@ -840,7 +844,7 @@ Json ExpressionEvaluator::sortBy(FunctionArgumentList &arguments)
         {
             BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
         }
-        expressionResultsMap[item] = m_context;
+        expressionResultsMap[item] = std::move(m_context);
     }
 
     std::sort(std::begin(*array), std::end(*array),
@@ -848,11 +852,10 @@ Json ExpressionEvaluator::sortBy(FunctionArgumentList &arguments)
     {
         return expressionResultsMap[first] < expressionResultsMap[second];
     });
-    return *array;
+    m_context = std::move(*array);
 }
 
-Json ExpressionEvaluator::startsWith(
-        const FunctionArgumentList &arguments) const
+void ExpressionEvaluator::startsWith(FunctionArgumentList &arguments)
 {
     const Json* subject = boost::get<Json>(&arguments[0]);
     const Json* prefix = boost::get<Json>(&arguments[1]);
@@ -862,10 +865,10 @@ Json ExpressionEvaluator::startsWith(
     }
     auto stringSubject = subject->get_ptr<const String*>();
     auto stringPrefix = prefix->get_ptr<const String*>();
-    return boost::starts_with(*stringSubject, *stringPrefix);
+    m_context = boost::starts_with(*stringSubject, *stringPrefix);
 }
 
-Json ExpressionEvaluator::sum(const FunctionArgumentList &arguments) const
+void ExpressionEvaluator::sum(FunctionArgumentList &arguments)
 {
     const Json* items = boost::get<Json>(&arguments[0]);
     if (items && items->is_array())
@@ -888,7 +891,7 @@ Json ExpressionEvaluator::sum(const FunctionArgumentList &arguments) const
                 BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
             }
         });
-        return sum;
+        m_context = sum;
     }
     else
     {
@@ -896,7 +899,7 @@ Json ExpressionEvaluator::sum(const FunctionArgumentList &arguments) const
     }
 }
 
-Json ExpressionEvaluator::toArray(FunctionArgumentList &arguments) const
+void ExpressionEvaluator::toArray(FunctionArgumentList &arguments)
 {
     const Json* value = boost::get<Json>(&arguments[0]);
     if (!value)
@@ -904,19 +907,18 @@ Json ExpressionEvaluator::toArray(FunctionArgumentList &arguments) const
         BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
     }
 
-    Json result(Json::value_t::array);
     if (value->is_array())
     {
-        result = std::move(*value);
+        m_context = std::move(*value);
     }
     else
     {
-        result.push_back(std::move(*value));
+        m_context = {};
+        m_context.push_back(std::move(*value));
     }
-    return result;
 }
 
-Json ExpressionEvaluator::toString(FunctionArgumentList &arguments) const
+void ExpressionEvaluator::toString(FunctionArgumentList &arguments)
 {
     const Json* value = boost::get<Json>(&arguments[0]);
     if (!value)
@@ -924,19 +926,17 @@ Json ExpressionEvaluator::toString(FunctionArgumentList &arguments) const
         BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
     }
 
-    Json result;
     if (value->is_string())
     {
-        result = std::move(*value);
+        m_context = std::move(*value);
     }
     else
     {
-        result = value->dump();
+        m_context = value->dump();
     }
-    return result;
 }
 
-Json ExpressionEvaluator::toNumber(FunctionArgumentList &arguments) const
+void ExpressionEvaluator::toNumber(FunctionArgumentList &arguments)
 {
     const Json* value = boost::get<Json>(&arguments[0]);
     if (!value)
@@ -944,25 +944,24 @@ Json ExpressionEvaluator::toNumber(FunctionArgumentList &arguments) const
         BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
     }
 
-    Json result;
+    m_context = {};
     if (value->is_number())
     {
-        result = std::move(*value);
+        m_context = std::move(*value);
     }
     else if (value->is_string())
     {
         try
         {
-            result = std::stod(*value->get_ptr<const String*>());
+            m_context = std::stod(*value->get_ptr<const String*>());
         }
-        catch (std::exception& exc)
+        catch (std::exception&)
         {
         }
     }
-    return result;
 }
 
-Json ExpressionEvaluator::type(const FunctionArgumentList &arguments) const
+void ExpressionEvaluator::type(FunctionArgumentList &arguments)
 {
     const Json* value = boost::get<Json>(&arguments[0]);
     if (!value)
@@ -970,9 +969,8 @@ Json ExpressionEvaluator::type(const FunctionArgumentList &arguments) const
         BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
     }
 
-    auto type = value->type();
     String result;
-    switch (type)
+    switch (value->type())
     {
     case Json::value_t::number_float:
     case Json::value_t::number_integer: result = "number"; break;
@@ -982,10 +980,10 @@ Json ExpressionEvaluator::type(const FunctionArgumentList &arguments) const
     case Json::value_t::object: result = "object"; break;
     default: result = "null";
     }
-    return result;
+    m_context = std::move(result);
 }
 
-Json ExpressionEvaluator::values(FunctionArgumentList &arguments) const
+void ExpressionEvaluator::values(FunctionArgumentList &arguments)
 {
     const Json* object = boost::get<Json>(&arguments[0]);
     if (!object || !object->is_object())
@@ -993,16 +991,15 @@ Json ExpressionEvaluator::values(FunctionArgumentList &arguments) const
         BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
     }
 
-    Json result(Json::value_t::array);
+    m_context = {};
     for (auto it = object->begin(); it != object->end(); ++it)
     {
-        result.push_back(std::move(it.value()));
+        m_context.push_back(std::move(it.value()));
     }
-    return result;
 }
 
-Json ExpressionEvaluator::maxElement(const FunctionArgumentList &arguments,
-                                     const JsonComparator &comparator) const
+void ExpressionEvaluator::maxElement(FunctionArgumentList &arguments,
+                                     const JsonComparator &comparator)
 {
     const Json* array = boost::get<Json>(&arguments[0]);
     if (!array || !isComparableArray(*array))
@@ -1010,16 +1007,15 @@ Json ExpressionEvaluator::maxElement(const FunctionArgumentList &arguments,
         BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
     }
 
-    Json result;
+    m_context = {};
     auto it = rng::max_element(*array, comparator);
     if (it != array->end())
     {
-        result = *it;
+        m_context = std::move(*it);
     }
-    return result;
 }
 
-Json ExpressionEvaluator::maxElementBy(FunctionArgumentList &arguments,
+void ExpressionEvaluator::maxElementBy(FunctionArgumentList &arguments,
                                        const JsonComparator &comparator)
 {
     Json* array = boost::get<Json>(&arguments[0]);
@@ -1045,7 +1041,7 @@ Json ExpressionEvaluator::maxElementBy(FunctionArgumentList &arguments,
     auto maxResultsIt = rng::max_element(expressionResults, comparator);
     auto maxIt = std::begin(*array)
             + std::distance(std::begin(expressionResults), maxResultsIt);
-    return *maxIt;
+    m_context = std::move(*maxIt);
 }
 
 bool ExpressionEvaluator::isComparableArray(const Json &array) const
