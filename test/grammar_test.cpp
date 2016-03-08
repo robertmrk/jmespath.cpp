@@ -1079,7 +1079,19 @@ TEST_CASE("Grammar")
                         ast::FunctionExpressionNode{"bar",
                         {ast::ExpressionNode{
                             ast::IdentifierNode{"id"}}}}}}};
-                    String expression{"foo(bar(id))"};
+            String expression{"foo(bar(id))"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
+
+        SECTION("function expression as subexpression")
+        {
+            auto expectedResult = ast::SubexpressionNode{
+                    ast::ExpressionNode{
+                        ast::IdentifierNode{"id"}},
+                    ast::ExpressionNode{
+                        ast::FunctionExpressionNode{"foo"}}};
+            String expression{"id.foo()"};
 
             REQUIRE(parseExpression(grammar, expression) == expectedResult);
         }

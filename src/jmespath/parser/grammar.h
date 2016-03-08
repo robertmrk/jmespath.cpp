@@ -134,7 +134,8 @@ public:
         // a pipe expresion a comparator expression an or expression and an
         // and expression
         m_subexpressionRule = (lit('.')
-            >> (m_identifierRule
+            >> (m_functionExpressionRule
+                | m_identifierRule
                 | m_multiselectListRule
                 | m_multiselectHashRule)[at_c<1>(_val) = _1])
             >> -m_indexExpressionRule(_r1)[insertNode(_r1, _1)]
