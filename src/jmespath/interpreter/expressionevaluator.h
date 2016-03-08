@@ -416,6 +416,14 @@ private:
      */
     Json maxElementBy(FunctionArgumentList& arguments,
                       const JsonComparator& comparator = std::less<Json>{});
+    /**
+     * @brief Checks whether @a array is a homogeneous array which contains
+     * comparable types like strings and numbers.
+     * @param array The JSON value that should be tested.
+     * @return Returns true if @a array is a comparable array, otherwise
+     * returns false.
+     */
+    bool isComparableArray(const Json& array) const;
 };
 }} // namespace jmespath::interpreter
 #endif // EXPRESSIONEVALUATOR_H

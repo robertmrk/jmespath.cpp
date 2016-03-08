@@ -2263,6 +2263,17 @@ TEST_CASE("ExpressionEvaluator")
                           InvalidFunctionArgumentType);
     }
 
+    SECTION("sort function throws on array argument heterogeneous item types")
+    {
+        ast::FunctionExpressionNode node{
+            "sort",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[1, \"string\"]"}}}};
+
+        REQUIRE_THROWS_AS(evaluator.visit(&node),
+                          InvalidFunctionArgumentType);
+    }
+
     SECTION("evaluates sort function on array of numbers")
     {
         ast::FunctionExpressionNode node{

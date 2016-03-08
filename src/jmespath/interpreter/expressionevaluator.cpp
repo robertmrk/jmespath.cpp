@@ -800,11 +800,7 @@ Json ExpressionEvaluator::reverse(FunctionArgumentList &arguments) const
 Json ExpressionEvaluator::sort(FunctionArgumentList &arguments) const
 {
     Json* array = boost::get<Json>(&arguments[0]);
-    auto notNumberOrString = [](const Json& json) -> bool
-    {
-        return !(json.is_number() || json.is_string());
-    };
-    if (!array || !array->is_array() || alg::any_of(*array, notNumberOrString))
+    if (!array || !isComparableArray(*array))
     {
         BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
     }
@@ -823,25 +819,31 @@ Json ExpressionEvaluator::sortBy(FunctionArgumentList &arguments)
         BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
     }
 
-    std::sort(std::begin(*array), std::end(*array),
-              [&, this](auto& first, auto& second) -> bool
+    std::unordered_map<Json, Json> expressionResultsMap;
+    auto firstItemType = Json::value_t::discarded;
+    for (const auto& item: *array)
     {
-        m_context = first;
-        this->visit(expression);
+        m_context = item;
+        visit(expression);
         if (!(m_context.is_number() || m_context.is_string()))
         {
             BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
         }
-        auto firstResult = std::move(m_context);
-
-        m_context = second;
-        this->visit(expression);
-        if (!(m_context.is_number() || m_context.is_string()))
+        if (firstItemType == Json::value_t::discarded)
+        {
+            firstItemType = m_context.type();
+        }
+        else if (m_context.type() != firstItemType)
         {
             BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
         }
+        expressionResultsMap[item] = m_context;
+    }
 
-        return firstResult < m_context;
+    std::sort(std::begin(*array), std::end(*array),
+              [&](auto& first, auto& second) -> bool
+    {
+        return expressionResultsMap[first] < expressionResultsMap[second];
     });
     return *array;
 }
@@ -1000,24 +1002,9 @@ Json ExpressionEvaluator::maxElement(const FunctionArgumentList &arguments,
                                      const JsonComparator &comparator) const
 {
     const Json* array = boost::get<Json>(&arguments[0]);
-    auto notNumberOrString = [](const auto& item)
-    {
-        return !(item.is_string() || item.is_number());
-    };
-    if (!array || !array->is_array() || alg::any_of(*array, notNumberOrString))
+    if (!array || !isComparableArray(*array))
     {
         BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
-    }
-    else if (!array->empty())
-    {
-        Json::value_t firstType = (*array)[0].type();
-        bool result = alg::any_of(*array, [&](const Json& item){
-           return item.type() != firstType;
-        });
-        if (result)
-        {
-            BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
-        }
     }
 
     Json result;
@@ -1056,5 +1043,27 @@ Json ExpressionEvaluator::maxElementBy(FunctionArgumentList &arguments,
     auto maxIt = std::begin(*array)
             + std::distance(std::begin(expressionResults), maxResultsIt);
     return *maxIt;
+}
+
+bool ExpressionEvaluator::isComparableArray(const Json &array) const
+{
+    bool result = false;
+    auto notComparablePredicate = [](const auto& item, const auto& type)
+    {
+        return !(item.is_string() || item.is_number())
+                || (item.type() != type);
+    };
+    if (array.is_array())
+    {
+        result = true;
+        if (!array.empty())
+        {
+            auto firstItemType = array[0].type();
+            result = !alg::any_of(array, std::bind(notComparablePredicate,
+                                                   std::placeholders::_1,
+                                                   std::cref(firstItemType)));
+        }
+    }
+    return result;
 }
 }} // namespace jmespath::interpreter
