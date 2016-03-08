@@ -60,6 +60,21 @@ protected:
                     REQUIRE_THROWS_AS(search(expression, document),
                                       InvalidValue);
                 }
+                else if (expectedError == "invalid-type")
+                {
+                    REQUIRE_THROWS_AS(search(expression, document),
+                                      InvalidFunctionArgumentType);
+                }
+                else if (expectedError == "invalid-arity")
+                {
+                    REQUIRE_THROWS_AS(search(expression, document),
+                                      InvalidFunctionArgumentArity);
+                }
+                else if (expectedError == "unknown-function")
+                {
+                    REQUIRE_THROWS_AS(search(expression, document),
+                                      UnknownFunction);
+                }
                 else
                 {
                     Json result;
