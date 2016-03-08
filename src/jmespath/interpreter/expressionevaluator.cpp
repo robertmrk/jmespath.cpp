@@ -693,7 +693,10 @@ Json ExpressionEvaluator::length(const FunctionArgumentList &arguments) const
     size_t result{};
     if (subject->is_string())
     {
-        result = subject->get_ptr<const String*>()->size();
+        const String* stringSubject = subject->get_ptr<const String*>();
+        auto begin = detail::UnicodeIteratorAdaptor(std::begin(*stringSubject));
+        auto end = detail::UnicodeIteratorAdaptor(std::end(*stringSubject));
+        result = std::distance(begin, end);
     }
     else
     {
