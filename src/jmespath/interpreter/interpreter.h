@@ -25,8 +25,8 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef EXPRESSIONEVALUATOR_H
-#define EXPRESSIONEVALUATOR_H
+#ifndef INTERPRETER_H
+#define INTERPRETER_H
 #include "jmespath/interpreter/abstractvisitor.h"
 #include "jmespath/detail/types.h"
 #include "jmespath/ast/expressionnode.h"
@@ -41,17 +41,17 @@ namespace jmespath { namespace interpreter {
 using detail::Json;
 using detail::String;
 /**
- * @brief The ExpressionEvaluator class evaluates the AST structure.
+ * @brief The Interpreter class evaluates the AST structure.
  */
-class ExpressionEvaluator : public AbstractVisitor
+class Interpreter : public AbstractVisitor
 {
 public:
     /**
-     * @brief Constructs an ExpressionEvaluator object with the given
+     * @brief Constructs an Interpreter object with the given
      * @a document as the context for the evaluation of the AST.
      * @param document JSON document on which the AST will be evaluated
      */
-    ExpressionEvaluator(const Json& contextValue = {});
+    Interpreter(const Json& contextValue = {});
     /**
      * @brief Sets the context of the evaluation.
      * @param value JSON document to be used as the context.
@@ -391,4 +391,4 @@ private:
     bool isComparableArray(const Json& array) const;
 };
 }} // namespace jmespath::interpreter
-#endif // EXPRESSIONEVALUATOR_H
+#endif // INTERPRETER_H

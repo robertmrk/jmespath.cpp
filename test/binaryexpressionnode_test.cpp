@@ -28,7 +28,7 @@
 #include "fakeit.hpp"
 #include "jmespath/ast/allnodes.h"
 #include "jmespath/interpreter/abstractvisitor.h"
-#include "jmespath/interpreter/expressionevaluator.h"
+#include "jmespath/interpreter/interpreter.h"
 
 using namespace jmespath::ast;
 

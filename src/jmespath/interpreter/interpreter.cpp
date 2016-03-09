@@ -25,7 +25,7 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "jmespath/interpreter/expressionevaluator.h"
+#include "jmespath/interpreter/interpreter.h"
 #include "jmespath/ast/allnodes.h"
 #include "jmespath/detail/exceptions.h"
 #include <numeric>
@@ -40,7 +40,7 @@ namespace jmespath { namespace interpreter {
 namespace rng = boost::range;
 namespace alg = boost::algorithm;
 
-ExpressionEvaluator::ExpressionEvaluator(const Json &contextValue)
+Interpreter::Interpreter(const Json &contextValue)
     : AbstractVisitor()
 {
     setContext(contextValue);
@@ -49,71 +49,71 @@ ExpressionEvaluator::ExpressionEvaluator(const Json &contextValue)
     using std::bind;
     m_functionMap = {
         {"abs", make_tuple(1, std::equal_to<size_t>{},
-                    bind(&ExpressionEvaluator::abs, this, _1))},
+                           bind(&Interpreter::abs, this, _1))},
         {"avg", make_tuple(1, std::equal_to<size_t>{},
-                    bind(&ExpressionEvaluator::avg, this, _1))},
+                           bind(&Interpreter::avg, this, _1))},
         {"contains", make_tuple(2, std::equal_to<size_t>{},
-                        bind(&ExpressionEvaluator::contains, this, _1))},
+                                bind(&Interpreter::contains, this, _1))},
         {"ceil", make_tuple(1, std::equal_to<size_t>{},
-                    bind(&ExpressionEvaluator::ceil, this, _1))},
+                            bind(&Interpreter::ceil, this, _1))},
         {"ends_with", make_tuple(2, std::equal_to<size_t>{},
-                        bind(&ExpressionEvaluator::endsWith, this, _1))},
+                                 bind(&Interpreter::endsWith, this, _1))},
         {"floor", make_tuple(1, std::equal_to<size_t>{},
-                    bind(&ExpressionEvaluator::floor, this, _1))},
+                             bind(&Interpreter::floor, this, _1))},
         {"join", make_tuple(2, std::equal_to<size_t>{},
-                  bind(&ExpressionEvaluator::join, this, _1))},
+                            bind(&Interpreter::join, this, _1))},
         {"keys", make_tuple(1, std::equal_to<size_t>{},
-                  bind(&ExpressionEvaluator::keys, this, _1))},
+                            bind(&Interpreter::keys, this, _1))},
         {"length", make_tuple(1, std::equal_to<size_t>{},
-                    bind(&ExpressionEvaluator::length, this, _1))},
+                              bind(&Interpreter::length, this, _1))},
         {"map", make_tuple(2, std::equal_to<size_t>{},
-                 bind(&ExpressionEvaluator::map, this, _1))},
+                           bind(&Interpreter::map, this, _1))},
         {"max", make_tuple(1, std::equal_to<size_t>{},
-                bind(&ExpressionEvaluator::max, this, _1, std::less<Json>{}))},
+                         bind(&Interpreter::max, this, _1, std::less<Json>{}))},
         {"max_by", make_tuple(2, std::equal_to<size_t>{},
-            bind(&ExpressionEvaluator::maxBy, this, _1, std::less<Json>{}))},
+                       bind(&Interpreter::maxBy, this, _1, std::less<Json>{}))},
         {"merge", make_tuple(0, std::greater_equal<size_t>{},
-                   bind(&ExpressionEvaluator::merge, this, _1))},
+                             bind(&Interpreter::merge, this, _1))},
         {"min", make_tuple(1, std::equal_to<size_t>{},
-            bind(&ExpressionEvaluator::max, this, _1, std::greater<Json>{}))},
+                      bind(&Interpreter::max, this, _1, std::greater<Json>{}))},
         {"min_by", make_tuple(2, std::equal_to<size_t>{},
-            bind(&ExpressionEvaluator::maxBy, this, _1, std::greater<Json>{}))},
+                    bind(&Interpreter::maxBy, this, _1, std::greater<Json>{}))},
         {"not_null", make_tuple(1, std::greater_equal<size_t>{},
-                      bind(&ExpressionEvaluator::notNull, this, _1))},
+                                bind(&Interpreter::notNull, this, _1))},
         {"reverse", make_tuple(1, std::equal_to<size_t>{},
-                     bind(&ExpressionEvaluator::reverse, this, _1))},
+                               bind(&Interpreter::reverse, this, _1))},
         {"sort", make_tuple(1, std::equal_to<size_t>{},
-                  bind(&ExpressionEvaluator::sort, this, _1))},
+                            bind(&Interpreter::sort, this, _1))},
         {"sort_by", make_tuple(2, std::equal_to<size_t>{},
-                     bind(&ExpressionEvaluator::sortBy, this, _1))},
+                               bind(&Interpreter::sortBy, this, _1))},
         {"starts_with", make_tuple(2, std::equal_to<size_t>{},
-                        bind(&ExpressionEvaluator::startsWith, this, _1))},
+                                   bind(&Interpreter::startsWith, this, _1))},
         {"sum", make_tuple(1, std::equal_to<size_t>{},
-                 bind(&ExpressionEvaluator::sum, this, _1))},
+                           bind(&Interpreter::sum, this, _1))},
         {"to_array", make_tuple(1, std::equal_to<size_t>{},
-                      bind(&ExpressionEvaluator::toArray, this, _1))},
+                                bind(&Interpreter::toArray, this, _1))},
         {"to_string", make_tuple(1, std::equal_to<size_t>{},
-                       bind(&ExpressionEvaluator::toString, this, _1))},
+                                 bind(&Interpreter::toString, this, _1))},
         {"to_number", make_tuple(1, std::equal_to<size_t>{},
-                       bind(&ExpressionEvaluator::toNumber, this, _1))},
+                                 bind(&Interpreter::toNumber, this, _1))},
         {"type", make_tuple(1, std::equal_to<size_t>{},
-                  bind(&ExpressionEvaluator::type, this, _1))},
+                            bind(&Interpreter::type, this, _1))},
         {"values", make_tuple(1, std::equal_to<size_t>{},
-                    bind(&ExpressionEvaluator::values, this, _1))}
+                              bind(&Interpreter::values, this, _1))}
     };
 }
 
-void ExpressionEvaluator::setContext(const Json &value)
+void Interpreter::setContext(const Json &value)
 {
     m_context = value;
 }
 
-Json ExpressionEvaluator::currentContext() const
+Json Interpreter::currentContext() const
 {
     return m_context;
 }
 
-void ExpressionEvaluator::evaluateProjection(ast::ExpressionNode *expression)
+void Interpreter::evaluateProjection(ast::ExpressionNode *expression)
 {
     Json result;
     if (m_context.is_array())
@@ -133,17 +133,17 @@ void ExpressionEvaluator::evaluateProjection(ast::ExpressionNode *expression)
     m_context = std::move(result);
 }
 
-void ExpressionEvaluator::visit(ast::AbstractNode *node)
+void Interpreter::visit(ast::AbstractNode *node)
 {
     node->accept(this);
 }
 
-void ExpressionEvaluator::visit(ast::ExpressionNode *node)
+void Interpreter::visit(ast::ExpressionNode *node)
 {
     node->accept(this);
 }
 
-void ExpressionEvaluator::visit(ast::IdentifierNode *node)
+void Interpreter::visit(ast::IdentifierNode *node)
 {
     Json result;
     if (m_context.is_object())
@@ -153,22 +153,22 @@ void ExpressionEvaluator::visit(ast::IdentifierNode *node)
     m_context = std::move(result);
 }
 
-void ExpressionEvaluator::visit(ast::RawStringNode *node)
+void Interpreter::visit(ast::RawStringNode *node)
 {
     m_context = std::move(node->rawString);
 }
 
-void ExpressionEvaluator::visit(ast::LiteralNode *node)
+void Interpreter::visit(ast::LiteralNode *node)
 {
     m_context = Json::parse(node->literal);
 }
 
-void ExpressionEvaluator::visit(ast::SubexpressionNode *node)
+void Interpreter::visit(ast::SubexpressionNode *node)
 {
     node->accept(this);
 }
 
-void ExpressionEvaluator::visit(ast::IndexExpressionNode *node)
+void Interpreter::visit(ast::IndexExpressionNode *node)
 {
     visit(&node->leftExpression);
     if (m_context.is_array())
@@ -185,7 +185,7 @@ void ExpressionEvaluator::visit(ast::IndexExpressionNode *node)
     }
 }
 
-void ExpressionEvaluator::visit(ast::ArrayItemNode *node)
+void Interpreter::visit(ast::ArrayItemNode *node)
 {
     Json result;
     if (m_context.is_array())
@@ -203,7 +203,7 @@ void ExpressionEvaluator::visit(ast::ArrayItemNode *node)
     m_context = std::move(result);
 }
 
-void ExpressionEvaluator::visit(ast::FlattenOperatorNode *)
+void Interpreter::visit(ast::FlattenOperatorNode *)
 {
     Json result;
     if (m_context.is_array())
@@ -226,12 +226,12 @@ void ExpressionEvaluator::visit(ast::FlattenOperatorNode *)
     m_context = std::move(result);
 }
 
-void ExpressionEvaluator::visit(ast::BracketSpecifierNode *node)
+void Interpreter::visit(ast::BracketSpecifierNode *node)
 {
     node->accept(this);
 }
 
-void ExpressionEvaluator::visit(ast::SliceExpressionNode *node)
+void Interpreter::visit(ast::SliceExpressionNode *node)
 {
     Json result;
     if (m_context.is_array())
@@ -281,7 +281,7 @@ void ExpressionEvaluator::visit(ast::SliceExpressionNode *node)
     m_context = std::move(result);
 }
 
-void ExpressionEvaluator::visit(ast::ListWildcardNode *node)
+void Interpreter::visit(ast::ListWildcardNode *node)
 {
     if (!m_context.is_array())
     {
@@ -289,7 +289,7 @@ void ExpressionEvaluator::visit(ast::ListWildcardNode *node)
     }
 }
 
-void ExpressionEvaluator::visit(ast::HashWildcardNode *node)
+void Interpreter::visit(ast::HashWildcardNode *node)
 {
     visit(&node->leftExpression);
     Json result;
@@ -303,7 +303,7 @@ void ExpressionEvaluator::visit(ast::HashWildcardNode *node)
     evaluateProjection(&node->rightExpression);
 }
 
-void ExpressionEvaluator::visit(ast::MultiselectListNode *node)
+void Interpreter::visit(ast::MultiselectListNode *node)
 {
     if (!m_context.is_null())
     {
@@ -319,7 +319,7 @@ void ExpressionEvaluator::visit(ast::MultiselectListNode *node)
     }
 }
 
-void ExpressionEvaluator::visit(ast::MultiselectHashNode *node)
+void Interpreter::visit(ast::MultiselectHashNode *node)
 {
     if (!m_context.is_null())
     {
@@ -335,13 +335,13 @@ void ExpressionEvaluator::visit(ast::MultiselectHashNode *node)
     }
 }
 
-void ExpressionEvaluator::visit(ast::NotExpressionNode *node)
+void Interpreter::visit(ast::NotExpressionNode *node)
 {
     visit(&node->expression);
     m_context = !toBoolean(m_context);
 }
 
-void ExpressionEvaluator::visit(ast::ComparatorExpressionNode *node)
+void Interpreter::visit(ast::ComparatorExpressionNode *node)
 {
     using Comparator = ast::ComparatorExpressionNode::Comparator;
 
@@ -384,7 +384,7 @@ void ExpressionEvaluator::visit(ast::ComparatorExpressionNode *node)
     }
 }
 
-void ExpressionEvaluator::visit(ast::OrExpressionNode *node)
+void Interpreter::visit(ast::OrExpressionNode *node)
 {
     Json childContext = m_context;
     visit(&node->leftExpression);
@@ -395,7 +395,7 @@ void ExpressionEvaluator::visit(ast::OrExpressionNode *node)
     }
 }
 
-void ExpressionEvaluator::visit(ast::AndExpressionNode *node)
+void Interpreter::visit(ast::AndExpressionNode *node)
 {
     Json childContext = m_context;
     visit(&node->leftExpression);
@@ -406,22 +406,22 @@ void ExpressionEvaluator::visit(ast::AndExpressionNode *node)
     }
 }
 
-void ExpressionEvaluator::visit(ast::ParenExpressionNode *node)
+void Interpreter::visit(ast::ParenExpressionNode *node)
 {
     visit(&node->expression);
 }
 
-void ExpressionEvaluator::visit(ast::PipeExpressionNode *node)
+void Interpreter::visit(ast::PipeExpressionNode *node)
 {
     visit(&node->leftExpression);
     visit(&node->rightExpression);
 }
 
-void ExpressionEvaluator::visit(ast::CurrentNode *)
+void Interpreter::visit(ast::CurrentNode *)
 {
 }
 
-void ExpressionEvaluator::visit(ast::FilterExpressionNode *node)
+void Interpreter::visit(ast::FilterExpressionNode *node)
 {
     Json result;
     if (m_context.is_array())
@@ -441,7 +441,7 @@ void ExpressionEvaluator::visit(ast::FilterExpressionNode *node)
     m_context = std::move(result);
 }
 
-void ExpressionEvaluator::visit(ast::FunctionExpressionNode *node)
+void Interpreter::visit(ast::FunctionExpressionNode *node)
 {
     auto it = m_functionMap.find(node->functionName);
     if (it == m_functionMap.end())
@@ -463,11 +463,11 @@ void ExpressionEvaluator::visit(ast::FunctionExpressionNode *node)
     function(argumentList);
 }
 
-void ExpressionEvaluator::visit(ast::ExpressionArgumentNode *)
+void Interpreter::visit(ast::ExpressionArgumentNode *)
 {
 }
 
-int ExpressionEvaluator::adjustSliceEndpoint(int length,
+int Interpreter::adjustSliceEndpoint(int length,
                                              int endpoint,
                                              int step) const
 {
@@ -486,7 +486,7 @@ int ExpressionEvaluator::adjustSliceEndpoint(int length,
     return endpoint;
 }
 
-bool ExpressionEvaluator::toBoolean(const Json &json) const
+bool Interpreter::toBoolean(const Json &json) const
 {
     return json.is_number()
             || ((!json.is_boolean() || json.get<bool>())
@@ -495,9 +495,8 @@ bool ExpressionEvaluator::toBoolean(const Json &json) const
                 && !json.empty());
 }
 
-ExpressionEvaluator::FunctionArgumentList
-ExpressionEvaluator::evaluateArguments(
-        const FunctionExpressionArgumentList &arguments)
+Interpreter::FunctionArgumentList
+Interpreter::evaluateArguments(const FunctionExpressionArgumentList &arguments)
 {
     FunctionArgumentList argumentList;
     rng::transform(arguments, std::back_inserter(argumentList),
@@ -527,7 +526,7 @@ ExpressionEvaluator::evaluateArguments(
     return argumentList;
 }
 
-void ExpressionEvaluator::abs(FunctionArgumentList &arguments)
+void Interpreter::abs(FunctionArgumentList &arguments)
 {
     const Json* value = boost::get<Json>(&arguments[0]);
     if (!value || !value->is_number())
@@ -544,7 +543,7 @@ void ExpressionEvaluator::abs(FunctionArgumentList &arguments)
     }
 }
 
-void ExpressionEvaluator::avg(FunctionArgumentList &arguments)
+void Interpreter::avg(FunctionArgumentList &arguments)
 {
     const Json* items = boost::get<Json>(&arguments[0]);
     if (items && items->is_array())
@@ -575,7 +574,7 @@ void ExpressionEvaluator::avg(FunctionArgumentList &arguments)
     }
 }
 
-void ExpressionEvaluator::contains(FunctionArgumentList &arguments)
+void Interpreter::contains(FunctionArgumentList &arguments)
 {
     const Json* subject = boost::get<Json>(&arguments[0]);
     const Json* item = boost::get<Json>(&arguments[1]);
@@ -598,7 +597,7 @@ void ExpressionEvaluator::contains(FunctionArgumentList &arguments)
     m_context = result;
 }
 
-void ExpressionEvaluator::ceil(FunctionArgumentList &arguments)
+void Interpreter::ceil(FunctionArgumentList &arguments)
 {
     const Json* value = boost::get<Json>(&arguments[0]);
     if (!value || !value->is_number())
@@ -615,7 +614,7 @@ void ExpressionEvaluator::ceil(FunctionArgumentList &arguments)
     }
 }
 
-void ExpressionEvaluator::endsWith(FunctionArgumentList &arguments)
+void Interpreter::endsWith(FunctionArgumentList &arguments)
 {
     const Json* subject = boost::get<Json>(&arguments[0]);
     const Json* suffix = boost::get<Json>(&arguments[1]);
@@ -628,7 +627,7 @@ void ExpressionEvaluator::endsWith(FunctionArgumentList &arguments)
     m_context = boost::ends_with(*stringSubject, *stringSuffix);
 }
 
-void ExpressionEvaluator::floor(FunctionArgumentList &arguments)
+void Interpreter::floor(FunctionArgumentList &arguments)
 {
     const Json* value = boost::get<Json>(&arguments[0]);
     if (!value || !value->is_number())
@@ -645,7 +644,7 @@ void ExpressionEvaluator::floor(FunctionArgumentList &arguments)
     }
 }
 
-void ExpressionEvaluator::join(FunctionArgumentList &arguments)
+void Interpreter::join(FunctionArgumentList &arguments)
 {
     const Json* glue = boost::get<Json>(&arguments[0]);
     const Json* array = boost::get<Json>(&arguments[1]);
@@ -666,7 +665,7 @@ void ExpressionEvaluator::join(FunctionArgumentList &arguments)
     m_context = std::move(result);
 }
 
-void ExpressionEvaluator::keys(FunctionArgumentList &arguments)
+void Interpreter::keys(FunctionArgumentList &arguments)
 {
     const Json* object = boost::get<Json>(&arguments[0]);
     if (!object || !object->is_object())
@@ -681,7 +680,7 @@ void ExpressionEvaluator::keys(FunctionArgumentList &arguments)
     }
 }
 
-void ExpressionEvaluator::length(FunctionArgumentList &arguments)
+void Interpreter::length(FunctionArgumentList &arguments)
 {
     const Json* subject = boost::get<Json>(&arguments[0]);
     if (!subject || !(subject->is_array() || subject->is_object()
@@ -703,7 +702,7 @@ void ExpressionEvaluator::length(FunctionArgumentList &arguments)
     }
 }
 
-void ExpressionEvaluator::map(FunctionArgumentList &arguments)
+void Interpreter::map(FunctionArgumentList &arguments)
 {
     ast::ExpressionNode* expression
             = boost::get<ast::ExpressionNode>(&arguments[0]);
@@ -722,7 +721,7 @@ void ExpressionEvaluator::map(FunctionArgumentList &arguments)
     m_context = std::move(*array);
 }
 
-void ExpressionEvaluator::merge(FunctionArgumentList &arguments)
+void Interpreter::merge(FunctionArgumentList &arguments)
 {
     m_context = Json(Json::value_t::object);
     for (auto& argument: arguments)
@@ -747,7 +746,7 @@ void ExpressionEvaluator::merge(FunctionArgumentList &arguments)
     };
 }
 
-void ExpressionEvaluator::notNull(FunctionArgumentList &arguments)
+void Interpreter::notNull(FunctionArgumentList &arguments)
 {
     m_context = {};
     for (auto& argument: arguments)
@@ -765,7 +764,7 @@ void ExpressionEvaluator::notNull(FunctionArgumentList &arguments)
     }
 }
 
-void ExpressionEvaluator::reverse(FunctionArgumentList &arguments)
+void Interpreter::reverse(FunctionArgumentList &arguments)
 {
     Json* subject = boost::get<Json>(&arguments[0]);
     if (!subject || !(subject->is_array() || subject->is_string()))
@@ -784,7 +783,7 @@ void ExpressionEvaluator::reverse(FunctionArgumentList &arguments)
     m_context = std::move(*subject);
 }
 
-void ExpressionEvaluator::sort(FunctionArgumentList &arguments)
+void Interpreter::sort(FunctionArgumentList &arguments)
 {
     Json* array = boost::get<Json>(&arguments[0]);
     if (!array || !isComparableArray(*array))
@@ -796,7 +795,7 @@ void ExpressionEvaluator::sort(FunctionArgumentList &arguments)
     m_context = std::move(*array);
 }
 
-void ExpressionEvaluator::sortBy(FunctionArgumentList &arguments)
+void Interpreter::sortBy(FunctionArgumentList &arguments)
 {
     Json* array = boost::get<Json>(&arguments[0]);
     ast::ExpressionNode* expression
@@ -835,7 +834,7 @@ void ExpressionEvaluator::sortBy(FunctionArgumentList &arguments)
     m_context = std::move(*array);
 }
 
-void ExpressionEvaluator::startsWith(FunctionArgumentList &arguments)
+void Interpreter::startsWith(FunctionArgumentList &arguments)
 {
     const Json* subject = boost::get<Json>(&arguments[0]);
     const Json* prefix = boost::get<Json>(&arguments[1]);
@@ -848,7 +847,7 @@ void ExpressionEvaluator::startsWith(FunctionArgumentList &arguments)
     m_context = boost::starts_with(*stringSubject, *stringPrefix);
 }
 
-void ExpressionEvaluator::sum(FunctionArgumentList &arguments)
+void Interpreter::sum(FunctionArgumentList &arguments)
 {
     const Json* items = boost::get<Json>(&arguments[0]);
     if (items && items->is_array())
@@ -879,7 +878,7 @@ void ExpressionEvaluator::sum(FunctionArgumentList &arguments)
     }
 }
 
-void ExpressionEvaluator::toArray(FunctionArgumentList &arguments)
+void Interpreter::toArray(FunctionArgumentList &arguments)
 {
     const Json* value = boost::get<Json>(&arguments[0]);
     if (!value)
@@ -898,7 +897,7 @@ void ExpressionEvaluator::toArray(FunctionArgumentList &arguments)
     }
 }
 
-void ExpressionEvaluator::toString(FunctionArgumentList &arguments)
+void Interpreter::toString(FunctionArgumentList &arguments)
 {
     const Json* value = boost::get<Json>(&arguments[0]);
     if (!value)
@@ -916,7 +915,7 @@ void ExpressionEvaluator::toString(FunctionArgumentList &arguments)
     }
 }
 
-void ExpressionEvaluator::toNumber(FunctionArgumentList &arguments)
+void Interpreter::toNumber(FunctionArgumentList &arguments)
 {
     const Json* value = boost::get<Json>(&arguments[0]);
     if (!value)
@@ -941,7 +940,7 @@ void ExpressionEvaluator::toNumber(FunctionArgumentList &arguments)
     }
 }
 
-void ExpressionEvaluator::type(FunctionArgumentList &arguments)
+void Interpreter::type(FunctionArgumentList &arguments)
 {
     const Json* value = boost::get<Json>(&arguments[0]);
     if (!value)
@@ -963,7 +962,7 @@ void ExpressionEvaluator::type(FunctionArgumentList &arguments)
     m_context = std::move(result);
 }
 
-void ExpressionEvaluator::values(FunctionArgumentList &arguments)
+void Interpreter::values(FunctionArgumentList &arguments)
 {
     const Json* object = boost::get<Json>(&arguments[0]);
     if (!object || !object->is_object())
@@ -978,7 +977,7 @@ void ExpressionEvaluator::values(FunctionArgumentList &arguments)
     }
 }
 
-void ExpressionEvaluator::max(FunctionArgumentList &arguments,
+void Interpreter::max(FunctionArgumentList &arguments,
                               const JsonComparator &comparator)
 {
     const Json* array = boost::get<Json>(&arguments[0]);
@@ -995,7 +994,7 @@ void ExpressionEvaluator::max(FunctionArgumentList &arguments,
     }
 }
 
-void ExpressionEvaluator::maxBy(FunctionArgumentList &arguments,
+void Interpreter::maxBy(FunctionArgumentList &arguments,
                                        const JsonComparator &comparator)
 {
     Json* array = boost::get<Json>(&arguments[0]);
@@ -1024,7 +1023,7 @@ void ExpressionEvaluator::maxBy(FunctionArgumentList &arguments,
     m_context = std::move(*maxIt);
 }
 
-bool ExpressionEvaluator::isComparableArray(const Json &array) const
+bool Interpreter::isComparableArray(const Json &array) const
 {
     bool result = false;
     auto notComparablePredicate = [](const auto& item, const auto& type)
