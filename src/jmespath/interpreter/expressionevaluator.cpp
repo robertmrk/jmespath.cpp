@@ -69,15 +69,15 @@ ExpressionEvaluator::ExpressionEvaluator(const Json &contextValue)
         {"map", make_tuple(2, std::equal_to<size_t>{},
                  bind(&ExpressionEvaluator::map, this, _1))},
         {"max", make_tuple(1, std::equal_to<size_t>{},
-                 bind(&ExpressionEvaluator::max, this, _1))},
+                bind(&ExpressionEvaluator::max, this, _1, std::less<Json>{}))},
         {"max_by", make_tuple(2, std::equal_to<size_t>{},
-                    bind(&ExpressionEvaluator::maxBy, this, _1))},
+            bind(&ExpressionEvaluator::maxBy, this, _1, std::less<Json>{}))},
         {"merge", make_tuple(0, std::greater_equal<size_t>{},
                    bind(&ExpressionEvaluator::merge, this, _1))},
         {"min", make_tuple(1, std::equal_to<size_t>{},
-                 bind(&ExpressionEvaluator::min, this, _1))},
+            bind(&ExpressionEvaluator::max, this, _1, std::greater<Json>{}))},
         {"min_by", make_tuple(2, std::equal_to<size_t>{},
-                    bind(&ExpressionEvaluator::minBy, this, _1))},
+            bind(&ExpressionEvaluator::maxBy, this, _1, std::greater<Json>{}))},
         {"not_null", make_tuple(1, std::greater_equal<size_t>{},
                       bind(&ExpressionEvaluator::notNull, this, _1))},
         {"reverse", make_tuple(1, std::equal_to<size_t>{},
@@ -722,16 +722,6 @@ void ExpressionEvaluator::map(FunctionArgumentList &arguments)
     m_context = std::move(*array);
 }
 
-void ExpressionEvaluator::max(FunctionArgumentList &arguments)
-{
-    maxElement(arguments);
-}
-
-void ExpressionEvaluator::maxBy(FunctionArgumentList &arguments)
-{
-    maxElementBy(arguments);
-}
-
 void ExpressionEvaluator::merge(FunctionArgumentList &arguments)
 {
     m_context = Json(Json::value_t::object);
@@ -755,16 +745,6 @@ void ExpressionEvaluator::merge(FunctionArgumentList &arguments)
             }
         }
     };
-}
-
-void ExpressionEvaluator::min(FunctionArgumentList &arguments)
-{
-    maxElement(arguments, std::greater<Json>{});
-}
-
-void ExpressionEvaluator::minBy(FunctionArgumentList &arguments)
-{    
-    maxElementBy(arguments, std::greater<Json>{});
 }
 
 void ExpressionEvaluator::notNull(FunctionArgumentList &arguments)
@@ -998,8 +978,8 @@ void ExpressionEvaluator::values(FunctionArgumentList &arguments)
     }
 }
 
-void ExpressionEvaluator::maxElement(FunctionArgumentList &arguments,
-                                     const JsonComparator &comparator)
+void ExpressionEvaluator::max(FunctionArgumentList &arguments,
+                              const JsonComparator &comparator)
 {
     const Json* array = boost::get<Json>(&arguments[0]);
     if (!array || !isComparableArray(*array))
@@ -1015,7 +995,7 @@ void ExpressionEvaluator::maxElement(FunctionArgumentList &arguments,
     }
 }
 
-void ExpressionEvaluator::maxElementBy(FunctionArgumentList &arguments,
+void ExpressionEvaluator::maxBy(FunctionArgumentList &arguments,
                                        const JsonComparator &comparator)
 {
     Json* array = boost::get<Json>(&arguments[0]);

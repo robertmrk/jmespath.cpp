@@ -255,25 +255,6 @@ private:
      */
     void map(FunctionArgumentList& arguments);
     /**
-     * @brief Finds the largest item in the array provided as the first item
-     * in the @a arguments, it must either be an array of numbers or an array
-     * of strings.
-     * @param arguments The list of the function's arguments.
-     * @return Returns the largest item.
-     * @throws InvalidFunctionArgumentType
-     */
-    void max(FunctionArgumentList& arguments);
-    /**
-     * @brief Finds the largest item in the array provided as the first item
-     * in the @a arguments, which must either be an array of numbers or an array
-     * of strings, using the expression provided as the second item in @a
-     * arguments as a key for comparison.
-     * @param arguments The list of the function's arguments.
-     * @return Returns the largest item.
-     * @throws InvalidFunctionArgumentType
-     */
-    void maxBy(FunctionArgumentList& arguments);
-    /**
      * @brief Accepts zero or more objects in the given @a arguments, and
      * returns a single object with subsequent objects merged. Each subsequent
      * object’s key/value pairs are added to the preceding object.
@@ -282,25 +263,6 @@ private:
      * @throws InvalidFunctionArgumentType
      */
     void merge(FunctionArgumentList& arguments);
-    /**
-     * @brief Finds the item with the lowest value in the array provided as the
-     * first item in the @a arguments, it must either be an array of numbers or
-     * an array of strings.
-     * @param arguments The list of the function's arguments.
-     * @return Returns the item with the lowest value.
-     * @throws InvalidFunctionArgumentType
-     */
-    void min(FunctionArgumentList& arguments);
-    /**
-     * @brief Finds the item with the lowest value in the array provided as the
-     * first item in the @a arguments, which must either be an array of numbers
-     * or an array of strings, using the expression provided as the second item
-     * in @a arguments as a key for comparison.
-     * @param arguments The list of the function's arguments.
-     * @return Returns the item with the lowest value.
-     * @throws InvalidFunctionArgumentType
-     */
-    void minBy(FunctionArgumentList& arguments);
     /**
      * @brief Accepts one or more items in @a arguments, and will evaluate them
      * in order until a non null argument is encounted.
@@ -399,11 +361,12 @@ private:
      * of strings.
      * @param arguments The list of the function's arguments.
      * @param comparator The comparator function used for comparing JSON values.
+     * It should return true if its first argument is less then its second
+     * argument.
      * @return Returns the largest item.
      * @throws InvalidFunctionArgumentType
      */
-    void maxElement(FunctionArgumentList& arguments,
-                    const JsonComparator& comparator = std::less<Json>{});
+    void max(FunctionArgumentList& arguments, const JsonComparator& comparator);
     /**
      * @brief Finds the largest item in the array provided as the first item
      * in the @a arguments, which must either be an array of numbers or an array
@@ -411,10 +374,12 @@ private:
      * arguments as a key for comparison.
      * @param arguments The list of the function's arguments.
      * @param comparator The comparator function used for comparing JSON values.
+     * It should return true if its first argument is less then its second
+     * argument.
      * @return Returns the largest item.
      * @throws InvalidFunctionArgumentType
      */
-    void maxElementBy(FunctionArgumentList& arguments,
+    void maxBy(FunctionArgumentList& arguments,
                       const JsonComparator& comparator = std::less<Json>{});
     /**
      * @brief Checks whether @a array is a homogeneous array which contains
