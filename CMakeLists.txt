@@ -12,7 +12,8 @@ if ((${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
     #wd4348 - ingore warning C4348 (A template parameter was redefined.)
     #EHsc - set synchronous exception handling
-    set(CMAKE_CXX_FLAGS "/EHsc /wd4348")
+    #bigobj - fix for error C1128 (increase the number of sections in .obj file)
+    set(CMAKE_CXX_FLAGS "/EHsc /wd4348 /bigobj")
 endif()
 
 find_package(Boost 1.57 REQUIRED)

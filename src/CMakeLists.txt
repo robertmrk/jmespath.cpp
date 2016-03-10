@@ -68,9 +68,13 @@ list(APPEND JMESPATH_SOURCE_FILES
     ${JMESPATH_AST_SOURCE_DIR}/currentnode.cpp
     ${JMESPATH_AST_SOURCE_DIR}/filterexpressionnode.h
     ${JMESPATH_AST_SOURCE_DIR}/filterexpressionnode.cpp
+    ${JMESPATH_AST_SOURCE_DIR}/functionexpressionnode.h
+    ${JMESPATH_AST_SOURCE_DIR}/functionexpressionnode.cpp
+    ${JMESPATH_AST_SOURCE_DIR}/expressionargumentnode.h
+    ${JMESPATH_AST_SOURCE_DIR}/expressionargumentnode.cpp
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/abstractvisitor.h
-    ${JMESPATH_INTERPRETER_SOURCE_DIR}/expressionevaluator.h
-    ${JMESPATH_INTERPRETER_SOURCE_DIR}/expressionevaluator.cpp)
+    ${JMESPATH_INTERPRETER_SOURCE_DIR}/interpreter.h
+    ${JMESPATH_INTERPRETER_SOURCE_DIR}/interpreter.cpp)
 set(JMESPATH_SOURCE_FILES ${JMESPATH_SOURCE_FILES} PARENT_SCOPE)
 
 list(APPEND JMESPATH_INCLUDE_DIRECTORIES

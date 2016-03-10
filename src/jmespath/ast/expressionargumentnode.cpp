@@ -25,35 +25,33 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "jmespath/jmespath.h"
-#include "jmespath/parser/parser.h"
-#include "jmespath/parser/grammar.h"
-#include "jmespath/interpreter/interpreter.h"
+#include "jmespath/ast/allnodes.h"
 
-namespace jmespath {
+namespace jmespath { namespace ast {
 
-Json search(const String &searchExpression, const Json &document)
+ExpressionArgumentNode::ExpressionArgumentNode()
+    : AbstractNode()
 {
-    using parser::Parser;
-    using parser::Grammar;
-    using interpreter::Interpreter;
-
-    // return null on empty searchExpression
-    if (searchExpression.empty())
-    {
-        return {};
-    }
-
-    // create a parser
-    Parser<Grammar> parser;
-    // parse the searchExpression and create an AST
-    auto astRoot = parser.parse(searchExpression);
-    // create an interpreter with the given JSON document
-    Interpreter interpreter{document};
-    // evaluate the expression by calling visit with the root of the AST
-    interpreter.visit(&astRoot);
-
-    // return the current evaluation context as the result
-    return interpreter.currentContext();
 }
-} // namespace jmespath
+
+ExpressionArgumentNode::ExpressionArgumentNode(const ExpressionNode &expression)
+    : AbstractNode(),
+      expression(expression)
+{
+}
+
+void ExpressionArgumentNode::accept(interpreter::AbstractVisitor *visitor)
+{
+    visitor->visit(this);
+}
+
+bool ExpressionArgumentNode::operator==(
+        const ExpressionArgumentNode &other) const
+{
+    if (this != &other)
+    {
+        return expression == other.expression;
+    }
+    return true;
+}
+}} // namespace jmespath::ast

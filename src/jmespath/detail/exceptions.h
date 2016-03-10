@@ -42,6 +42,11 @@ using InfoSearchExpression
  */
 using InfoSyntaxErrorLocation
     = boost::error_info<struct tag_syntax_error_location, int>;
+/**
+ * @brief InfoFunctionName contains the name of the built in JMESpath function.
+ */
+using InfoFunctionName
+    = boost::error_info<struct tag_function_name, std::string>;
 
 /**
  * @brief The Exception struct is the common base class for
@@ -63,5 +68,20 @@ struct InvalidAgrument : virtual Exception {};
  * expression.
  */
 struct InvalidValue : virtual Exception {};
+/**
+ * @brief The UnknownFunction struct represents a call to a JMESPath built in
+ * function which doesn't exists.
+ */
+struct UnknownFunction : virtual Exception {};
+/**
+ * @brief The InvalidFunctionArgumentArity struct signals the a JMESPath built
+ * in function was called with an unexpected number of arguments.
+ */
+struct InvalidFunctionArgumentArity : virtual Exception {};
+/**
+ * @brief The InvalidFunctionArgumentType struct represents a call to a JMESPath
+ * built in function with an unexpected type of argument.
+ */
+struct InvalidFunctionArgumentType : virtual Exception {};
 }} // namespace jmespath::detail
 #endif // EXCEPTIONS_H

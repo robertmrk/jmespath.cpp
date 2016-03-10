@@ -13,7 +13,7 @@ add_executable(${JMESPATH_UNITTEST_TARGET_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/identifiernode_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rawstringnode_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/variantnode_test.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/expressionevaluator_test.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/interpreter_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/variantvisitoradaptor_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/subexpressionnode_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/literalnode_test.cpp
@@ -37,6 +37,8 @@ add_executable(${JMESPATH_UNITTEST_TARGET_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/pipeexpressionnode_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/currentnode_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/filterexpressionnode_test.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/functionexpressionnode_test.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/expressionargumentnode_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/nodechildextractionpolicy_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/nodeinsertpolicy_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/nodeinsertcondition_test.cpp)
