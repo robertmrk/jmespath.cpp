@@ -949,6 +949,7 @@ void Interpreter::type(FunctionArgumentList &arguments)
     switch (value->type())
     {
     case Json::value_t::number_float:
+    case Json::value_t::number_unsigned:
     case Json::value_t::number_integer: result = "number"; break;
     case Json::value_t::string: result = "string"; break;
     case Json::value_t::boolean: result = "boolean"; break;
