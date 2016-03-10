@@ -187,8 +187,7 @@ TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Slice expressions",
     executeFeatureTest("slice");
 }
 
-TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Syntax",
-                 "[!hide][syntax]")
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Syntax", "[syntax]")
 {
     executeFeatureTest("syntax");
 }
