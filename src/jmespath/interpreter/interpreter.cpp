@@ -646,7 +646,7 @@ void Interpreter::floor(FunctionArgumentList &arguments)
 
 void Interpreter::join(FunctionArgumentList &arguments)
 {
-    const Json* glue = boost::get<Json>(&arguments[0]);
+    Json* glue = boost::get<Json>(&arguments[0]);
     const Json* array = boost::get<Json>(&arguments[1]);
     if (!glue || !glue->is_string() || !array || !array->is_array()
        || alg::any_of(*array, [](const auto& item) {return !item.is_string();}))
@@ -654,15 +654,12 @@ void Interpreter::join(FunctionArgumentList &arguments)
         BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
     }
 
-    const String* glueString = glue->get_ptr<const String*>();
-    String result = boost::accumulate(*array, String{},
-                                      [&](auto& string, const Json& value)
+    std::vector<String> stringArray;
+    rng::transform(*array, std::back_inserter(stringArray), [](const Json& item)
     {
-        return string.empty() ?
-                    value.get<String>() :
-                    string += *glueString + value.get<String>();
+        return item.get<String>();
     });
-    m_context = std::move(result);
+    m_context = alg::join(stringArray, glue->get<String>());
 }
 
 void Interpreter::keys(FunctionArgumentList &arguments)
