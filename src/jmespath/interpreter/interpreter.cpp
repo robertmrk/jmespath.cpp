@@ -949,6 +949,7 @@ void Interpreter::type(FunctionArgumentList &arguments)
     switch (value->type())
     {
     case Json::value_t::number_float:
+    case Json::value_t::number_unsigned:
     case Json::value_t::number_integer: result = "number"; break;
     case Json::value_t::string: result = "string"; break;
     case Json::value_t::boolean: result = "boolean"; break;
@@ -1023,20 +1024,19 @@ void Interpreter::maxBy(FunctionArgumentList &arguments,
 bool Interpreter::isComparableArray(const Json &array) const
 {
     bool result = false;
-    auto notComparablePredicate = [](const auto& item, const auto& type)
+    auto notComparablePredicate = [](const auto& item, const auto& firstItem)
     {
-        return !(item.is_string() || item.is_number())
-                || (item.type() != type);
+        return !((item.is_number() && firstItem.is_number())
+                 || (item.is_string() && firstItem.is_string()));
     };
     if (array.is_array())
     {
         result = true;
         if (!array.empty())
         {
-            auto firstItemType = array[0].type();
             result = !alg::any_of(array, std::bind(notComparablePredicate,
                                                    std::placeholders::_1,
-                                                   std::cref(firstItemType)));
+                                                   std::cref(array[0])));
         }
     }
     return result;
