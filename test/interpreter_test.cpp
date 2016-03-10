@@ -2359,6 +2359,20 @@ TEST_CASE("Interpreter")
                           InvalidFunctionArgumentType);
     }
 
+    SECTION("sort_by function throws on inconsistent expression result type")
+    {
+        ast::FunctionExpressionNode node{
+            "sort_by",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[{\"id\": 3}, {\"id\": 5}, {\"id\":\"s\"}]"}},
+            ast::ExpressionArgumentNode{
+                ast::ExpressionNode{
+                    ast::IdentifierNode{"id"}}}}};
+
+        REQUIRE_THROWS_AS(interpreter.visit(&node),
+                          InvalidFunctionArgumentType);
+    }
+
     SECTION("evaluates sort_by function")
     {
         ast::FunctionExpressionNode node{
