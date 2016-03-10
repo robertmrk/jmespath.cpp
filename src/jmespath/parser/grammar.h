@@ -164,9 +164,9 @@ public:
         m_bracketSpecifierRule = (lit("[")
                                   >> (m_sliceExpressionRule
                                       | m_arrayItemRule
-                                      | m_listWildcardRule
-                                      | m_filterExpressionRule)
+                                      | m_listWildcardRule)
                                   >> lit("]"))
+                | m_filterExpressionRule
                 | m_flattenOperatorRule;
 
         // match an integer
@@ -176,7 +176,7 @@ public:
         m_flattenOperatorRule = eps >> lit("[]");
 
         // match an expression preceded by a question mark
-        m_filterExpressionRule = lit('?') >> m_expressionRule;
+        m_filterExpressionRule = lit("[?") >> m_expressionRule >> lit("]");
 
         // match a colon which can be optionally preceded and followed by a
         // single integer, these matches can also be optionally followed by
