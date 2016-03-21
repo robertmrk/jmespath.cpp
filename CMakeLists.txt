@@ -28,8 +28,8 @@ target_include_directories(${JMESPATH_TARGET_NAME}
     PUBLIC ${JMESPATH_INCLUDE_DIRECTORIES} ${Boost_INCLUDE_DIRS})
 target_link_libraries(${JMESPATH_TARGET_NAME}
     PUBLIC ${Boost_LIBRARIES})
-set_target_properties(${JMESPATH_TARGET_NAME} PROPERTIES
-    COMPILE_DEFINITIONS "BOOST_SPIRIT_UNICODE=1")
+target_compile_definitions(${JMESPATH_TARGET_NAME}
+    PUBLIC "BOOST_SPIRIT_UNICODE=1")
 if (${JMESPATH_COVERAGE_INFO})
     set_target_properties(${JMESPATH_TARGET_NAME} PROPERTIES
         COMPILE_FLAGS "--coverage"
