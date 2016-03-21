@@ -67,33 +67,33 @@ public:
      * context.
      * @param expression The expression that gets projected.
      */
-    virtual void evaluateProjection(ast::ExpressionNode* expression);
+    virtual void evaluateProjection(const ast::ExpressionNode* expression);
 
-    void visit(ast::AbstractNode *node) override;
-    void visit(ast::ExpressionNode *node) override;
-    void visit(ast::IdentifierNode *node) override;
-    void visit(ast::RawStringNode *node) override;
-    void visit(ast::LiteralNode* node) override;
-    void visit(ast::SubexpressionNode* node) override;
-    void visit(ast::IndexExpressionNode* node) override;
-    void visit(ast::ArrayItemNode* node) override;
-    void visit(ast::FlattenOperatorNode*) override;
-    void visit(ast::BracketSpecifierNode* node) override;
-    void visit(ast::SliceExpressionNode* node) override;
-    void visit(ast::ListWildcardNode* node) override;
-    void visit(ast::HashWildcardNode* node) override;
-    void visit(ast::MultiselectListNode* node) override;
-    void visit(ast::MultiselectHashNode* node) override;
-    void visit(ast::NotExpressionNode* node) override;
-    void visit(ast::ComparatorExpressionNode* node) override;
-    void visit(ast::OrExpressionNode* node) override;
-    void visit(ast::AndExpressionNode* node) override;
-    void visit(ast::ParenExpressionNode* node) override;
-    void visit(ast::PipeExpressionNode* node) override;
-    void visit(ast::CurrentNode*) override;
-    void visit(ast::FilterExpressionNode* node) override;
-    void visit(ast::FunctionExpressionNode* node) override;
-    void visit(ast::ExpressionArgumentNode*) override;
+    void visit(const ast::AbstractNode *node) override;
+    void visit(const ast::ExpressionNode *node) override;
+    void visit(const ast::IdentifierNode *node) override;
+    void visit(const ast::RawStringNode *node) override;
+    void visit(const ast::LiteralNode* node) override;
+    void visit(const ast::SubexpressionNode* node) override;
+    void visit(const ast::IndexExpressionNode* node) override;
+    void visit(const ast::ArrayItemNode* node) override;
+    void visit(const ast::FlattenOperatorNode*) override;
+    void visit(const ast::BracketSpecifierNode* node) override;
+    void visit(const ast::SliceExpressionNode* node) override;
+    void visit(const ast::ListWildcardNode* node) override;
+    void visit(const ast::HashWildcardNode* node) override;
+    void visit(const ast::MultiselectListNode* node) override;
+    void visit(const ast::MultiselectHashNode* node) override;
+    void visit(const ast::NotExpressionNode* node) override;
+    void visit(const ast::ComparatorExpressionNode* node) override;
+    void visit(const ast::OrExpressionNode* node) override;
+    void visit(const ast::AndExpressionNode* node) override;
+    void visit(const ast::ParenExpressionNode* node) override;
+    void visit(const ast::PipeExpressionNode* node) override;
+    void visit(const ast::CurrentNode*) override;
+    void visit(const ast::FilterExpressionNode* node) override;
+    void visit(const ast::FunctionExpressionNode* node) override;
+    void visit(const ast::ExpressionArgumentNode*) override;
 
 private:
     /**

@@ -100,12 +100,16 @@ TEST_CASE("FunctionExpressionNode")
     {
         FunctionExpressionNode node;
         Mock<AbstractVisitor> visitor;
-        When(OverloadedMethod(visitor, visit, void(FunctionExpressionNode*)))
+        When(OverloadedMethod(visitor,
+                              visit,
+                              void(const FunctionExpressionNode*)))
                 .AlwaysReturn();
 
         node.accept(&visitor.get());
 
-        Verify(OverloadedMethod(visitor, visit, void(FunctionExpressionNode*)))
+        Verify(OverloadedMethod(visitor,
+                                visit,
+                                void(const FunctionExpressionNode*)))
                 .Once();
     }
 }

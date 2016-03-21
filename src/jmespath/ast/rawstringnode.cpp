@@ -41,7 +41,7 @@ RawStringNode::RawStringNode(const detail::String &string)
 {
 }
 
-void RawStringNode::accept(interpreter::AbstractVisitor *visitor)
+void RawStringNode::accept(interpreter::AbstractVisitor *visitor) const
 {
     visitor->visit(this);
 }

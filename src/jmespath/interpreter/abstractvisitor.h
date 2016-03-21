@@ -76,31 +76,31 @@ public:
      * @param node Pointer to the node
      * @{
      */
-    virtual void visit(ast::AbstractNode* node) = 0;
-    virtual void visit(ast::ExpressionNode* node) = 0;
-    virtual void visit(ast::IdentifierNode* node) = 0;
-    virtual void visit(ast::RawStringNode* node) = 0;
-    virtual void visit(ast::LiteralNode* node) = 0;
-    virtual void visit(ast::SubexpressionNode* node) = 0;
-    virtual void visit(ast::IndexExpressionNode* node) = 0;
-    virtual void visit(ast::ArrayItemNode* node) = 0;
-    virtual void visit(ast::FlattenOperatorNode* node) = 0;
-    virtual void visit(ast::BracketSpecifierNode* node) = 0;
-    virtual void visit(ast::SliceExpressionNode* node) = 0;    
-    virtual void visit(ast::ListWildcardNode* node) = 0;
-    virtual void visit(ast::HashWildcardNode* node) = 0;
-    virtual void visit(ast::MultiselectListNode* node) = 0;
-    virtual void visit(ast::MultiselectHashNode* node) = 0;
-    virtual void visit(ast::NotExpressionNode* node) = 0;
-    virtual void visit(ast::ComparatorExpressionNode* node) = 0;
-    virtual void visit(ast::OrExpressionNode* node) = 0;
-    virtual void visit(ast::AndExpressionNode* node) = 0;
-    virtual void visit(ast::ParenExpressionNode* node) = 0;
-    virtual void visit(ast::PipeExpressionNode* node) = 0;
-    virtual void visit(ast::CurrentNode* node) = 0;
-    virtual void visit(ast::FilterExpressionNode* node) = 0;
-    virtual void visit(ast::FunctionExpressionNode* node) = 0;
-    virtual void visit(ast::ExpressionArgumentNode* node) = 0;
+    virtual void visit(const ast::AbstractNode* node) = 0;
+    virtual void visit(const ast::ExpressionNode* node) = 0;
+    virtual void visit(const ast::IdentifierNode* node) = 0;
+    virtual void visit(const ast::RawStringNode* node) = 0;
+    virtual void visit(const ast::LiteralNode* node) = 0;
+    virtual void visit(const ast::SubexpressionNode* node) = 0;
+    virtual void visit(const ast::IndexExpressionNode* node) = 0;
+    virtual void visit(const ast::ArrayItemNode* node) = 0;
+    virtual void visit(const ast::FlattenOperatorNode* node) = 0;
+    virtual void visit(const ast::BracketSpecifierNode* node) = 0;
+    virtual void visit(const ast::SliceExpressionNode* node) = 0;
+    virtual void visit(const ast::ListWildcardNode* node) = 0;
+    virtual void visit(const ast::HashWildcardNode* node) = 0;
+    virtual void visit(const ast::MultiselectListNode* node) = 0;
+    virtual void visit(const ast::MultiselectHashNode* node) = 0;
+    virtual void visit(const ast::NotExpressionNode* node) = 0;
+    virtual void visit(const ast::ComparatorExpressionNode* node) = 0;
+    virtual void visit(const ast::OrExpressionNode* node) = 0;
+    virtual void visit(const ast::AndExpressionNode* node) = 0;
+    virtual void visit(const ast::ParenExpressionNode* node) = 0;
+    virtual void visit(const ast::PipeExpressionNode* node) = 0;
+    virtual void visit(const ast::CurrentNode* node) = 0;
+    virtual void visit(const ast::FilterExpressionNode* node) = 0;
+    virtual void visit(const ast::FunctionExpressionNode* node) = 0;
+    virtual void visit(const ast::ExpressionArgumentNode* node) = 0;
     /** @}*/
 };
 }} // namespace jmespath::interpreter

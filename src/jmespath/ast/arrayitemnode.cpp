@@ -41,7 +41,7 @@ ArrayItemNode::ArrayItemNode(int index)
 {
 }
 
-void ArrayItemNode::accept(interpreter::AbstractVisitor *visitor)
+void ArrayItemNode::accept(interpreter::AbstractVisitor *visitor) const
 {
     visitor->visit(this);
 }

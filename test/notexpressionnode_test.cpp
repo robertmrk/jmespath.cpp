@@ -70,12 +70,12 @@ TEST_CASE("NotExpressionNode")
     {
         NotExpressionNode node;
         Mock<AbstractVisitor> visitor;
-        When(OverloadedMethod(visitor, visit, void(NotExpressionNode*)))
+        When(OverloadedMethod(visitor, visit, void(const NotExpressionNode*)))
                 .AlwaysReturn();
 
         node.accept(&visitor.get());
 
-        Verify(OverloadedMethod(visitor, visit, void(NotExpressionNode*)))
+        Verify(OverloadedMethod(visitor, visit, void(const NotExpressionNode*)))
                 .Once();
     }
 }

@@ -65,7 +65,7 @@ public:
      * on the node's child expressions.
      * @param visitor A visitor implementation.
      */
-    void accept(interpreter::AbstractVisitor *visitor) override;
+    void accept(interpreter::AbstractVisitor *visitor) const override;
     /**
      * @brief Reports whether the right hand side expression is projected onto
      * the result of the operation or not.

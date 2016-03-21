@@ -95,12 +95,14 @@ TEST_CASE("MultiselectHashNode")
     {
         MultiselectHashNode node;
         Mock<AbstractVisitor> visitor;
-        When(OverloadedMethod(visitor, visit, void(MultiselectHashNode*)))
+        When(OverloadedMethod(visitor, visit, void(const MultiselectHashNode*)))
                 .AlwaysReturn();
 
         node.accept(&visitor.get());
 
-        Verify(OverloadedMethod(visitor, visit, void(MultiselectHashNode*)))
+        Verify(OverloadedMethod(visitor,
+                                visit,
+                                void(const MultiselectHashNode*)))
                 .Once();
     }
 }

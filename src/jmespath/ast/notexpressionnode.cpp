@@ -42,7 +42,7 @@ NotExpressionNode::NotExpressionNode(const ExpressionNode &expression)
 {
 }
 
-void NotExpressionNode::accept(interpreter::AbstractVisitor *visitor)
+void NotExpressionNode::accept(interpreter::AbstractVisitor *visitor) const
 {
     visitor->visit(this);
 }

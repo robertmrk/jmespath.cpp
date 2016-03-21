@@ -87,12 +87,12 @@ TEST_CASE("AndExpressionNode")
     {
         AndExpressionNode node;
         Mock<AbstractVisitor> visitor;
-        When(OverloadedMethod(visitor, visit, void(AndExpressionNode*)))
+        When(OverloadedMethod(visitor, visit, void(const AndExpressionNode*)))
                 .AlwaysReturn();
 
         node.accept(&visitor.get());
 
-        Verify(OverloadedMethod(visitor, visit, void(AndExpressionNode*)))
+        Verify(OverloadedMethod(visitor, visit, void(const AndExpressionNode*)))
                 .Once();
     }
 }

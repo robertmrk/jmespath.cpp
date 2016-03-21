@@ -35,7 +35,7 @@ CurrentNode::CurrentNode()
 {
 }
 
-void CurrentNode::accept(interpreter::AbstractVisitor *visitor)
+void CurrentNode::accept(interpreter::AbstractVisitor *visitor) const
 {
     visitor->visit(this);
 }

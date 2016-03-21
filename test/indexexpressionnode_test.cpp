@@ -116,12 +116,14 @@ TEST_CASE("IndexExpressionNode")
     {
         IndexExpressionNode node{};
         Mock<AbstractVisitor> visitor;
-        When(OverloadedMethod(visitor, visit, void(IndexExpressionNode*)))
+        When(OverloadedMethod(visitor, visit, void(const IndexExpressionNode*)))
                 .AlwaysReturn();
 
         node.accept(&visitor.get());
 
-        Verify(OverloadedMethod(visitor, visit, void(IndexExpressionNode*)))
+        Verify(OverloadedMethod(visitor,
+                                visit,
+                                void(const IndexExpressionNode*)))
                 .Once();
     }
 }

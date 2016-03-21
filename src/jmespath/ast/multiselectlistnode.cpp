@@ -49,7 +49,7 @@ MultiselectListNode::MultiselectListNode(
 {
 }
 
-void MultiselectListNode::accept(interpreter::AbstractVisitor *visitor)
+void MultiselectListNode::accept(interpreter::AbstractVisitor *visitor) const
 {
     visitor->visit(this);
 }

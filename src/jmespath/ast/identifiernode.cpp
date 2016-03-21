@@ -41,7 +41,7 @@ IdentifierNode::IdentifierNode(const detail::String &identifier)
 {
 }
 
-void IdentifierNode::accept(interpreter::AbstractVisitor *visitor)
+void IdentifierNode::accept(interpreter::AbstractVisitor *visitor) const
 {
     visitor->visit(this);
 }

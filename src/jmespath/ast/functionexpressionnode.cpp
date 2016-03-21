@@ -44,7 +44,7 @@ FunctionExpressionNode::FunctionExpressionNode(const String &functionName,
 {
 }
 
-void FunctionExpressionNode::accept(interpreter::AbstractVisitor *visitor)
+void FunctionExpressionNode::accept(interpreter::AbstractVisitor *visitor) const
 {
     visitor->visit(this);
 }

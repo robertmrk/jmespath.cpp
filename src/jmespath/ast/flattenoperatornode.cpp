@@ -33,7 +33,7 @@ FlattenOperatorNode::FlattenOperatorNode()
     : AbstractNode()
 {    
 }
-void FlattenOperatorNode::accept(interpreter::AbstractVisitor *visitor)
+void FlattenOperatorNode::accept(interpreter::AbstractVisitor *visitor) const
 {
     visitor->visit(this);
 }

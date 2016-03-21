@@ -52,7 +52,7 @@ bool BinaryExpressionNode::operator==(const BinaryExpressionNode &other) const
     return true;
 }
 
-void BinaryExpressionNode::accept(interpreter::AbstractVisitor *visitor)
+void BinaryExpressionNode::accept(interpreter::AbstractVisitor *visitor) const
 {
     leftExpression.accept(visitor);
     rightExpression.accept(visitor);

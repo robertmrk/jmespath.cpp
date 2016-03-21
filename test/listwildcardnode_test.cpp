@@ -52,12 +52,12 @@ TEST_CASE("ListWildcardNode")
     {
         ListWildcardNode node{};
         Mock<AbstractVisitor> visitor;
-        When(OverloadedMethod(visitor, visit, void(ListWildcardNode*)))
+        When(OverloadedMethod(visitor, visit, void(const ListWildcardNode*)))
                 .AlwaysReturn();
 
         node.accept(&visitor.get());
 
-        Verify(OverloadedMethod(visitor, visit, void(ListWildcardNode*)))
+        Verify(OverloadedMethod(visitor, visit, void(const ListWildcardNode*)))
                 .Once();
     }
 }

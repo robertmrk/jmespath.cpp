@@ -6,6 +6,7 @@ set(JMESPATH_COPY_COMPLIANCETEST_FILES_TARGET_NAME copy_tests)
 
 add_executable(${JMESPATH_UNITTEST_TARGET_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/unit.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/expression_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/grammar_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/search_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/parser_test.cpp

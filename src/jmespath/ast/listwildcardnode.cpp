@@ -35,7 +35,7 @@ ListWildcardNode::ListWildcardNode()
 {
 }
 
-void ListWildcardNode::accept(interpreter::AbstractVisitor *visitor)
+void ListWildcardNode::accept(interpreter::AbstractVisitor *visitor) const
 {
     visitor->visit(this);
 }

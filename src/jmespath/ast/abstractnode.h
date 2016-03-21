@@ -53,7 +53,7 @@ public:
      * and the accept method of the node's member nodes with the \a visitor as
      * the parameter.
      */
-    virtual void accept(interpreter::AbstractVisitor* visitor) = 0;
+    virtual void accept(interpreter::AbstractVisitor* visitor) const = 0;
 };
 }} // namespace jmespath::ast
 #endif // ABSTRACTNODE_H

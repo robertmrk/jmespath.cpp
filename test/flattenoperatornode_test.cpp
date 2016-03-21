@@ -55,12 +55,14 @@ TEST_CASE("FlattenOperatorNode")
     {
         FlattenOperatorNode node{};
         Mock<AbstractVisitor> visitor;
-        When(OverloadedMethod(visitor, visit, void(FlattenOperatorNode*)))
+        When(OverloadedMethod(visitor, visit, void(const FlattenOperatorNode*)))
                 .AlwaysReturn();
 
         node.accept(&visitor.get());
 
-        Verify(OverloadedMethod(visitor, visit, void(FlattenOperatorNode*)))
+        Verify(OverloadedMethod(visitor,
+                                visit,
+                                void(const FlattenOperatorNode*)))
                 .Once();
     }
 }

@@ -40,7 +40,7 @@ SliceExpressionNode::SliceExpressionNode(const IndexType &start,
 {
 }
 
-void SliceExpressionNode::accept(interpreter::AbstractVisitor *visitor)
+void SliceExpressionNode::accept(interpreter::AbstractVisitor *visitor) const
 {
     visitor->visit(this);
 }

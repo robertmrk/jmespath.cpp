@@ -52,7 +52,7 @@ bool PipeExpressionNode::stopsProjection() const
     return true;
 }
 
-void PipeExpressionNode::accept(interpreter::AbstractVisitor *visitor)
+void PipeExpressionNode::accept(interpreter::AbstractVisitor *visitor) const
 {
     visitor->visit(this);
 }

@@ -92,7 +92,7 @@ public:
      * dynamic type of the node.
      * @param visitor A visitor implementation
      */
-    void accept(interpreter::AbstractVisitor* visitor) override;
+    void accept(interpreter::AbstractVisitor* visitor) const override;
     /**
      * @brief The type of comparator associated with the expression.
      */

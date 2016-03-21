@@ -26,34 +26,24 @@
 **
 ****************************************************************************/
 #include "jmespath/jmespath.h"
-#include "jmespath/parser/parser.h"
-#include "jmespath/parser/grammar.h"
 #include "jmespath/interpreter/interpreter.h"
 
 namespace jmespath {
 
-Json search(const String &searchExpression, const Json &document)
+Json search(const Expression &expression, const Json &document)
 {
-    using parser::Parser;
-    using parser::Grammar;
     using interpreter::Interpreter;
 
-    // return null on empty searchExpression
-    if (searchExpression.empty())
+    static std::unique_ptr<Interpreter> s_interpreter;
+    if (!s_interpreter)
     {
-        return {};
+        s_interpreter.reset(new Interpreter);
     }
-
-    // create a parser
-    Parser<Grammar> parser;
-    // parse the searchExpression and create an AST
-    auto astRoot = parser.parse(searchExpression);
-    // create an interpreter with the given JSON document
-    Interpreter interpreter{document};
+    s_interpreter->setContext(document);
     // evaluate the expression by calling visit with the root of the AST
-    interpreter.visit(&astRoot);
+    s_interpreter->visit(&expression.m_astRoot);
 
     // return the current evaluation context as the result
-    return interpreter.currentContext();
+    return s_interpreter->currentContext();
 }
 } // namespace jmespath

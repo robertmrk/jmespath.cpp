@@ -45,7 +45,7 @@ public:
     {
     }
 
-    void accept(jmespath::interpreter::AbstractVisitor* visitor) override
+    void accept(jmespath::interpreter::AbstractVisitor* visitor) const override
     {
         BinaryExpressionNode::accept(visitor);
     }
@@ -99,12 +99,12 @@ TEST_CASE("BinaryExpressionNode")
         ExpressionNode rightNode{IdentifierNode{"id2"}};
         BinaryExpressionNodeStub node{leftNode, rightNode};
         Mock<AbstractVisitor> visitor;
-        When(OverloadedMethod(visitor, visit, void(IdentifierNode*)))
+        When(OverloadedMethod(visitor, visit, void(const IdentifierNode*)))
                 .AlwaysReturn();
 
         node.accept(&visitor.get());
 
-        Verify(OverloadedMethod(visitor, visit, void(IdentifierNode*)))
+        Verify(OverloadedMethod(visitor, visit, void(const IdentifierNode*)))
                 .Exactly(2);
     }
 }

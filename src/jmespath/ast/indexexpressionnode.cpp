@@ -70,7 +70,7 @@ bool IndexExpressionNode::stopsProjection() const
     return bracketSpecifier.stopsProjection();
 }
 
-void IndexExpressionNode::accept(interpreter::AbstractVisitor *visitor)
+void IndexExpressionNode::accept(interpreter::AbstractVisitor *visitor) const
 {
     visitor->visit(this);
 }

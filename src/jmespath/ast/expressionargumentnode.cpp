@@ -40,7 +40,7 @@ ExpressionArgumentNode::ExpressionArgumentNode(const ExpressionNode &expression)
 {
 }
 
-void ExpressionArgumentNode::accept(interpreter::AbstractVisitor *visitor)
+void ExpressionArgumentNode::accept(interpreter::AbstractVisitor *visitor) const
 {
     visitor->visit(this);
 }

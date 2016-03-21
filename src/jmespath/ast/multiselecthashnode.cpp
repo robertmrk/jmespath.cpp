@@ -50,7 +50,7 @@ MultiselectHashNode::MultiselectHashNode(
 {
 }
 
-void MultiselectHashNode::accept(interpreter::AbstractVisitor *visitor)
+void MultiselectHashNode::accept(interpreter::AbstractVisitor *visitor) const
 {
     visitor->visit(this);
 }

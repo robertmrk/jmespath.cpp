@@ -51,7 +51,7 @@ bool HashWildcardNode::stopsProjection() const
     return false;
 }
 
-void HashWildcardNode::accept(interpreter::AbstractVisitor *visitor)
+void HashWildcardNode::accept(interpreter::AbstractVisitor *visitor) const
 {
     visitor->visit(this);
 }

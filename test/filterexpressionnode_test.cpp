@@ -68,12 +68,16 @@ TEST_CASE("FilterExpressionNode")
     {
         FilterExpressionNode node{};
         Mock<AbstractVisitor> visitor;
-        When(OverloadedMethod(visitor, visit, void(FilterExpressionNode*)))
+        When(OverloadedMethod(visitor,
+                              visit,
+                              void(const FilterExpressionNode*)))
                 .AlwaysReturn();
 
         node.accept(&visitor.get());
 
-        Verify(OverloadedMethod(visitor, visit, void(FilterExpressionNode*)))
+        Verify(OverloadedMethod(visitor,
+                                visit,
+                                void(const FilterExpressionNode*)))
                 .Once();
     }
 }

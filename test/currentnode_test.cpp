@@ -53,11 +53,12 @@ TEST_CASE("CurrentNode")
     {
         CurrentNode node{};
         Mock<AbstractVisitor> visitor;
-        When(OverloadedMethod(visitor, visit, void(CurrentNode*)))
+        When(OverloadedMethod(visitor, visit, void(const CurrentNode*)))
                 .AlwaysReturn();
 
         node.accept(&visitor.get());
 
-        Verify(OverloadedMethod(visitor, visit, void(CurrentNode*))).Once();
+        Verify(OverloadedMethod(visitor, visit, void(const CurrentNode*)))
+                .Once();
     }
 }

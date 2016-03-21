@@ -87,12 +87,14 @@ TEST_CASE("PipeExpressionNode")
     {
         PipeExpressionNode node;
         Mock<AbstractVisitor> visitor;
-        When(OverloadedMethod(visitor, visit, void(PipeExpressionNode*)))
+        When(OverloadedMethod(visitor, visit, void(const PipeExpressionNode*)))
                 .AlwaysReturn();
 
         node.accept(&visitor.get());
 
-        Verify(OverloadedMethod(visitor, visit, void(PipeExpressionNode*)))
+        Verify(OverloadedMethod(visitor,
+                                visit,
+                                void(const PipeExpressionNode*)))
                 .Once();
     }
 }

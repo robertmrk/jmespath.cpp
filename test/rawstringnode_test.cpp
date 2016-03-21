@@ -62,11 +62,12 @@ TEST_CASE("RawStringNode")
     {
         RawStringNode node{};
         Mock<AbstractVisitor> visitor;
-        When(OverloadedMethod(visitor, visit, void(RawStringNode*)))
+        When(OverloadedMethod(visitor, visit, void(const RawStringNode*)))
                 .AlwaysReturn();
 
         node.accept(&visitor.get());
 
-        Verify(OverloadedMethod(visitor, visit, void(RawStringNode*))).Once();
+        Verify(OverloadedMethod(visitor, visit, void(const RawStringNode*)))
+                .Once();
     }
 }

@@ -42,7 +42,7 @@ ParenExpressionNode::ParenExpressionNode(const ExpressionNode &expression)
 {
 }
 
-void ParenExpressionNode::accept(interpreter::AbstractVisitor *visitor)
+void ParenExpressionNode::accept(interpreter::AbstractVisitor *visitor) const
 {
     visitor->visit(this);
 }
