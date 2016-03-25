@@ -40,68 +40,85 @@ protected:
     void executeFeatureTest(const std::string& featureName) const
     {
         Json testSuites = readTestSuites(featureName + ".json");
-        for (auto testSuite: testSuites)
+        for (const auto& testSuite: testSuites)
         {
-            Json document = testSuite["given"];
-            Json testCases = testSuite["cases"];
-            for (auto testCase: testCases)
+            const Json& document = testSuite["given"];
+            const Json& testCases = testSuite["cases"];
+            for (const auto& testCase: testCases)
             {
-                String expression = testCase["expression"];
-                Json expectedResult = testCase["result"];
-                Json expectedError = testCase["error"];
-
-                if (expectedError == "syntax")
+                auto expression = testCase["expression"]
+                        .get_ref<const String&>();
+                auto resultIt = testCase.find("result");
+                if (resultIt != testCase.cend())
                 {
-                    REQUIRE_THROWS_AS(search(expression, document),
-                                      SyntaxError);
+                    testResult(expression, document, *resultIt);
                 }
-                else if (expectedError == "invalid-value")
+                auto errorIt = testCase.find("error");
+                if (errorIt != testCase.cend())
                 {
-                    REQUIRE_THROWS_AS(search(expression, document),
-                                      InvalidValue);
-                }
-                else if (expectedError == "invalid-type")
-                {
-                    REQUIRE_THROWS_AS(search(expression, document),
-                                      InvalidFunctionArgumentType);
-                }
-                else if (expectedError == "invalid-arity")
-                {
-                    REQUIRE_THROWS_AS(search(expression, document),
-                                      InvalidFunctionArgumentArity);
-                }
-                else if (expectedError == "unknown-function")
-                {
-                    REQUIRE_THROWS_AS(search(expression, document),
-                                      UnknownFunction);
-                }
-                else
-                {
-                    Json result;
-                    try
-                    {
-                        result = search(expression, document);
-                    }
-                    catch(std::exception& exc)
-                    {
-                        FAIL("Exception: " + String(exc.what())
-                             + "\nExpression: " + expression
-                             + "\nExpected result: " + expectedResult.dump()
-                             + "\nResult: " + result.dump());
-                    }
-
-                    if (result == expectedResult)
-                    {
-                        SUCCEED();
-                    }
-                    else
-                    {
-                        FAIL("Expression: " + expression
-                             + "\nExpected result: " + expectedResult.dump()
-                             + "\nResult: " + result.dump());
-                    }
+                    testError(expression, document, *errorIt);
                 }
             }
+        }
+    }
+
+    void testResult(const std::string& expression,
+                    const Json& document,
+                    const Json& expectedResult) const
+    {
+        Json result;
+        try
+        {
+            result = search(expression, document);
+        }
+        catch(std::exception& exc)
+        {
+            FAIL("Exception: " + String(exc.what())
+                 + "\nExpression: " + expression
+                 + "\nExpected result: " + expectedResult.dump()
+                 + "\nResult: " + result.dump());
+        }
+
+        if (result == expectedResult)
+        {
+            SUCCEED();
+        }
+        else
+        {
+            FAIL("Expression: " + expression
+                 + "\nExpected result: " + expectedResult.dump()
+                 + "\nResult: " + result.dump());
+        }
+    }
+
+    void testError(const std::string& expression,
+                   const Json& document,
+                   const std::string& expectedError) const
+    {
+        if (expectedError == "syntax")
+        {
+            REQUIRE_THROWS_AS(search(expression, document),
+                              SyntaxError);
+        }
+        else if (expectedError == "invalid-value")
+        {
+            REQUIRE_THROWS_AS(search(expression, document),
+                              InvalidValue);
+        }
+        else if (expectedError == "invalid-type")
+        {
+            REQUIRE_THROWS_AS(search(expression, document),
+                              InvalidFunctionArgumentType);
+        }
+        else if (expectedError == "invalid-arity")
+        {
+            REQUIRE_THROWS_AS(search(expression, document),
+                              InvalidFunctionArgumentArity);
+        }
+        else if (expectedError == "unknown-function")
+        {
+            REQUIRE_THROWS_AS(search(expression, document),
+                              UnknownFunction);
         }
     }
 
@@ -110,11 +127,10 @@ private:
 
     Json readTestSuites(const std::string& fileName) const
     {
-        Json featureTest;
         std::ifstream jsonFile;
         jsonFile.open(s_relativePath + "/" + fileName);
         REQUIRE(jsonFile.is_open());
-        jsonFile >> featureTest;
+        Json featureTest(jsonFile);
         jsonFile.close();
         return featureTest;
     }
