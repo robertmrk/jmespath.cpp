@@ -8,7 +8,10 @@ if ((${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
         OR (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
         OR (${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang"))
     #std=c++1y - use c++14 language standard
-    set(CMAKE_CXX_FLAGS "-std=c++1y")
+    set(CMAKE_CXX_FLAGS "-std=c++1y \
+        -Weverything -Wno-padded -Wno-c++98-compat-pedantic \
+        -Wno-disabled-macro-expansion \
+        --system-header-prefix=boost --system-header-prefix=json.hpp")
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
     #wd4348 - ingore warning C4348 (A template parameter was redefined.)
     #EHsc - set synchronous exception handling
