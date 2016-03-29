@@ -281,7 +281,7 @@ void Interpreter::visit(const ast::SliceExpressionNode *node)
     m_context = std::move(result);
 }
 
-void Interpreter::visit(const ast::ListWildcardNode *node)
+void Interpreter::visit(const ast::ListWildcardNode*)
 {
     if (!m_context.is_array())
     {

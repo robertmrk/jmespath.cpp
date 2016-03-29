@@ -80,7 +80,7 @@ public:
     void visit(const ast::FlattenOperatorNode*) override;
     void visit(const ast::BracketSpecifierNode* node) override;
     void visit(const ast::SliceExpressionNode* node) override;
-    void visit(const ast::ListWildcardNode* node) override;
+    void visit(const ast::ListWildcardNode*) override;
     void visit(const ast::HashWildcardNode* node) override;
     void visit(const ast::MultiselectListNode* node) override;
     void visit(const ast::MultiselectHashNode* node) override;

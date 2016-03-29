@@ -77,6 +77,10 @@ public:
      */
     ExpressionNode();
     /**
+     * @brief Copy-constructs an ExpressionNode object.
+     */
+    ExpressionNode(const ExpressionNode&) = default;
+    /**
      * @brief Constructs an ExpressionNode object with its child expression
      * initialized to \a expression
      * @param expression The node's child expression

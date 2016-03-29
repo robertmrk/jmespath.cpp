@@ -55,6 +55,10 @@ public:
     {
     }
     /**
+     * @brief Copy-constructs an VariantNode object.
+     */
+    VariantNode(const VariantNode&) = default;
+    /**
      * @brief Copy constructs a VariantNode object if T is VariantNode or
      * constructs a VariantNode object with T as the represented node type with
      * the value given in \a other.

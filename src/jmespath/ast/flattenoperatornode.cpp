@@ -38,7 +38,7 @@ void FlattenOperatorNode::accept(interpreter::AbstractVisitor *visitor) const
     visitor->visit(this);
 }
 
-bool FlattenOperatorNode::operator==(const FlattenOperatorNode &other) const
+bool FlattenOperatorNode::operator==(const FlattenOperatorNode&) const
 {
     return true;
 }
