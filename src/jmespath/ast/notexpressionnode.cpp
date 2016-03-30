@@ -36,9 +36,9 @@ NotExpressionNode::NotExpressionNode()
 {
 }
 
-NotExpressionNode::NotExpressionNode(const ExpressionNode &expression)
+NotExpressionNode::NotExpressionNode(const ExpressionNode &subexpression)
     : AbstractNode(),
-      expression(expression)
+      expression(subexpression)
 {
 }
 

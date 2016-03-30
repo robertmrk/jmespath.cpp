@@ -36,16 +36,16 @@ MultiselectListNode::MultiselectListNode()
 }
 
 MultiselectListNode::MultiselectListNode(
-        const std::vector<ExpressionNode> &expressions)
+        const std::vector<ExpressionNode> &subexpressions)
     : AbstractNode(),
-      expressions(expressions)
+      expressions(subexpressions)
 {
 }
 
 MultiselectListNode::MultiselectListNode(
-        const std::initializer_list<ExpressionNode> &expressions)
+        const std::initializer_list<ExpressionNode> &subexpressions)
     : AbstractNode(),
-      expressions(expressions)
+      expressions(subexpressions)
 {
 }
 

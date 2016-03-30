@@ -34,9 +34,10 @@ ExpressionArgumentNode::ExpressionArgumentNode()
 {
 }
 
-ExpressionArgumentNode::ExpressionArgumentNode(const ExpressionNode &expression)
+ExpressionArgumentNode::ExpressionArgumentNode(
+        const ExpressionNode &subexpression)
     : AbstractNode(),
-      expression(expression)
+      expression(subexpression)
 {
 }
 

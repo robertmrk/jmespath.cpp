@@ -30,13 +30,13 @@
 
 namespace jmespath { namespace ast {
 
-SliceExpressionNode::SliceExpressionNode(const IndexType &start,
-                                         const IndexType &stop,
-                                         const IndexType &step)
+SliceExpressionNode::SliceExpressionNode(const IndexType &startIndex,
+                                         const IndexType &stopIndex,
+                                         const IndexType &stepIndex)
     : AbstractNode(),
-      start(start),
-      stop(stop),
-      step(step)
+      start(startIndex),
+      stop(stopIndex),
+      step(stepIndex)
 {
 }
 

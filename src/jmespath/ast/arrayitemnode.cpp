@@ -35,9 +35,9 @@ ArrayItemNode::ArrayItemNode()
 {
 }
 
-ArrayItemNode::ArrayItemNode(int index)
+ArrayItemNode::ArrayItemNode(int itemIndex)
     : AbstractNode(),
-      index(index)
+      index(itemIndex)
 {
 }
 

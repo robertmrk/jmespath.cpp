@@ -59,14 +59,14 @@ public:
     /**
      * @brief Constructs a ComparatorExpressionNode object with the given @a
      * leftExpression, @a comparator and @a rightExpression.
-     * @param leftExpression The node's left hand child expression.
-     * @param comparator The type of comparison operator to use for comparing
-     * the left to the right hand child expression.
-     * @param rightExpression The node's right hand child expression.
+     * @param left The node's left hand child expression.
+     * @param valueComparator The type of comparison operator to use for
+     * comparing the results of the left and right hand child expressions.
+     * @param right The node's right hand child expression.
      */
-    ComparatorExpressionNode(const ExpressionNode& leftExpression,
-                             Comparator comparator,
-                             const ExpressionNode& rightExpression);
+    ComparatorExpressionNode(const ExpressionNode& left,
+                             Comparator valueComparator,
+                             const ExpressionNode& right);
     /**
      * @brief Equality compares this node to the \a other
      * @param other The node that should be compared.

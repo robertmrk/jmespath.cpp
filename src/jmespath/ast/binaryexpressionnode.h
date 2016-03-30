@@ -46,11 +46,11 @@ public:
     /**
      * @brief Constructs a BinaryExpressionNode object with the given @a leftExpressin
      * and @a rightExpression as its children.
-     * @param leftExpression Left hand expression of the node.
-     * @param rightExpression Right hand expression of the node.
+     * @param left Left hand expression of the node.
+     * @param right hand expression of the node.
      */
-    BinaryExpressionNode(const ExpressionNode& leftExpression,
-                         const ExpressionNode& rightExpression);
+    BinaryExpressionNode(const ExpressionNode& left,
+                         const ExpressionNode& right);
     /**
      * @brief Equality compares this node to the \a other
      * @param other The node that should be compared.

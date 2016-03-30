@@ -34,11 +34,11 @@ BinaryExpressionNode::BinaryExpressionNode()
 {
 }
 
-BinaryExpressionNode::BinaryExpressionNode(const ExpressionNode &leftExpression,
-                                          const ExpressionNode &rightExpression)
+BinaryExpressionNode::BinaryExpressionNode(const ExpressionNode &left,
+                                           const ExpressionNode &right)
     : AbstractNode(),
-      leftExpression(leftExpression),
-      rightExpression(rightExpression)
+      leftExpression(left),
+      rightExpression(right)
 {
 }
 

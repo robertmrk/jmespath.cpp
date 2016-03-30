@@ -56,11 +56,11 @@ public:
     /**
      * @brief Constructs a FunctionExpressionNode object with the given
      * @a function name and list of @a arguments as its arguments
-     * @param functionName The function's identifier
-     * @param arguments The function's arguments
+     * @param name The function's identifier
+     * @param argumentList The function's arguments
      */
-    FunctionExpressionNode(const String& functionName,
-        const std::initializer_list<ArgumentType>& arguments = {});
+    FunctionExpressionNode(const String& name,
+        const std::initializer_list<ArgumentType>& argumentList = {});
     /**
      * @brief Calls the visit method of the given \a visitor with the
      * dynamic type of the node.

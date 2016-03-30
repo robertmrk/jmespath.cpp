@@ -548,10 +548,11 @@ void Interpreter::avg(FunctionArgumentList &arguments)
     const Json* items = boost::get<Json>(&arguments[0]);
     if (items && items->is_array())
     {
-        double sum = std::accumulate(items->cbegin(),
-                                     items->cend(),
-                                     0.0,
-                                     [](double sum, const Json& item) -> double
+        double itemsSum = std::accumulate(items->cbegin(),
+                                          items->cend(),
+                                          0.0,
+                                          [](double sum,
+                                             const Json& item) -> double
         {
             if (item.is_number_integer())
             {
@@ -566,7 +567,7 @@ void Interpreter::avg(FunctionArgumentList &arguments)
                 BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
             }
         });
-        m_context = sum / items->size();
+        m_context = itemsSum / items->size();
     }
     else
     {
@@ -849,10 +850,11 @@ void Interpreter::sum(FunctionArgumentList &arguments)
     const Json* items = boost::get<Json>(&arguments[0]);
     if (items && items->is_array())
     {
-        double sum = std::accumulate(items->cbegin(),
-                                     items->cend(),
-                                     0.0,
-                                     [](double sum, const Json& item) -> double
+        double itemsSum = std::accumulate(items->cbegin(),
+                                          items->cend(),
+                                          0.0,
+                                          [](double sum,
+                                             const Json& item) -> double
         {
             if (item.is_number_integer())
             {
@@ -867,7 +869,7 @@ void Interpreter::sum(FunctionArgumentList &arguments)
                 BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
             }
         });
-        m_context = sum;
+        m_context = itemsSum;
     }
     else
     {

@@ -36,9 +36,9 @@ ParenExpressionNode::ParenExpressionNode()
 {
 }
 
-ParenExpressionNode::ParenExpressionNode(const ExpressionNode &expression)
+ParenExpressionNode::ParenExpressionNode(const ExpressionNode &subexpression)
     : AbstractNode(),
-      expression(expression)
+      expression(subexpression)
 {
 }
 

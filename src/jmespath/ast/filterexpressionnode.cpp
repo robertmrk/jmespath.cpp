@@ -36,9 +36,9 @@ FilterExpressionNode::FilterExpressionNode()
 {
 }
 
-FilterExpressionNode::FilterExpressionNode(const ExpressionNode &expression)
+FilterExpressionNode::FilterExpressionNode(const ExpressionNode &subexpression)
     : AbstractNode(),
-      expression(expression)
+      expression(subexpression)
 {
 
 }

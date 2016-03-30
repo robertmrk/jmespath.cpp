@@ -45,9 +45,9 @@ public:
     /**
      * @brief Constructs a ParenExpressionNode object with the given @a expression
      * as its child expression.
-     * @param expression The node's child expression.
+     * @param subexpression The node's child expression.
      */
-    ParenExpressionNode(const ExpressionNode& expression);
+    ParenExpressionNode(const ExpressionNode& subexpression);
     /**
      * @brief Calls the visit method of the given \a visitor with the
      * dynamic type of the node.
