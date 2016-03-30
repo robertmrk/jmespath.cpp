@@ -35,13 +35,13 @@ ArrayItemNode::ArrayItemNode()
 {
 }
 
-ArrayItemNode::ArrayItemNode(int index)
+ArrayItemNode::ArrayItemNode(int itemIndex)
     : AbstractNode(),
-      index(index)
+      index(itemIndex)
 {
 }
 
-void ArrayItemNode::accept(interpreter::AbstractVisitor *visitor)
+void ArrayItemNode::accept(interpreter::AbstractVisitor *visitor) const
 {
     visitor->visit(this);
 }

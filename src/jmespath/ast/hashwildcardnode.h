@@ -64,7 +64,7 @@ public:
      * dynamic type of the node.
      * @param visitor A visitor implementation
      */
-    void accept(interpreter::AbstractVisitor* visitor) override;
+    void accept(interpreter::AbstractVisitor* visitor) const override;
 };
 }} // namespace jmespath::ast
 

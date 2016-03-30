@@ -47,14 +47,14 @@ public:
      * dynamic type of the node.
      * @param visitor A visitor implementation
      */
-    void accept(interpreter::AbstractVisitor* visitor) override;
+    void accept(interpreter::AbstractVisitor* visitor) const override;
     /**
      * @brief Equality compares this node to the \a other
      * @param other The node that should be compared.
      * @return Returns true if this object is equal to the \a other, otherwise
      * false
      */
-    bool operator==(const CurrentNode&) const;
+    bool operator==(const CurrentNode& other) const;
 };
 }} // namespace jmespath::ast
 #endif // CURRENTNODE_H

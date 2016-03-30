@@ -46,6 +46,23 @@ class AbstractNode
 {
 public:
     /**
+     * @brief Constructs an AbstractNode object.
+     */
+    AbstractNode() = default;
+    /**
+     * @brief Copy-constructs an AbstractNode object.
+     */
+    AbstractNode(const AbstractNode&) = default;
+    /**
+     * @brief Destroys the AbstractNode object.
+     */
+    virtual ~AbstractNode() = default;
+    /**
+     * @brief Copy-assigns the other object to this object.
+     * @return Returns a reference to this object.
+     */
+    AbstractNode& operator=(const AbstractNode&) = default;
+    /**
      * @brief Accepts the given \a visitor object.
      *
      * Subclasses should implement this function by calling the visit
@@ -53,7 +70,7 @@ public:
      * and the accept method of the node's member nodes with the \a visitor as
      * the parameter.
      */
-    virtual void accept(interpreter::AbstractVisitor* visitor) = 0;
+    virtual void accept(interpreter::AbstractVisitor* visitor) const = 0;
 };
 }} // namespace jmespath::ast
 #endif // ABSTRACTNODE_H

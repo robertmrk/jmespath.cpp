@@ -84,12 +84,12 @@ TEST_CASE("HashWildcardNode")
     {
         HashWildcardNode node{};
         Mock<AbstractVisitor> visitor;
-        When(OverloadedMethod(visitor, visit, void(HashWildcardNode*)))
+        When(OverloadedMethod(visitor, visit, void(const HashWildcardNode*)))
                 .AlwaysReturn();
 
         node.accept(&visitor.get());
 
-        Verify(OverloadedMethod(visitor, visit, void(HashWildcardNode*)))
+        Verify(OverloadedMethod(visitor, visit, void(const HashWildcardNode*)))
                 .Once();
     }
 }

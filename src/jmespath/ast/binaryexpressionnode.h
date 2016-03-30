@@ -35,8 +35,6 @@ namespace jmespath { namespace ast {
 /**
  * @brief The BinaryExpressionNode class is the base class for all node types
  * which consist of a left and a right hand side expression.
- * @tparam ExpressionNode The left hand node's type.
- * @tparam ExpressionNode The right hand node's type.
  */
 class BinaryExpressionNode : public AbstractNode
 {
@@ -48,11 +46,11 @@ public:
     /**
      * @brief Constructs a BinaryExpressionNode object with the given @a leftExpressin
      * and @a rightExpression as its children.
-     * @param leftExpression Left hand expression of the node.
-     * @param rightExpression Right hand expression of the node.
+     * @param left Left hand expression of the node.
+     * @param right hand expression of the node.
      */
-    BinaryExpressionNode(const ExpressionNode& leftExpression,
-                         const ExpressionNode& rightExpression);
+    BinaryExpressionNode(const ExpressionNode& left,
+                         const ExpressionNode& right);
     /**
      * @brief Equality compares this node to the \a other
      * @param other The node that should be compared.
@@ -65,7 +63,7 @@ public:
      * on the node's child expressions.
      * @param visitor A visitor implementation.
      */
-    void accept(interpreter::AbstractVisitor *visitor) override;
+    void accept(interpreter::AbstractVisitor *visitor) const override;
     /**
      * @brief Reports whether the right hand side expression is projected onto
      * the result of the operation or not.

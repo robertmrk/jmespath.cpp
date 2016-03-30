@@ -35,18 +35,18 @@ IndexExpressionNode::IndexExpressionNode()
 }
 
 IndexExpressionNode::IndexExpressionNode(const BracketSpecifierNode
-                                            &bracketSpecifier)
+                                         &bracketNode)
     : BinaryExpressionNode(),
-      bracketSpecifier(bracketSpecifier)
+      bracketSpecifier(bracketNode)
 {
 }
 
-IndexExpressionNode::IndexExpressionNode(const ExpressionNode &expression,
+IndexExpressionNode::IndexExpressionNode(const ExpressionNode &left,
                                          const BracketSpecifierNode
-                                            &bracketSpecifier,
-                                         const ExpressionNode &subexpression)
-    : BinaryExpressionNode(expression, subexpression),
-      bracketSpecifier(bracketSpecifier)
+                                         &bracketNode,
+                                         const ExpressionNode &right)
+    : BinaryExpressionNode(left, right),
+      bracketSpecifier(bracketNode)
 {
 }
 
@@ -70,7 +70,7 @@ bool IndexExpressionNode::stopsProjection() const
     return bracketSpecifier.stopsProjection();
 }
 
-void IndexExpressionNode::accept(interpreter::AbstractVisitor *visitor)
+void IndexExpressionNode::accept(interpreter::AbstractVisitor *visitor) const
 {
     visitor->visit(this);
 }

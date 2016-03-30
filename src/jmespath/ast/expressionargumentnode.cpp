@@ -34,13 +34,14 @@ ExpressionArgumentNode::ExpressionArgumentNode()
 {
 }
 
-ExpressionArgumentNode::ExpressionArgumentNode(const ExpressionNode &expression)
+ExpressionArgumentNode::ExpressionArgumentNode(
+        const ExpressionNode &subexpression)
     : AbstractNode(),
-      expression(expression)
+      expression(subexpression)
 {
 }
 
-void ExpressionArgumentNode::accept(interpreter::AbstractVisitor *visitor)
+void ExpressionArgumentNode::accept(interpreter::AbstractVisitor *visitor) const
 {
     visitor->visit(this);
 }

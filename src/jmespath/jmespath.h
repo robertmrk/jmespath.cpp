@@ -30,7 +30,7 @@
 #include <string>
 #include "jmespath/detail/types.h"
 #include "jmespath/detail/exceptions.h"
-#include "json.hpp"
+#include "jmespath/expression.h"
 
 /**
  * @brief The top level namespace which contains the public
@@ -40,15 +40,15 @@ namespace jmespath {
 
 using namespace detail;
 /**
- * @brief Finds or creates the results for the \a searchExpression
- * evaluated on the given \a document.
+ * @brief Finds or creates the results for the \a expression evaluated on the
+ * given \a document.
  *
  * The \a searchExpression string should be encoded in UTF-8.
- * @param searchExpression JMESPath search expression.
+ * @param expression JMESPath expression.
  * @param document Input JSON document
- * @return Result of the evaluation of the \a searchExpression in JSON format
+ * @return Result of the evaluation of the \a expression in JSON format
  */
-Json search(const String& searchExpression,
+Json search(const Expression& expression,
             const Json& document);
 } // namespace jmespath
 #endif // JMESPATH_H

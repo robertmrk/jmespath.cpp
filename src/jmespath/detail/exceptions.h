@@ -41,7 +41,7 @@ using InfoSearchExpression
  * in the JMESPath expression
  */
 using InfoSyntaxErrorLocation
-    = boost::error_info<struct tag_syntax_error_location, int>;
+    = boost::error_info<struct tag_syntax_error_location, long>;
 /**
  * @brief InfoFunctionName contains the name of the built in JMESpath function.
  */

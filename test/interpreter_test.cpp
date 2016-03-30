@@ -167,19 +167,19 @@ TEST_CASE("Interpreter")
         Mock<Interpreter> interpreterMock(interpreter);
         interpreterMock.get().setContext("[1, 2, 3]"_json);
         When(OverloadedMethod(interpreterMock, visit,
-                              void(ast::ExpressionNode*)))
+                              void(const ast::ExpressionNode*)))
                 .AlwaysReturn();
         When(OverloadedMethod(interpreterMock, visit,
-                              void(ast::BracketSpecifierNode*)))
+                              void(const ast::BracketSpecifierNode*)))
                 .AlwaysReturn();
 
         interpreterMock.get().visit(&node);
 
         Verify(OverloadedMethod(interpreterMock, visit,
-                                void(ast::ExpressionNode*))
+                                void(const ast::ExpressionNode*))
                     .Using(&node.leftExpression)
                + OverloadedMethod(interpreterMock, visit,
-                                  void(ast::BracketSpecifierNode*))
+                                  void(const ast::BracketSpecifierNode*))
                     .Using(&node.bracketSpecifier))
                 .Once();
         VerifyNoOtherInvocations(interpreterMock);
@@ -192,14 +192,14 @@ TEST_CASE("Interpreter")
         Mock<Interpreter> interpreterMock(interpreter);
         interpreterMock.get().setContext("string value");
         When(OverloadedMethod(interpreterMock, visit,
-                              void(ast::ExpressionNode*)))
+                              void(const ast::ExpressionNode*)))
                 .AlwaysReturn();
 
         interpreterMock.get().visit(&node);
 
         REQUIRE(interpreterMock.get().currentContext() == Json{});
         Verify(OverloadedMethod(interpreterMock, visit,
-                                void(ast::ExpressionNode*))
+                                void(const ast::ExpressionNode*))
                     .Using(&node.leftExpression)).Once();
         VerifyNoOtherInvocations(interpreterMock);
     }
@@ -214,10 +214,10 @@ TEST_CASE("Interpreter")
         Mock<Interpreter> interpreterMock(interpreter);
         interpreterMock.get().setContext("[1, 2, 3]"_json);
         When(OverloadedMethod(interpreterMock, visit,
-                              void(ast::ExpressionNode*)))
+                              void(const ast::ExpressionNode*)))
                 .AlwaysReturn();
         When(OverloadedMethod(interpreterMock, visit,
-                              void(ast::BracketSpecifierNode*)))
+                              void(const ast::BracketSpecifierNode*)))
                 .AlwaysReturn();
         When(Method(interpreterMock, evaluateProjection))
                 .AlwaysReturn();
@@ -225,10 +225,10 @@ TEST_CASE("Interpreter")
         interpreterMock.get().visit(&node);
 
         Verify(OverloadedMethod(interpreterMock, visit,
-                                void(ast::ExpressionNode*))
+                                void(const ast::ExpressionNode*))
                     .Using(&node.leftExpression)
                + OverloadedMethod(interpreterMock, visit,
-                                  void(ast::BracketSpecifierNode*))
+                                  void(const ast::BracketSpecifierNode*))
                     .Using(&node.bracketSpecifier)
                + Method(interpreterMock, evaluateProjection)
                     .Using(&node.rightExpression))
@@ -470,7 +470,7 @@ TEST_CASE("Interpreter")
         ast::HashWildcardNode node;
         Mock<Interpreter> interpreterMock(interpreter);
         When(OverloadedMethod(interpreterMock, visit,
-                              void(ast::ExpressionNode*)))
+                              void(const ast::ExpressionNode*)))
                 .AlwaysReturn();
         When(Method(interpreterMock, evaluateProjection))
                 .AlwaysReturn();
@@ -478,7 +478,7 @@ TEST_CASE("Interpreter")
         interpreterMock.get().visit(&node);
 
         Verify(OverloadedMethod(interpreterMock, visit,
-                                void(ast::ExpressionNode*))
+                                void(const ast::ExpressionNode*))
                     .Using(&node.leftExpression)
                + Method(interpreterMock, evaluateProjection)
                     .Using(&node.rightExpression))
@@ -498,20 +498,20 @@ TEST_CASE("Interpreter")
         ast::MultiselectListNode node{exp1, exp2, exp3};
         Mock<Interpreter> interpreterMock(interpreter);
         When(OverloadedMethod(interpreterMock, visit,
-                              void(ast::ExpressionNode*)))
+                              void(const ast::ExpressionNode*)))
                 .AlwaysReturn();
         interpreterMock.get().setContext("value");
 
         interpreterMock.get().visit(&node);
 
         Verify(OverloadedMethod(interpreterMock, visit,
-                                void(ast::ExpressionNode*))
+                                void(const ast::ExpressionNode*))
                     .Using(&node.expressions[0])
                 + OverloadedMethod(interpreterMock, visit,
-                                   void(ast::ExpressionNode*))
+                                   void(const ast::ExpressionNode*))
                        .Using(&node.expressions[1])
                 + OverloadedMethod(interpreterMock, visit,
-                                   void(ast::ExpressionNode*))
+                                   void(const ast::ExpressionNode*))
                        .Using(&node.expressions[2]))
                 .Once();
         VerifyNoOtherInvocations(interpreterMock);
@@ -528,7 +528,7 @@ TEST_CASE("Interpreter")
         ast::MultiselectListNode node{exp1, exp2, exp3};
         Mock<Interpreter> interpreterMock(interpreter);
         When(OverloadedMethod(interpreterMock, visit,
-                              void(ast::ExpressionNode*)))
+                              void(const ast::ExpressionNode*)))
                 .AlwaysReturn();
 
         interpreterMock.get().visit(&node);
@@ -565,16 +565,16 @@ TEST_CASE("Interpreter")
                     ast::IdentifierNode{"id4"}}}};
         Mock<Interpreter> interpreterMock(interpreter);
         When(OverloadedMethod(interpreterMock, visit,
-                              void(ast::ExpressionNode*))).AlwaysReturn();
+                              void(const ast::ExpressionNode*))).AlwaysReturn();
         interpreterMock.get().setContext("value");
 
         interpreterMock.get().visit(&node);
 
         Verify(OverloadedMethod(interpreterMock, visit,
-                                void(ast::ExpressionNode*))
+                                void(const ast::ExpressionNode*))
                .Using(&node.expressions[0].second)).Once();
         Verify(OverloadedMethod(interpreterMock, visit,
-                                void(ast::ExpressionNode*))
+                                void(const ast::ExpressionNode*))
                .Using(&node.expressions[1].second)).Once();
         VerifyNoOtherInvocations(interpreterMock);
     }
@@ -590,7 +590,7 @@ TEST_CASE("Interpreter")
                     ast::IdentifierNode{"id4"}}}};
         Mock<Interpreter> interpreterMock(interpreter);
         When(OverloadedMethod(interpreterMock, visit,
-                              void(ast::ExpressionNode*))).AlwaysReturn();
+                              void(const ast::ExpressionNode*))).AlwaysReturn();
         interpreterMock.get().setContext({});
 
         interpreterMock.get().visit(&node);
@@ -621,12 +621,12 @@ TEST_CASE("Interpreter")
         ast::NotExpressionNode node;
         Mock<Interpreter> interpreterMock(interpreter);
         When(OverloadedMethod(interpreterMock, visit,
-                              void(ast::ExpressionNode*))).AlwaysReturn();
+                              void(const ast::ExpressionNode*))).AlwaysReturn();
 
         interpreterMock.get().visit(&node);
 
         Verify(OverloadedMethod(interpreterMock, visit,
-                                void(ast::ExpressionNode*))
+                                void(const ast::ExpressionNode*))
                .Using(&node.expression)).Once();
         VerifyNoOtherInvocations(interpreterMock);
     }
@@ -780,15 +780,15 @@ TEST_CASE("Interpreter")
                 ast::LiteralNode{"5"}}};
         Mock<Interpreter> interpreterMock(interpreter);
         When(OverloadedMethod(interpreterMock, visit,
-                              void(ast::ExpressionNode*))).AlwaysReturn();
+                              void(const ast::ExpressionNode*))).AlwaysReturn();
 
         interpreterMock.get().visit(&node);
 
         Verify(OverloadedMethod(interpreterMock, visit,
-                                void(ast::ExpressionNode*))
+                                void(const ast::ExpressionNode*))
                     .Using(&node.leftExpression)
                + OverloadedMethod(interpreterMock, visit,
-                                void(ast::ExpressionNode*))
+                                void(const ast::ExpressionNode*))
                     .Using(&node.rightExpression)).Once();
         VerifyNoOtherInvocations(interpreterMock);
     }
@@ -976,15 +976,15 @@ TEST_CASE("Interpreter")
             ast::ExpressionNode{}};
         Mock<Interpreter> interpreterMock(interpreter);
         When(OverloadedMethod(interpreterMock, visit,
-                              void(ast::ExpressionNode*))).AlwaysReturn();
+                              void(const ast::ExpressionNode*))).AlwaysReturn();
 
         interpreterMock.get().visit(&node);
 
         Verify(OverloadedMethod(interpreterMock, visit,
-                                void(ast::ExpressionNode*))
+                                void(const ast::ExpressionNode*))
                     .Using(&node.leftExpression)
                + OverloadedMethod(interpreterMock, visit,
-                                void(ast::ExpressionNode*))
+                                void(const ast::ExpressionNode*))
                     .Using(&node.rightExpression)).Once();
         VerifyNoOtherInvocations(interpreterMock);
     }
@@ -1027,16 +1027,16 @@ TEST_CASE("Interpreter")
             ast::ExpressionNode{}};
         Mock<Interpreter> interpreterMock(interpreter);
         When(OverloadedMethod(interpreterMock, visit,
-                              void(ast::ExpressionNode*))).AlwaysReturn();
+                              void(const ast::ExpressionNode*))).AlwaysReturn();
         interpreterMock.get().setContext("true"_json);
 
         interpreterMock.get().visit(&node);
 
         Verify(OverloadedMethod(interpreterMock, visit,
-                                void(ast::ExpressionNode*))
+                                void(const ast::ExpressionNode*))
                     .Using(&node.leftExpression)
                + OverloadedMethod(interpreterMock, visit,
-                                void(ast::ExpressionNode*))
+                                void(const ast::ExpressionNode*))
                     .Using(&node.rightExpression)).Once();
         VerifyNoOtherInvocations(interpreterMock);
     }
@@ -1078,12 +1078,12 @@ TEST_CASE("Interpreter")
         ast::ParenExpressionNode node;
         Mock<Interpreter> interpreterMock(interpreter);
         When(OverloadedMethod(interpreterMock, visit,
-                              void(ast::ExpressionNode*))).AlwaysReturn();
+                              void(const ast::ExpressionNode*))).AlwaysReturn();
 
         interpreterMock.get().visit(&node);
 
         Verify(OverloadedMethod(interpreterMock, visit,
-                                void(ast::ExpressionNode*))
+                                void(const ast::ExpressionNode*))
                .Using(&node.expression)).Once();
         VerifyNoOtherInvocations(interpreterMock);
     }
@@ -1093,15 +1093,15 @@ TEST_CASE("Interpreter")
         ast::PipeExpressionNode node;
         Mock<Interpreter> interpreterMock(interpreter);
         When(OverloadedMethod(interpreterMock, visit,
-                              void(ast::ExpressionNode*))).AlwaysReturn();
+                              void(const ast::ExpressionNode*))).AlwaysReturn();
 
         interpreterMock.get().visit(&node);
 
         Verify(OverloadedMethod(interpreterMock, visit,
-                                void(ast::ExpressionNode*))
+                                void(const ast::ExpressionNode*))
                     .Using(&node.leftExpression)
                + OverloadedMethod(interpreterMock, visit,
-                                void(ast::ExpressionNode*))
+                                void(const ast::ExpressionNode*))
                     .Using(&node.rightExpression)).Once();
         VerifyNoOtherInvocations(interpreterMock);
     }
@@ -1127,7 +1127,7 @@ TEST_CASE("Interpreter")
         ast::CurrentNode node;
         Mock<Interpreter> interpreterMock(interpreter);
         When(OverloadedMethod(interpreterMock, visit,
-                              void(ast::ExpressionNode*))).AlwaysReturn();
+                              void(const ast::ExpressionNode*))).AlwaysReturn();
         interpreterMock.get().setContext("value");
 
         interpreterMock.get().visit(&node);
@@ -1157,13 +1157,13 @@ TEST_CASE("Interpreter")
         Mock<Interpreter> interpreterMock(interpreter);
         interpreterMock.get().setContext("[1, 2, 3]"_json);
         When(OverloadedMethod(interpreterMock, visit,
-                              void(ast::ExpressionNode*)))
+                              void(const ast::ExpressionNode*)))
                 .AlwaysReturn();
 
         interpreterMock.get().visit(&node);
 
         Verify(OverloadedMethod(interpreterMock, visit,
-                                void(ast::ExpressionNode*))
+                                void(const ast::ExpressionNode*))
                     .Using(&node.expression)).Exactly(3);
         VerifyNoOtherInvocations(interpreterMock);
     }

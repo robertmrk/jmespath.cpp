@@ -46,15 +46,15 @@ public:
     /**
      * @brief Constructs a NotExpressionNode object with the given @a expression
      * as its child expression.
-     * @param expression The node's child expression.
+     * @param subexpression The node's child expression.
      */
-    NotExpressionNode(const ExpressionNode& expression);
+    NotExpressionNode(const ExpressionNode& subexpression);
     /**
      * @brief Calls the visit method of the given \a visitor with the
      * dynamic type of the node.
      * @param visitor A visitor implementation
      */
-    void accept(interpreter::AbstractVisitor* visitor) override;
+    void accept(interpreter::AbstractVisitor* visitor) const override;
     /**
      * @brief Equality compares this node to the \a other
      * @param other The node that should be compared.

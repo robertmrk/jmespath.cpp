@@ -44,19 +44,19 @@ public:
     /**
      * @brief Constructs a SliceExpressionNode object with the given index
      * values.
-     * @param start Inclusive start index of slice.
-     * @param stop Exclusive end index of slice.
-     * @param step Step index of slice.
+     * @param startIndex Inclusive start index of slice.
+     * @param stopIndex Exclusive end index of slice.
+     * @param stepIndex Step index of slice.
      */
-    SliceExpressionNode(const IndexType& start = boost::none,
-                        const IndexType& stop = boost::none,
-                        const IndexType& step = boost::none);
+    SliceExpressionNode(const IndexType& startIndex = boost::none,
+                        const IndexType& stopIndex = boost::none,
+                        const IndexType& stepIndex = boost::none);
     /**
      * @brief Calls the visit method of the given \a visitor with the
      * dynamic type of the node.
      * @param visitor A visitor implementation
      */
-    void accept(interpreter::AbstractVisitor* visitor) override;
+    void accept(interpreter::AbstractVisitor* visitor) const override;
     /**
      * @brief Equality compares this node to the \a other
      * @param other The node that should be compared.

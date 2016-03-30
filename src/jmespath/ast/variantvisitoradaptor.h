@@ -53,7 +53,7 @@ public:
      * @param variant The object that the visitor should visit.
      */
     template <typename T>
-    void operator() (T& variant) const
+    void operator() (const T& variant) const
     {
         m_visitor->visit(&variant);
     }
@@ -61,7 +61,7 @@ public:
      * @brief Does nothing, defined to ignore empty variants and to avoid
      * calling the visitor object with a blank value.
      */
-    void operator() (boost::blank&) const
+    void operator() (const boost::blank&) const
     {
     }
 

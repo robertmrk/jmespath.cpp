@@ -43,9 +43,17 @@ namespace jmespath { namespace parser {
  * @a node will be inserted using @a NodeInserterT. If @a NodeInsertConditionT
  * returns false it will try to insert @a node at the next location supplied by
  * @a ChildExtractorT.
- * @tparam ChildExtractorT
- * @tparam NodeInserterT
- * @tparam NodeInsertConditionT
+ * @tparam ChildExtractorT Policy type for getting the subsequent node of the
+ * passed node. The functor should have an overloaded function call operator
+ * with a signature of ast::ExpressionNode*(ast::ExpressionNode* node) const.
+ * @tparam NodeInserterT Policy type for inserting the a node at the position
+ * of the target node into the AST. The functor should have an overloaded
+ * function call operator with a signature of
+ * void(ast::ExpressionNode* targetNode, T* node) const.
+ * @tparam NodeInsertConditionT Policy type for checking whether the passed node
+ * can be inserted at the position of the target node. The functor should have
+ * an overloaded function call operator with a signature of
+ * bool(ast::ExpressionNode* targetNode, T* node) const.
  */
 template <typename ChildExtractorT,
           typename NodeInserterT,

@@ -67,11 +67,12 @@ TEST_CASE("ArrayItemNode")
     {
         ArrayItemNode node{};
         Mock<AbstractVisitor> visitor;
-        When(OverloadedMethod(visitor, visit, void(ArrayItemNode*)))
+        When(OverloadedMethod(visitor, visit, void(const ArrayItemNode*)))
                 .AlwaysReturn();
 
         node.accept(&visitor.get());
 
-        Verify(OverloadedMethod(visitor, visit, void(ArrayItemNode*))).Once();
+        Verify(OverloadedMethod(visitor, visit, void(const ArrayItemNode*)))
+                .Once();
     }
 }

@@ -52,7 +52,7 @@ bool OrExpressionNode::stopsProjection() const
     return true;
 }
 
-void OrExpressionNode::accept(interpreter::AbstractVisitor *visitor)
+void OrExpressionNode::accept(interpreter::AbstractVisitor *visitor) const
 {
     visitor->visit(this);
 }

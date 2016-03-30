@@ -93,12 +93,14 @@ TEST_CASE("MultiselectListNode")
     {
         MultiselectListNode node;
         Mock<AbstractVisitor> visitor;
-        When(OverloadedMethod(visitor, visit, void(MultiselectListNode*)))
+        When(OverloadedMethod(visitor, visit, void(const MultiselectListNode*)))
                 .AlwaysReturn();
 
         node.accept(&visitor.get());
 
-        Verify(OverloadedMethod(visitor, visit, void(MultiselectListNode*)))
+        Verify(OverloadedMethod(visitor,
+                                visit,
+                                void(const MultiselectListNode*)))
                 .Once();
     }
 }

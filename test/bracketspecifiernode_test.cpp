@@ -103,12 +103,12 @@ TEST_CASE("BracketSpecifierNode")
     {
         BracketSpecifierNode node{ArrayItemNode{}};
         Mock<AbstractVisitor> visitor;
-        When(OverloadedMethod(visitor, visit, void(ArrayItemNode*)))
+        When(OverloadedMethod(visitor, visit, void(const ArrayItemNode*)))
                 .AlwaysReturn();
 
         node.accept(&visitor.get());
 
-        Verify(OverloadedMethod(visitor, visit, void(ArrayItemNode*)))
+        Verify(OverloadedMethod(visitor, visit, void(const ArrayItemNode*)))
                 .Once();
     }
 

@@ -52,7 +52,7 @@ bool AndExpressionNode::stopsProjection() const
     return true;
 }
 
-void AndExpressionNode::accept(interpreter::AbstractVisitor *visitor)
+void AndExpressionNode::accept(interpreter::AbstractVisitor *visitor) const
 {
     visitor->visit(this);
 }

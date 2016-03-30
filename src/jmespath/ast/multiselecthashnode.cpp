@@ -37,20 +37,20 @@ MultiselectHashNode::MultiselectHashNode()
 }
 
 MultiselectHashNode::MultiselectHashNode(
-        const std::vector<KeyValuePairType> &expressions)
+        const std::vector<KeyValuePairType> &subexpressions)
     : AbstractNode(),
-      expressions(expressions)
+      expressions(subexpressions)
 {
 }
 
 MultiselectHashNode::MultiselectHashNode(
-        const std::initializer_list<KeyValuePairType> &expressions)
+        const std::initializer_list<KeyValuePairType> &subexpressions)
     : AbstractNode(),
-      expressions(expressions)
+      expressions(subexpressions)
 {
 }
 
-void MultiselectHashNode::accept(interpreter::AbstractVisitor *visitor)
+void MultiselectHashNode::accept(interpreter::AbstractVisitor *visitor) const
 {
     visitor->visit(this);
 }

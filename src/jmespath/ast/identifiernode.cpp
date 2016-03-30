@@ -35,13 +35,13 @@ IdentifierNode::IdentifierNode()
 {
 }
 
-IdentifierNode::IdentifierNode(const detail::String &identifier)
+IdentifierNode::IdentifierNode(const detail::String &name)
     : AbstractNode(),
-      identifier(identifier)
+      identifier(name)
 {
 }
 
-void IdentifierNode::accept(interpreter::AbstractVisitor *visitor)
+void IdentifierNode::accept(interpreter::AbstractVisitor *visitor) const
 {
     visitor->visit(this);
 }

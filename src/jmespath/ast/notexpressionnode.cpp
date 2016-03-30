@@ -36,13 +36,13 @@ NotExpressionNode::NotExpressionNode()
 {
 }
 
-NotExpressionNode::NotExpressionNode(const ExpressionNode &expression)
+NotExpressionNode::NotExpressionNode(const ExpressionNode &subexpression)
     : AbstractNode(),
-      expression(expression)
+      expression(subexpression)
 {
 }
 
-void NotExpressionNode::accept(interpreter::AbstractVisitor *visitor)
+void NotExpressionNode::accept(interpreter::AbstractVisitor *visitor) const
 {
     visitor->visit(this);
 }

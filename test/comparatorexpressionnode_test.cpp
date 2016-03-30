@@ -91,13 +91,15 @@ TEST_CASE("ComparatorExpressionNode")
     {
         ComparatorExpressionNode node;
         Mock<AbstractVisitor> visitor;
-        When(OverloadedMethod(visitor, visit, void(ComparatorExpressionNode*)))
+        When(OverloadedMethod(visitor,
+                              visit,
+                              void(const ComparatorExpressionNode*)))
                 .AlwaysReturn();
 
         node.accept(&visitor.get());
 
         Verify(OverloadedMethod(visitor,
                                 visit,
-                                void(ComparatorExpressionNode*))).Once();
+                                void(const ComparatorExpressionNode*))).Once();
     }
 }

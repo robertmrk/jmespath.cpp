@@ -36,15 +36,15 @@ FunctionExpressionNode::FunctionExpressionNode()
 {
 }
 
-FunctionExpressionNode::FunctionExpressionNode(const String &functionName,
-        const std::initializer_list<ArgumentType> &arguments)
+FunctionExpressionNode::FunctionExpressionNode(const String &name,
+        const std::initializer_list<ArgumentType> &argumentList)
     : AbstractNode(),
-      functionName(functionName),
-      arguments(arguments)
+      functionName(name),
+      arguments(argumentList)
 {
 }
 
-void FunctionExpressionNode::accept(interpreter::AbstractVisitor *visitor)
+void FunctionExpressionNode::accept(interpreter::AbstractVisitor *visitor) const
 {
     visitor->visit(this);
 }

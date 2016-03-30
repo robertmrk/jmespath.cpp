@@ -34,11 +34,11 @@ BinaryExpressionNode::BinaryExpressionNode()
 {
 }
 
-BinaryExpressionNode::BinaryExpressionNode(const ExpressionNode &leftExpression,
-                                          const ExpressionNode &rightExpression)
+BinaryExpressionNode::BinaryExpressionNode(const ExpressionNode &left,
+                                           const ExpressionNode &right)
     : AbstractNode(),
-      leftExpression(leftExpression),
-      rightExpression(rightExpression)
+      leftExpression(left),
+      rightExpression(right)
 {
 }
 
@@ -52,7 +52,7 @@ bool BinaryExpressionNode::operator==(const BinaryExpressionNode &other) const
     return true;
 }
 
-void BinaryExpressionNode::accept(interpreter::AbstractVisitor *visitor)
+void BinaryExpressionNode::accept(interpreter::AbstractVisitor *visitor) const
 {
     leftExpression.accept(visitor);
     rightExpression.accept(visitor);

@@ -49,22 +49,22 @@ public:
     /**
      * @brief Constructs a MultiselectListNode object with the given
      * @a expressions as its subexpressions
-     * @param expressions The node's subexpressoins
+     * @param subexpressions The node's subexpressoins
      */
-    MultiselectListNode(const std::vector<ExpressionNode>& expressions);
+    MultiselectListNode(const std::vector<ExpressionNode>& subexpressions);
     /**
      * @brief Constructs a MultiselectListNode object with the given
      * @a expressions as its subexpressions
-     * @param expressions The node's subexpressoins
+     * @param subexpressions The node's subexpressoins
      */
     MultiselectListNode(
-            const std::initializer_list<ExpressionNode>& expressions);
+            const std::initializer_list<ExpressionNode>& subexpressions);
     /**
      * @brief Calls the visit method of the given \a visitor with the
      * dynamic type of the node.
      * @param visitor A visitor implementation
      */
-    void accept(interpreter::AbstractVisitor* visitor) override;
+    void accept(interpreter::AbstractVisitor* visitor) const override;
     /**
      * @brief Equality compares this node to the \a other
      * @param other The node that should be compared.

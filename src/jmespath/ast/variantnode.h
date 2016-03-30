@@ -55,6 +55,10 @@ public:
     {
     }
     /**
+     * @brief Copy-constructs an VariantNode object.
+     */
+    VariantNode(const VariantNode&) = default;
+    /**
      * @brief Copy constructs a VariantNode object if T is VariantNode or
      * constructs a VariantNode object with T as the represented node type with
      * the value given in \a other.
@@ -103,7 +107,7 @@ public:
         return true;
     }
     /**
-     * @brief Returns wheather this object has been initialized.
+     * @brief Returns whether this object has been initialized.
      * @return Returns true if some node's value has been assigned to this
      * object, or false if this object doesn't yet represents any node.
      */
@@ -112,7 +116,7 @@ public:
         return value.type() == typeid(boost::blank);
     }
 
-    void accept(interpreter::AbstractVisitor *visitor) override
+    void accept(interpreter::AbstractVisitor *visitor) const override
     {
         boost::apply_visitor(VariantVisitorAdaptor(visitor), value);
     }

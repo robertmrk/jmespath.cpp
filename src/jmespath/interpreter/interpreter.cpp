@@ -40,10 +40,10 @@ namespace jmespath { namespace interpreter {
 namespace rng = boost::range;
 namespace alg = boost::algorithm;
 
-Interpreter::Interpreter(const Json &contextValue)
+Interpreter::Interpreter(const Json &value)
     : AbstractVisitor()
 {
-    setContext(contextValue);
+    setContext(value);
     using std::placeholders::_1;
     using std::make_tuple;
     using std::bind;
@@ -113,7 +113,7 @@ Json Interpreter::currentContext() const
     return m_context;
 }
 
-void Interpreter::evaluateProjection(ast::ExpressionNode *expression)
+void Interpreter::evaluateProjection(const ast::ExpressionNode *expression)
 {
     Json result;
     if (m_context.is_array())
@@ -133,17 +133,17 @@ void Interpreter::evaluateProjection(ast::ExpressionNode *expression)
     m_context = std::move(result);
 }
 
-void Interpreter::visit(ast::AbstractNode *node)
+void Interpreter::visit(const ast::AbstractNode *node)
 {
     node->accept(this);
 }
 
-void Interpreter::visit(ast::ExpressionNode *node)
+void Interpreter::visit(const ast::ExpressionNode *node)
 {
     node->accept(this);
 }
 
-void Interpreter::visit(ast::IdentifierNode *node)
+void Interpreter::visit(const ast::IdentifierNode *node)
 {
     Json result;
     if (m_context.is_object())
@@ -153,22 +153,22 @@ void Interpreter::visit(ast::IdentifierNode *node)
     m_context = std::move(result);
 }
 
-void Interpreter::visit(ast::RawStringNode *node)
+void Interpreter::visit(const ast::RawStringNode *node)
 {
-    m_context = std::move(node->rawString);
+    m_context = node->rawString;
 }
 
-void Interpreter::visit(ast::LiteralNode *node)
+void Interpreter::visit(const ast::LiteralNode *node)
 {
     m_context = Json::parse(node->literal);
 }
 
-void Interpreter::visit(ast::SubexpressionNode *node)
+void Interpreter::visit(const ast::SubexpressionNode *node)
 {
     node->accept(this);
 }
 
-void Interpreter::visit(ast::IndexExpressionNode *node)
+void Interpreter::visit(const ast::IndexExpressionNode *node)
 {
     visit(&node->leftExpression);
     if (m_context.is_array())
@@ -185,7 +185,7 @@ void Interpreter::visit(ast::IndexExpressionNode *node)
     }
 }
 
-void Interpreter::visit(ast::ArrayItemNode *node)
+void Interpreter::visit(const ast::ArrayItemNode *node)
 {
     Json result;
     if (m_context.is_array())
@@ -203,7 +203,7 @@ void Interpreter::visit(ast::ArrayItemNode *node)
     m_context = std::move(result);
 }
 
-void Interpreter::visit(ast::FlattenOperatorNode *)
+void Interpreter::visit(const ast::FlattenOperatorNode *)
 {
     Json result;
     if (m_context.is_array())
@@ -226,12 +226,12 @@ void Interpreter::visit(ast::FlattenOperatorNode *)
     m_context = std::move(result);
 }
 
-void Interpreter::visit(ast::BracketSpecifierNode *node)
+void Interpreter::visit(const ast::BracketSpecifierNode *node)
 {
     node->accept(this);
 }
 
-void Interpreter::visit(ast::SliceExpressionNode *node)
+void Interpreter::visit(const ast::SliceExpressionNode *node)
 {
     Json result;
     if (m_context.is_array())
@@ -281,7 +281,7 @@ void Interpreter::visit(ast::SliceExpressionNode *node)
     m_context = std::move(result);
 }
 
-void Interpreter::visit(ast::ListWildcardNode *node)
+void Interpreter::visit(const ast::ListWildcardNode*)
 {
     if (!m_context.is_array())
     {
@@ -289,7 +289,7 @@ void Interpreter::visit(ast::ListWildcardNode *node)
     }
 }
 
-void Interpreter::visit(ast::HashWildcardNode *node)
+void Interpreter::visit(const ast::HashWildcardNode *node)
 {
     visit(&node->leftExpression);
     Json result;
@@ -303,7 +303,7 @@ void Interpreter::visit(ast::HashWildcardNode *node)
     evaluateProjection(&node->rightExpression);
 }
 
-void Interpreter::visit(ast::MultiselectListNode *node)
+void Interpreter::visit(const ast::MultiselectListNode *node)
 {
     if (!m_context.is_null())
     {
@@ -319,7 +319,7 @@ void Interpreter::visit(ast::MultiselectListNode *node)
     }
 }
 
-void Interpreter::visit(ast::MultiselectHashNode *node)
+void Interpreter::visit(const ast::MultiselectHashNode *node)
 {
     if (!m_context.is_null())
     {
@@ -335,13 +335,13 @@ void Interpreter::visit(ast::MultiselectHashNode *node)
     }
 }
 
-void Interpreter::visit(ast::NotExpressionNode *node)
+void Interpreter::visit(const ast::NotExpressionNode *node)
 {
     visit(&node->expression);
     m_context = !toBoolean(m_context);
 }
 
-void Interpreter::visit(ast::ComparatorExpressionNode *node)
+void Interpreter::visit(const ast::ComparatorExpressionNode *node)
 {
     using Comparator = ast::ComparatorExpressionNode::Comparator;
 
@@ -384,7 +384,7 @@ void Interpreter::visit(ast::ComparatorExpressionNode *node)
     }
 }
 
-void Interpreter::visit(ast::OrExpressionNode *node)
+void Interpreter::visit(const ast::OrExpressionNode *node)
 {
     Json childContext = m_context;
     visit(&node->leftExpression);
@@ -395,7 +395,7 @@ void Interpreter::visit(ast::OrExpressionNode *node)
     }
 }
 
-void Interpreter::visit(ast::AndExpressionNode *node)
+void Interpreter::visit(const ast::AndExpressionNode *node)
 {
     Json childContext = m_context;
     visit(&node->leftExpression);
@@ -406,22 +406,22 @@ void Interpreter::visit(ast::AndExpressionNode *node)
     }
 }
 
-void Interpreter::visit(ast::ParenExpressionNode *node)
+void Interpreter::visit(const ast::ParenExpressionNode *node)
 {
     visit(&node->expression);
 }
 
-void Interpreter::visit(ast::PipeExpressionNode *node)
+void Interpreter::visit(const ast::PipeExpressionNode *node)
 {
     visit(&node->leftExpression);
     visit(&node->rightExpression);
 }
 
-void Interpreter::visit(ast::CurrentNode *)
+void Interpreter::visit(const ast::CurrentNode *)
 {
 }
 
-void Interpreter::visit(ast::FilterExpressionNode *node)
+void Interpreter::visit(const ast::FilterExpressionNode *node)
 {
     Json result;
     if (m_context.is_array())
@@ -441,7 +441,7 @@ void Interpreter::visit(ast::FilterExpressionNode *node)
     m_context = std::move(result);
 }
 
-void Interpreter::visit(ast::FunctionExpressionNode *node)
+void Interpreter::visit(const ast::FunctionExpressionNode *node)
 {
     auto it = m_functionMap.find(node->functionName);
     if (it == m_functionMap.end())
@@ -463,7 +463,7 @@ void Interpreter::visit(ast::FunctionExpressionNode *node)
     function(argumentList);
 }
 
-void Interpreter::visit(ast::ExpressionArgumentNode *)
+void Interpreter::visit(const ast::ExpressionArgumentNode *)
 {
 }
 
@@ -518,7 +518,7 @@ Interpreter::evaluateArguments(const FunctionExpressionArgumentList &arguments)
                 = boost::get<ast::ExpressionArgumentNode>(&argument);
         if (expressionTypeArgument)
         {
-            functionArgument = std::move(expressionTypeArgument->expression);
+            functionArgument = expressionTypeArgument->expression;
         }
 
         return functionArgument;
@@ -548,10 +548,11 @@ void Interpreter::avg(FunctionArgumentList &arguments)
     const Json* items = boost::get<Json>(&arguments[0]);
     if (items && items->is_array())
     {
-        double sum = std::accumulate(items->cbegin(),
-                                     items->cend(),
-                                     0.0,
-                                     [](double sum, const Json& item) -> double
+        double itemsSum = std::accumulate(items->cbegin(),
+                                          items->cend(),
+                                          0.0,
+                                          [](double sum,
+                                             const Json& item) -> double
         {
             if (item.is_number_integer())
             {
@@ -566,7 +567,7 @@ void Interpreter::avg(FunctionArgumentList &arguments)
                 BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
             }
         });
-        m_context = sum / items->size();
+        m_context = itemsSum / items->size();
     }
     else
     {
@@ -849,10 +850,11 @@ void Interpreter::sum(FunctionArgumentList &arguments)
     const Json* items = boost::get<Json>(&arguments[0]);
     if (items && items->is_array())
     {
-        double sum = std::accumulate(items->cbegin(),
-                                     items->cend(),
-                                     0.0,
-                                     [](double sum, const Json& item) -> double
+        double itemsSum = std::accumulate(items->cbegin(),
+                                          items->cend(),
+                                          0.0,
+                                          [](double sum,
+                                             const Json& item) -> double
         {
             if (item.is_number_integer())
             {
@@ -867,7 +869,7 @@ void Interpreter::sum(FunctionArgumentList &arguments)
                 BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
             }
         });
-        m_context = sum;
+        m_context = itemsSum;
     }
     else
     {
@@ -946,6 +948,8 @@ void Interpreter::type(FunctionArgumentList &arguments)
     }
 
     String result;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcovered-switch-default"
     switch (value->type())
     {
     case Json::value_t::number_float:
@@ -955,8 +959,11 @@ void Interpreter::type(FunctionArgumentList &arguments)
     case Json::value_t::boolean: result = "boolean"; break;
     case Json::value_t::array: result = "array"; break;
     case Json::value_t::object: result = "object"; break;
+    case Json::value_t::discarded:
+    case Json::value_t::null:
     default: result = "null";
     }
+#pragma clang diagnostic pop
     m_context = std::move(result);
 }
 

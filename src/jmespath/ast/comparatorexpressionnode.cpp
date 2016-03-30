@@ -37,12 +37,11 @@ ComparatorExpressionNode::ComparatorExpressionNode()
 {
 }
 
-ComparatorExpressionNode::ComparatorExpressionNode(
-        const ExpressionNode &leftExpression,
-        Comparator comparator,
-        const ExpressionNode &rightExpression)
-    : BinaryExpressionNode(leftExpression, rightExpression),
-      comparator(comparator)
+ComparatorExpressionNode::ComparatorExpressionNode(const ExpressionNode &left,
+        Comparator valueComparator,
+        const ExpressionNode &right)
+    : BinaryExpressionNode(left, right),
+      comparator(valueComparator)
 {
 }
 
@@ -67,7 +66,7 @@ bool ComparatorExpressionNode::stopsProjection() const
     return true;
 }
 
-void ComparatorExpressionNode::accept(interpreter::AbstractVisitor *visitor)
+void ComparatorExpressionNode::accept(interpreter::AbstractVisitor *visitor) const
 {
     visitor->visit(this);
 }

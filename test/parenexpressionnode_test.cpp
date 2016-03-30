@@ -70,12 +70,14 @@ TEST_CASE("ParenExpressionNode")
     {
         ParenExpressionNode node;
         Mock<AbstractVisitor> visitor;
-        When(OverloadedMethod(visitor, visit, void(ParenExpressionNode*)))
+        When(OverloadedMethod(visitor, visit, void(const ParenExpressionNode*)))
                 .AlwaysReturn();
 
         node.accept(&visitor.get());
 
-        Verify(OverloadedMethod(visitor, visit, void(ParenExpressionNode*)))
+        Verify(OverloadedMethod(visitor,
+                                visit,
+                                void(const ParenExpressionNode*)))
                 .Once();
     }
 }

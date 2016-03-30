@@ -88,12 +88,14 @@ TEST_CASE("SliceExpressionNode")
     {
         SliceExpressionNode node{};
         Mock<AbstractVisitor> visitor;
-        When(OverloadedMethod(visitor, visit, void(SliceExpressionNode*)))
+        When(OverloadedMethod(visitor, visit, void(const SliceExpressionNode*)))
                 .AlwaysReturn();
 
         node.accept(&visitor.get());
 
-        Verify(OverloadedMethod(visitor, visit, void(SliceExpressionNode*)))
+        Verify(OverloadedMethod(visitor,
+                                visit,
+                                void(const SliceExpressionNode*)))
                 .Once();
     }
 }

@@ -36,13 +36,13 @@ ParenExpressionNode::ParenExpressionNode()
 {
 }
 
-ParenExpressionNode::ParenExpressionNode(const ExpressionNode &expression)
+ParenExpressionNode::ParenExpressionNode(const ExpressionNode &subexpression)
     : AbstractNode(),
-      expression(expression)
+      expression(subexpression)
 {
 }
 
-void ParenExpressionNode::accept(interpreter::AbstractVisitor *visitor)
+void ParenExpressionNode::accept(interpreter::AbstractVisitor *visitor) const
 {
     visitor->visit(this);
 }

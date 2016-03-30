@@ -47,15 +47,15 @@ public:
     /**
      * @brief Constructs an IdentifierNode object with the given @a identifier
      * parameter as its name.
-     * @param identifier The identifier's name.
+     * @param name The identifier's name.
      */
-    IdentifierNode(const String& identifier);
+    IdentifierNode(const String& name);
     /**
      * @brief Calls the visit method of the given \a visitor with the
      * dynamic type of the node.
      * @param visitor A visitor implementation
      */
-    void accept(interpreter::AbstractVisitor* visitor) override;
+    void accept(interpreter::AbstractVisitor* visitor) const override;
     /**
      * @brief Equality compares this node to the \a other
      * @param other The node that should be compared.

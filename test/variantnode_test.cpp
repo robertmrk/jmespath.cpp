@@ -91,12 +91,13 @@ TEST_CASE("VariantNode")
         using jmespath::interpreter::AbstractVisitor;
         VariantNode<IdentifierNode> node = IdentifierNode{};
         Mock<AbstractVisitor> visitor;
-        When(OverloadedMethod(visitor, visit, void(IdentifierNode*)))
+        When(OverloadedMethod(visitor, visit, void(const IdentifierNode*)))
                 .AlwaysReturn();
 
         node.accept(&visitor.get());
 
-        Verify(OverloadedMethod(visitor, visit, void(IdentifierNode*))).Once();
+        Verify(OverloadedMethod(visitor, visit, void(const IdentifierNode*)))
+                .Once();
         VerifyNoOtherInvocations(visitor);
     }
 }

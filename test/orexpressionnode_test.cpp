@@ -87,12 +87,12 @@ TEST_CASE("OrExpressionNode")
     {
         OrExpressionNode node;
         Mock<AbstractVisitor> visitor;
-        When(OverloadedMethod(visitor, visit, void(OrExpressionNode*)))
+        When(OverloadedMethod(visitor, visit, void(const OrExpressionNode*)))
                 .AlwaysReturn();
 
         node.accept(&visitor.get());
 
-        Verify(OverloadedMethod(visitor, visit, void(OrExpressionNode*)))
+        Verify(OverloadedMethod(visitor, visit, void(const OrExpressionNode*)))
                 .Once();
     }
 }

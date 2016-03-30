@@ -35,12 +35,11 @@ namespace {
 
 /**
  * @brief Returns the rank of the given @a node object's type.
- * @param node The node object that should be ranked.
  * @tparam T The type of the @a node object.
  * @return Returns the rank of the node as an integer.
  */
 template <typename T>
-int nodeRank(const T& node)
+int nodeRank(const T&)
 {
     return 0;
 }
@@ -72,6 +71,8 @@ int nodeRank(const boost::variant<Args...>& variant)
     return boost::apply_visitor(NodeRankVisitor{}, variant);
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunneeded-internal-declaration"
 template <>
 int nodeRank(const ast::ExpressionNode& node)
 {
@@ -84,6 +85,7 @@ int nodeRank(const ast::ExpressionNode& node)
         return nodeRank(node.value);
     }
 }
+#pragma clang diagnostic pop
 
 template <>
 int nodeRank(const ast::SubexpressionNode&)
@@ -104,67 +106,67 @@ int nodeRank(const ast::IndexExpressionNode& node)
 }
 
 template <>
-int nodeRank(const ast::ArrayItemNode& node)
+int nodeRank(const ast::ArrayItemNode&)
 {
     return 1;
 }
 
 template <>
-int nodeRank(const ast::FlattenOperatorNode& node)
+int nodeRank(const ast::FlattenOperatorNode&)
 {
     return 2;
 }
 
 template <>
-int nodeRank(const ast::SliceExpressionNode& node)
+int nodeRank(const ast::SliceExpressionNode&)
 {
     return 2;
 }
 
 template <>
-int nodeRank(const ast::ListWildcardNode& node)
+int nodeRank(const ast::ListWildcardNode&)
 {
     return 2;
 }
 
 template <>
-int nodeRank(const ast::HashWildcardNode& node)
+int nodeRank(const ast::HashWildcardNode&)
 {
     return 2;
 }
 
 template <>
-int nodeRank(const ast::FilterExpressionNode& node)
+int nodeRank(const ast::FilterExpressionNode&)
 {
     return 2;
 }
 
 template <>
-int nodeRank(const ast::NotExpressionNode& node)
+int nodeRank(const ast::NotExpressionNode&)
 {
     return 3;
 }
 
 template <>
-int nodeRank(const ast::ComparatorExpressionNode& node)
+int nodeRank(const ast::ComparatorExpressionNode&)
 {
     return 4;
 }
 
 template <>
-int nodeRank(const ast::AndExpressionNode& node)
+int nodeRank(const ast::AndExpressionNode&)
 {
     return 5;
 }
 
 template <>
-int nodeRank(const ast::OrExpressionNode& node)
+int nodeRank(const ast::OrExpressionNode&)
 {
     return 6;
 }
 
 template <>
-int nodeRank(const ast::PipeExpressionNode& node)
+int nodeRank(const ast::PipeExpressionNode&)
 {
     return 7;
 }

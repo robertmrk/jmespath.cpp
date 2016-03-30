@@ -35,12 +35,12 @@ ListWildcardNode::ListWildcardNode()
 {
 }
 
-void ListWildcardNode::accept(interpreter::AbstractVisitor *visitor)
+void ListWildcardNode::accept(interpreter::AbstractVisitor *visitor) const
 {
     visitor->visit(this);
 }
 
-bool ListWildcardNode::operator==(const ListWildcardNode &other) const
+bool ListWildcardNode::operator==(const ListWildcardNode&) const
 {
     return true;
 }

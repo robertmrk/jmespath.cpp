@@ -46,15 +46,15 @@ public:
     /**
      * @brief Constructs an ArrayItemNode object with the given @a index as its
      * value.
-     * @param index The node's value.
+     * @param itemIndex The node's value.
      */
-    ArrayItemNode(int index);
+    ArrayItemNode(int itemIndex);
     /**
      * @brief Calls the visit method of the given \a visitor with the
      * dynamic type of the node.
      * @param visitor A visitor implementation
      */
-    void accept(interpreter::AbstractVisitor* visitor) override;
+    void accept(interpreter::AbstractVisitor* visitor) const override;
     /**
      * @brief Equality compares this node to the \a other
      * @param other The node that should be compared.

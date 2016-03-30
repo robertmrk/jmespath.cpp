@@ -41,7 +41,7 @@ LiteralNode::LiteralNode(const detail::String &value)
 {
 }
 
-void LiteralNode::accept(interpreter::AbstractVisitor *visitor)
+void LiteralNode::accept(interpreter::AbstractVisitor *visitor) const
 {
     visitor->visit(this);
 }

@@ -46,20 +46,20 @@ public:
     /**
      * @brief Constructs an IndexExpressionNode object with the given
      * @a bracketSpecifier and empty left and right expressions.
-     * @param bracketSpecifier The bracket specifier node.
+     * @param bracketNode The bracket specifier node.
      */
-    IndexExpressionNode(const BracketSpecifierNode& bracketSpecifier);
+    IndexExpressionNode(const BracketSpecifierNode& bracketNode);
     /**
      * @brief Constructs an IndexExpressionNode with given @a expression as its
      * left hand expression, @a subexpression as its right hand expression and
      * with the given @a bracketSpecifier.
-     * @param expression The left hand expression of the node.
-     * @param bracketSpecifier The index expression's bracket specifier.
-     * @param subexpression The right hand expression of the node.
+     * @param left The left hand expression of the node.
+     * @param bracketNode The index expression's bracket specifier.
+     * @param right The right hand expression of the node.
      */
-    IndexExpressionNode(const ExpressionNode& expression,
-                        const BracketSpecifierNode& bracketSpecifier,
-                        const ExpressionNode& subexpression = {});
+    IndexExpressionNode(const ExpressionNode& left,
+                        const BracketSpecifierNode& bracketNode,
+                        const ExpressionNode& right = {});
     /**
      * @brief Equality compares this node to the \a other
      * @param other The node that should be compared.
@@ -85,7 +85,7 @@ public:
      * dynamic type of the node.
      * @param visitor A visitor implementation
      */
-    void accept(interpreter::AbstractVisitor* visitor) override;
+    void accept(interpreter::AbstractVisitor* visitor) const override;
     /**
      * @brief The bracket specifier in an index expression.
      */

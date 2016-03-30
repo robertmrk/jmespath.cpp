@@ -55,12 +55,13 @@ TEST_CASE("VariantVisitorAdaptor")
                 boost::recursive_wrapper<IdentifierNode> > variant;
         variant = IdentifierNode{};
         Mock<AbstractVisitor> visitor;
-        When(OverloadedMethod(visitor, visit, void(IdentifierNode*)))
+        When(OverloadedMethod(visitor, visit, void(const IdentifierNode*)))
                 .AlwaysReturn();
 
         boost::apply_visitor(VariantVisitorAdaptor(&visitor.get()), variant);
 
-        Verify(OverloadedMethod(visitor, visit, void(IdentifierNode*))).Once();
+        Verify(OverloadedMethod(visitor, visit, void(const IdentifierNode*)))
+                .Once();
         VerifyNoOtherInvocations(visitor);
     }
 
@@ -69,7 +70,7 @@ TEST_CASE("VariantVisitorAdaptor")
         boost::variant<boost::blank,
                 boost::recursive_wrapper<IdentifierNode> > variant;
         Mock<AbstractVisitor> visitor;
-        When(OverloadedMethod(visitor, visit, void(IdentifierNode*)))
+        When(OverloadedMethod(visitor, visit, void(const IdentifierNode*)))
                 .AlwaysReturn();
 
         boost::apply_visitor(VariantVisitorAdaptor(&visitor.get()), variant);
