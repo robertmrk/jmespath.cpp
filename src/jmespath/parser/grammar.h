@@ -72,7 +72,6 @@ public:
         : Grammar::base_type(m_expressionRule)
     {
         using encoding::char_;
-        using qi::int_;
         using qi::lit;
         using qi::lexeme;
         using qi::int_parser;
@@ -169,8 +168,11 @@ public:
                 | m_filterExpressionRule
                 | m_flattenOperatorRule;
 
-        // match an integer
-        m_arrayItemRule = int_;
+        // match an integer of type Index
+        m_indexRule = int_parser<detail::Index>();
+
+        // match an index
+        m_arrayItemRule = m_indexRule;
 
         // match a pair of square brackets
         m_flattenOperatorRule = eps >> lit("[]");
@@ -179,13 +181,12 @@ public:
         m_filterExpressionRule = lit("[?") >> m_expressionRule >> lit("]");
 
         // match a colon which can be optionally preceded and followed by a
-        // single integer, these matches can also be optionally followed by
-        // another colon which can be followed by an integer whose value doesn't
-        // equals to 0
-        m_sliceExpressionRule = -int_[at_c<0>(_val) = _1]
+        // single index, these matches can also be optionally followed by
+        // another colon which can be followed by an index
+        m_sliceExpressionRule = -m_indexRule[at_c<0>(_val) = _1]
                 >> lit(':')
-                >> -int_[at_c<1>(_val) = _1]
-                >> -(lit(':') >> -int_[at_c<2>(_val) = _1]);
+                >> -m_indexRule[at_c<1>(_val) = _1]
+                >> -(lit(':') >> -m_indexRule[at_c<2>(_val) = _1]);
 
         // match an asterisk
         m_listWildcardRule = eps >> lit("*");
@@ -490,6 +491,7 @@ private:
     qi::rule<Iterator>                      m_quoteRule;
     qi::rule<Iterator>                      m_escapeRule;
     qi::symbols<UnicodeChar, UnicodeChar>   m_controlCharacterSymbols;
+    qi::rule<Iterator, detail::Index()>     m_indexRule;
 
     /**
     * @brief Appends the \a utf32Char character to the \a utf8String encoded in

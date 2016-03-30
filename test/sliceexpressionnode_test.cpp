@@ -34,6 +34,7 @@ TEST_CASE("SliceExpressionNode")
     using namespace jmespath::ast;
     using namespace jmespath::interpreter;
     using namespace fakeit;
+    using jmespath::detail::Index;
 
     SECTION("can be constructed")
     {
@@ -48,35 +49,35 @@ TEST_CASE("SliceExpressionNode")
 
         SECTION("with start index")
         {
-            SliceExpressionNode node{3};
+            SliceExpressionNode node{SliceExpressionNode::IndexType{3}};
 
-            REQUIRE(node.start == 3);
+            REQUIRE(node.start == Index{3});
             REQUIRE_FALSE(node.stop);
             REQUIRE_FALSE(node.step);
         }
 
         SECTION("with start and stop index")
         {
-            SliceExpressionNode node{3, 5};
+            SliceExpressionNode node{Index{3}, Index{5}};
 
-            REQUIRE(node.start == 3);
-            REQUIRE(node.stop == 5);
+            REQUIRE(node.start == Index{3});
+            REQUIRE(node.stop == Index{5});
             REQUIRE_FALSE(node.step);
         }
 
         SECTION("with start, stop and step index")
         {
-            SliceExpressionNode node{3, 5, -1};
+            SliceExpressionNode node{Index{3}, Index{5}, Index{-1}};
 
-            REQUIRE(node.start == 3);
-            REQUIRE(node.stop == 5);
-            REQUIRE(node.step == -1);
+            REQUIRE(node.start == Index{3});
+            REQUIRE(node.stop == Index{5});
+            REQUIRE(node.step == Index{-1});
         }
     }
 
     SECTION("can be compared for equality")
     {
-        SliceExpressionNode node1{3, 5, -1};
+        SliceExpressionNode node1{Index{3}, Index{5}, Index{-1}};
         SliceExpressionNode node2;
         node2 = node1;
 

@@ -332,7 +332,7 @@ TEST_CASE("Interpreter")
 
     SECTION("evaluates slice expression on non array to null")
     {
-        ast::SliceExpressionNode sliceNode{2, 5};
+        ast::SliceExpressionNode sliceNode{Index{2}, Index{5}};
 
         interpreter.visit(&sliceNode);
 
@@ -343,7 +343,7 @@ TEST_CASE("Interpreter")
             "step equals to zero")
     {
         interpreter.setContext("[]"_json);
-        ast::SliceExpressionNode sliceNode{2, 5, 0};
+        ast::SliceExpressionNode sliceNode{Index{2}, Index{5}, Index{0}};
 
         REQUIRE_THROWS_AS(interpreter.visit(&sliceNode), InvalidValue);
     }
@@ -352,7 +352,7 @@ TEST_CASE("Interpreter")
     {
         Json context = "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]"_json;
         interpreter.setContext(context);
-        ast::SliceExpressionNode sliceNode{2, 5};
+        ast::SliceExpressionNode sliceNode{Index{2}, Index{5}};
         Json expectedResult = "[2, 3, 4]"_json;
 
         interpreter.visit(&sliceNode);
@@ -364,7 +364,7 @@ TEST_CASE("Interpreter")
     {
         Json context = "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]"_json;
         interpreter.setContext(context);
-        ast::SliceExpressionNode sliceNode{2, 5, 2};
+        ast::SliceExpressionNode sliceNode{Index{2}, Index{5}, Index{2}};
         Json expectedResult = "[2, 4]"_json;
 
         interpreter.visit(&sliceNode);
@@ -376,7 +376,7 @@ TEST_CASE("Interpreter")
     {
         Json context = "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]"_json;
         interpreter.setContext(context);
-        ast::SliceExpressionNode sliceNode{5, 2, -1};
+        ast::SliceExpressionNode sliceNode{Index{5}, Index{2}, Index{-1}};
         Json expectedResult = "[5, 4, 3]"_json;
 
         interpreter.visit(&sliceNode);
@@ -399,7 +399,7 @@ TEST_CASE("Interpreter")
     {
         Json context = "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]"_json;
         interpreter.setContext(context);
-        ast::SliceExpressionNode sliceNode{0, 20};
+        ast::SliceExpressionNode sliceNode{Index{0}, Index{20}};
 
         interpreter.visit(&sliceNode);
 
@@ -411,7 +411,8 @@ TEST_CASE("Interpreter")
     {
         Json context = "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]"_json;
         interpreter.setContext(context);
-        ast::SliceExpressionNode sliceNode{-50};
+        ast::SliceExpressionNode sliceNode{
+            ast::SliceExpressionNode::IndexType{-50}};
 
         interpreter.visit(&sliceNode);
 

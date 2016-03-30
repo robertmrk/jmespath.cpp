@@ -148,7 +148,9 @@ private:
      * @param step The slice's step variable value.
      * @return Returns the endpoint's new value.
      */
-    int adjustSliceEndpoint(int length, int endpoint, int step) const;
+    detail::Index adjustSliceEndpoint(size_t length,
+                                      detail::Index endpoint,
+                                      detail::Index step) const;
     /**
      * @brief Converts the @a json value to a boolean.
      * @param json The JSON value that needs to be converted.

@@ -29,7 +29,8 @@
 #define TYPES_H
 #include <string>
 #include <boost/regex/pending/unicode_iterator.hpp>
-#include "json.hpp"
+#include <boost/multiprecision/cpp_int.hpp>
+#include <json.hpp>
 
 /**
  * @namespace jmespath::detail
@@ -66,5 +67,16 @@ using StringIteratorAdaptor
  * @brief JSON data type
  */
 using Json      = nlohmann::json;
+/**
+ * @brief Signed integer type that can hold all values in the range of
+ * numeric_limits<size_t>::max() * -1 ... numeric_limits<size_t>::max()
+ */
+using Index = boost::multiprecision::number<
+    boost::multiprecision::cpp_int_backend<
+        CHAR_BIT * sizeof(size_t) * 2,
+        CHAR_BIT * sizeof(size_t) * 2,
+        boost::multiprecision::signed_magnitude,
+        boost::multiprecision::unchecked,
+        void> >;
 }} // namespace jmespath::detail
 #endif // TYPES_H

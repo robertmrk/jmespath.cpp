@@ -28,6 +28,7 @@
 #ifndef ARRAYITEMNODE_H
 #define ARRAYITEMNODE_H
 #include "jmespath/ast/abstractnode.h"
+#include "jmespath/detail/types.h"
 #include <boost/fusion/include/adapt_struct.hpp>
 
 namespace jmespath { namespace ast {
@@ -48,7 +49,7 @@ public:
      * value.
      * @param itemIndex The node's value.
      */
-    ArrayItemNode(int itemIndex);
+    ArrayItemNode(detail::Index itemIndex);
     /**
      * @brief Calls the visit method of the given \a visitor with the
      * dynamic type of the node.
@@ -65,12 +66,12 @@ public:
     /**
      * @brief The node's value.
      */
-    int index;
+    detail::Index index;
 };
 }} // namespace jmespath::ast
 
 BOOST_FUSION_ADAPT_STRUCT(
     jmespath::ast::ArrayItemNode,
-    (int, index)
+    (jmespath::detail::Index, index)
 )
 #endif // ARRAYITEMNODE_H

@@ -190,14 +190,14 @@ void Interpreter::visit(const ast::ArrayItemNode *node)
     Json result;
     if (m_context.is_array())
     {
-        int arrayIndex = node->index;
+        auto arrayIndex = node->index;
         if (arrayIndex < 0)
         {
             arrayIndex += m_context.size();
         }
         if ((arrayIndex >= 0) && (arrayIndex < m_context.size()))
         {
-            result = std::move(m_context[arrayIndex]);
+            result = std::move(m_context[static_cast<size_t>(arrayIndex)]);
         }
     }
     m_context = std::move(result);
@@ -236,10 +236,10 @@ void Interpreter::visit(const ast::SliceExpressionNode *node)
     Json result;
     if (m_context.is_array())
     {
-        int startIndex = 0;
-        int endIndex = 0;
-        int step = 1;
-        int length = m_context.size();
+        detail::Index startIndex = 0;
+        detail::Index stopIndex = 0;
+        detail::Index step = 1;
+        size_t length = m_context.size();
 
         if (node->step)
         {
@@ -259,23 +259,20 @@ void Interpreter::visit(const ast::SliceExpressionNode *node)
         }
         if (!node->stop)
         {
-            endIndex = step < 0 ? -1 : length;
+            stopIndex = step < 0 ? -1 : detail::Index{length};
         }
         else
         {
-            endIndex = adjustSliceEndpoint(length, *node->stop, step);
+            stopIndex = adjustSliceEndpoint(length, *node->stop, step);
         }
 
         result = Json(Json::value_t::array);
-        auto beginIt = std::begin(m_context);
-        auto it = beginIt + startIndex;
-        auto stopIt = beginIt + endIndex;
-
-        while (((step > 0) && (it < stopIt))
-               || ((step < 0) && (it > stopIt)))
+        for (auto i = startIndex;
+             step > 0 ? (i < stopIndex) : (i > stopIndex);
+             i += step)
         {
-            result.push_back(std::move(*it));
-            it += step;
+            size_t arrayIndex = static_cast<size_t>(i);
+            result.push_back(std::move(m_context[arrayIndex]));
         }
     }
     m_context = std::move(result);
@@ -467,9 +464,9 @@ void Interpreter::visit(const ast::ExpressionArgumentNode *)
 {
 }
 
-int Interpreter::adjustSliceEndpoint(int length,
-                                             int endpoint,
-                                             int step) const
+detail::Index Interpreter::adjustSliceEndpoint(size_t length,
+                                               detail::Index endpoint,
+                                               detail::Index step) const
 {
     if (endpoint < 0)
     {

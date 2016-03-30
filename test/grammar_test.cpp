@@ -28,8 +28,10 @@
 #include "fakeit.hpp"
 #include "jmespath/parser/grammar.h"
 #include "jmespath/detail/types.h"
+#include <limits>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/optional/optional_io.hpp>
+#include <boost/multiprecision/cpp_int/serialize.hpp>
 
 using namespace jmespath::parser;
 using namespace jmespath::detail;
@@ -56,6 +58,7 @@ TEST_CASE("Grammar")
     using namespace jmespath::parser;
     namespace qi = boost::spirit::qi;
     namespace ast = jmespath::ast;
+    using jmespath::detail::Index;
 
     Grammar<UnicodeIteratorAdaptor> grammar;
 
@@ -199,6 +202,33 @@ TEST_CASE("Grammar")
                 ast::BracketSpecifierNode{
                     ast::ArrayItemNode{3}}};
             String expression{"[3]"};
+
+            REQUIRE(parseExpression(grammar, expression)
+                    == expectedResult);
+        }
+
+        SECTION("index expression with large positive index")
+        {
+            Index index = std::numeric_limits<size_t>::max();
+            auto expectedResult = ast::IndexExpressionNode{
+                ast::ExpressionNode{},
+                ast::BracketSpecifierNode{
+                    ast::ArrayItemNode{index}}};
+            String expression{"[" + index.str() + "]"};
+
+            REQUIRE(parseExpression(grammar, expression)
+                    == expectedResult);
+        }
+
+        SECTION("index expression with large negative index")
+        {
+            Index index = std::numeric_limits<size_t>::max();
+            index *= -1;
+            auto expectedResult = ast::IndexExpressionNode{
+                ast::ExpressionNode{},
+                ast::BracketSpecifierNode{
+                    ast::ArrayItemNode{index}}};
+            String expression{"[" + index.str() + "]"};
 
             REQUIRE(parseExpression(grammar, expression)
                     == expectedResult);
@@ -368,7 +398,7 @@ TEST_CASE("Grammar")
         {
             auto expectedResult = ast::IndexExpressionNode{
                     ast::BracketSpecifierNode{
-                        ast::SliceExpressionNode{1, 3}}};
+                        ast::SliceExpressionNode{Index{1}, Index{3}}}};
             String expression{"[1:3]"};
 
             REQUIRE(parseExpression(grammar, expression) == expectedResult);
@@ -398,7 +428,7 @@ TEST_CASE("Grammar")
         {
             auto expectedResult = ast::IndexExpressionNode{
                     ast::BracketSpecifierNode{
-                        ast::SliceExpressionNode{1, 3, 2}}};
+                       ast::SliceExpressionNode{Index{1}, Index{3}, Index{2}}}};
             String expression{"[1:3:2]"};
 
             REQUIRE(parseExpression(grammar, expression) == expectedResult);
@@ -408,8 +438,23 @@ TEST_CASE("Grammar")
         {
             auto expectedResult = ast::IndexExpressionNode{
                     ast::BracketSpecifierNode{
-                        ast::SliceExpressionNode{-1, -3, -1}}};
+                        ast::SliceExpressionNode{
+                            Index{-1},
+                            Index{-3},
+                            Index{-1}}}};
             String expression{"[-1:-3:-1]"};
+
+            REQUIRE(parseExpression(grammar, expression) == expectedResult);
+        }
+
+        SECTION("slice expression with large indices")
+        {
+            Index index1 = std::numeric_limits<size_t>::max();
+            Index index2 = index1 * -1;
+            auto expectedResult = ast::IndexExpressionNode{
+                    ast::BracketSpecifierNode{
+                        ast::SliceExpressionNode{Index{0}, index1, index2}}};
+            String expression{"[0:" + index1.str() + ":" + index2.str() + "]"};
 
             REQUIRE(parseExpression(grammar, expression) == expectedResult);
         }
