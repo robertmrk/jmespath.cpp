@@ -146,11 +146,6 @@ private:
      */
     ast::ExpressionNode m_astRoot;
     /**
-     * @brief Creates a parser object.
-     * @return Returns the pointer to the parser object instance.
-     */
-    static ParserType* parser();
-    /**
      * @brief Parses the @a expressionString and updates the AST.
      * @param expressionString The string representation of the JMESPath
      * expression.

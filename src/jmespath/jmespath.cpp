@@ -34,16 +34,15 @@ Json search(const Expression &expression, const Json &document)
 {
     using interpreter::Interpreter;
 
-    static std::unique_ptr<Interpreter> s_interpreter;
-    if (!s_interpreter)
-    {
-        s_interpreter.reset(new Interpreter);
-    }
-    s_interpreter->setContext(document);
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wexit-time-destructors"
+    static Interpreter s_interpreter;
+#pragma clang diagnostic pop
+    s_interpreter.setContext(document);
     // evaluate the expression by calling visit with the root of the AST
-    s_interpreter->visit(&expression.m_astRoot);
+    s_interpreter.visit(&expression.m_astRoot);
 
     // return the current evaluation context as the result
-    return s_interpreter->currentContext();
+    return s_interpreter.currentContext();
 }
 } // namespace jmespath

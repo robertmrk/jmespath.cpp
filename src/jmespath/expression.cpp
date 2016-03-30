@@ -27,7 +27,6 @@
 ****************************************************************************/
 #include "jmespath/expression.h"
 #include "jmespath/ast/allnodes.h"
-#include <memory>
 
 namespace jmespath {
 
@@ -75,21 +74,15 @@ bool Expression::isEmpty() const
     return m_astRoot.isNull();
 }
 
-Expression::ParserType *Expression::parser()
-{
-    static std::unique_ptr<ParserType> s_parser;
-    if (!s_parser)
-    {
-        s_parser.reset(new ParserType);
-    }
-    return s_parser.get();
-}
-
 void Expression::parseExpression(const detail::String& expressionString)
 {
     if (!expressionString.empty())
     {
-        m_astRoot = parser()->parse(expressionString);
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wexit-time-destructors"
+        static ParserType s_parser;
+        m_astRoot = s_parser.parse(expressionString);
+#pragma clang diagnostic pop
     }
 }
 
