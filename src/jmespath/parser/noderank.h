@@ -35,7 +35,6 @@ namespace {
 
 /**
  * @brief Returns the rank of the given @a node object's type.
- * @param node The node object that should be ranked.
  * @tparam T The type of the @a node object.
  * @return Returns the rank of the node as an integer.
  */

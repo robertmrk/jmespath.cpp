@@ -54,7 +54,7 @@ public:
      * @return Returns true if this object is equal to the \a other, otherwise
      * false
      */
-    bool operator==(const CurrentNode&) const;
+    bool operator==(const CurrentNode& other) const;
 };
 }} // namespace jmespath::ast
 #endif // CURRENTNODE_H

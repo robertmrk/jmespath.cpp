@@ -10,7 +10,7 @@ if ((${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     #std=c++1y - use c++14 language standard
     set(JMESPATH_COMPILE_FLAGS "-Weverything -Wno-padded \
         -Wno-c++98-compat-pedantic -Wno-disabled-macro-expansion \
-        -Wno-documentation -Wno-weak-vtables -Wno-shadow")
+        -Wno-weak-vtables -Wno-shadow")
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
     #wd4348 - ingore warning C4348 (A template parameter was redefined.)
     #EHsc - set synchronous exception handling

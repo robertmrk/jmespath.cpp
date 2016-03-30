@@ -48,10 +48,10 @@ class Interpreter : public AbstractVisitor
 public:
     /**
      * @brief Constructs an Interpreter object with the given
-     * @a document as the context for the evaluation of the AST.
-     * @param document JSON document on which the AST will be evaluated
+     * @a value as the context for the evaluation of the AST.
+     * @param value JSON document on which the AST will be evaluated
      */
-    Interpreter(const Json& contextValue = {});
+    Interpreter(const Json& value = {});
     /**
      * @brief Sets the context of the evaluation.
      * @param value JSON document to be used as the context.
@@ -171,7 +171,6 @@ private:
      * @brief Calculates the absolute value of the first item in the given list
      * of @a arguments. The first item must be a number JSON value.
      * @param arguments The list of the function's arguments.
-     * @return Absolute value of the first item in @a arguments.
      * @throws InvalidFunctionArgumentType
      */
     void abs(FunctionArgumentList& arguments);
@@ -180,8 +179,6 @@ private:
      * given @a arguments. The first item must be an JSON array and every item
      * in the array must be a number JSON value.
      * @param arguments The list of the function's arguments.
-     * @return Average value of the items in the first item of the given
-     * @a arguments
      * @throws InvalidFunctionArgumentType
      */
     void avg(FunctionArgumentList& arguments);
@@ -190,8 +187,6 @@ private:
      * the second item. The first item should be either an array or string the
      * second item can be any JSON type.
      * @param arguments The list of the function's arguments.
-     * @return Returns true if the first item contains the second, otherwise
-     * returns false.
      * @throws InvalidFunctionArgumentType
      */
     void contains(FunctionArgumentList& arguments);
@@ -199,7 +194,6 @@ private:
      * @brief Rounds up the first item of the given @a arguments to the next
      * highest integer value. The first item should be a JSON number.
      * @param arguments The list of the function's arguments.
-     * @return Returns the next highest integer value of the first item.
      * @throws InvalidFunctionArgumentType
      */
     void ceil(FunctionArgumentList& arguments);
@@ -208,7 +202,6 @@ private:
      * the second item. The first and second item of @a arguments must be a
      * JSON string.
      * @param arguments The list of the function's arguments.
-     * @return
      * @throws InvalidFunctionArgumentType
      */
     void endsWith(FunctionArgumentList& arguments);
@@ -216,7 +209,6 @@ private:
      * @brief Rounds down the first item of the given @a arguments to the next
      * lowest integer value. The first item should be a JSON number.
      * @param arguments The list of the function's arguments.
-     * @return Returns the next lowest integer value of the first item.
      * @throws InvalidFunctionArgumentType
      */
     void floor(FunctionArgumentList& arguments);
@@ -225,7 +217,6 @@ private:
      * given @a arguments with the first item as a separator. The first item
      * must be a string and the second item must be an array of strings.
      * @param arguments The list of the function's arguments.
-     * @return Returns the joined value.
      * @throws InvalidFunctionArgumentType
      */
     void join(FunctionArgumentList& arguments);
@@ -233,7 +224,6 @@ private:
      * @brief Extracts the keys from the object provided as the first item of
      * the given @a arguments.
      * @param arguments The list of the function's arguments.
-     * @return Returns the array of keys.
      * @throws InvalidFunctionArgumentType
      */
     void keys(FunctionArgumentList& arguments);
@@ -241,7 +231,6 @@ private:
      * @brief Returns the length of the first item in the given @a arguments.
      * The first item must be either an array a string or an object.
      * @param arguments The list of the function's arguments.
-     * @return Returns the length.
      * @throws InvalidFunctionArgumentType
      */
     void length(FunctionArgumentList& arguments);
@@ -250,7 +239,6 @@ private:
      * @a arguments to every item in the array provided as the second item in
      * @a arguments.
      * @param arguments The list of the function's arguments.
-     * @return Returns the array of results.
      * @throws InvalidFunctionArgumentType
      */
     void map(FunctionArgumentList& arguments);
@@ -259,7 +247,6 @@ private:
      * returns a single object with subsequent objects merged. Each subsequent
      * object’s key/value pairs are added to the preceding object.
      * @param arguments The list of the function's arguments.
-     * @return Returns the merged object.
      * @throws InvalidFunctionArgumentType
      */
     void merge(FunctionArgumentList& arguments);
@@ -267,7 +254,6 @@ private:
      * @brief Accepts one or more items in @a arguments, and will evaluate them
      * in order until a non null argument is encounted.
      * @param arguments The list of the function's arguments.
-     * @return Returns the first argument that does not resolve to null.
      * @throws InvalidFunctionArgumentType
      */
     void notNull(FunctionArgumentList& arguments);
@@ -275,7 +261,6 @@ private:
      * @brief Reverses the order of the first item in @a arguments. It must
      * either be an array or a string.
      * @param arguments The list of the function's arguments.
-     * @return Returns the reversed item.
      * @throws InvalidFunctionArgumentType
      */
     void reverse(FunctionArgumentList& arguments);
@@ -283,7 +268,6 @@ private:
      * @brief Sorts the first item in the given @a arguments, which must either
      * be an array of numbers or an array of strings.
      * @param arguments The list of the function's arguments.
-     * @return Returns the sorted array.
      * @throws InvalidFunctionArgumentType
      */
     void sort(FunctionArgumentList& arguments);
@@ -292,7 +276,6 @@ private:
      * be an array of numbers or an array of strings. It uses the expression
      * provided as the second item in @a arguments as the sort key.
      * @param arguments The list of the function's arguments.
-     * @return Returns the sorted array.
      * @throws InvalidFunctionArgumentType
      */
     void sortBy(FunctionArgumentList& arguments);
@@ -301,8 +284,6 @@ private:
      * arguments starts with the string provided as the second item in @a
      * arguments.
      * @param arguments The list of the function's arguments.
-     * @return Returns true if the first item starts with the second item,
-     * otherwise it returns false.
      * @throws InvalidFunctionArgumentType
      */
     void startsWith(FunctionArgumentList& arguments);
@@ -310,7 +291,6 @@ private:
      * @brief Calculates the sum of the numbers in the array provided as the
      * first item of @a arguments.
      * @param arguments The list of the function's arguments.
-     * @return Returns the sum.
      * @throws InvalidFunctionArgumentType
      */
     void sum(FunctionArgumentList& arguments);
@@ -318,7 +298,6 @@ private:
      * @brief Converts the first item of the given @a arguments to a one element
      * array if it's not already an array.
      * @param arguments The list of the function's arguments.
-     * @return Returns the resulting array.
      * @throws InvalidFunctionArgumentType
      */
     void toArray(FunctionArgumentList& arguments);
@@ -326,7 +305,6 @@ private:
      * @brief Returns the JSON encoded value of the first item in the given
      * @a arguments as a string if it's not already a string.
      * @param arguments The list of the function's arguments.
-     * @return Returns the string representation.
      * @throws InvalidFunctionArgumentType
      */
     void toString(FunctionArgumentList& arguments);
@@ -335,7 +313,6 @@ private:
      * @a arguments to a number. If it's already a number then the original
      * value is returned, all other JSON types are converted to null.
      * @param arguments The list of the function's arguments.
-     * @return Returns the numeric representation.
      * @throws InvalidFunctionArgumentType
      */
     void toNumber(FunctionArgumentList& arguments);
@@ -343,7 +320,6 @@ private:
      * @brief Returns the type of the JSON value provided as the first item in
      * @a arguments.
      * @param arguments The list of the function's arguments.
-     * @return Returns the string representation of the type.
      * @throws InvalidFunctionArgumentType
      */
     void type(FunctionArgumentList& arguments);
@@ -351,7 +327,6 @@ private:
      * @brief Extracts the values from the object provided as the first item of
      * the given @a arguments.
      * @param arguments The list of the function's arguments.
-     * @return Returns the array of values.
      * @throws InvalidFunctionArgumentType
      */
     void values(FunctionArgumentList& arguments);
@@ -363,7 +338,6 @@ private:
      * @param comparator The comparator function used for comparing JSON values.
      * It should return true if its first argument is less then its second
      * argument.
-     * @return Returns the largest item.
      * @throws InvalidFunctionArgumentType
      */
     void max(FunctionArgumentList& arguments, const JsonComparator& comparator);
@@ -376,11 +350,10 @@ private:
      * @param comparator The comparator function used for comparing JSON values.
      * It should return true if its first argument is less then its second
      * argument.
-     * @return Returns the largest item.
      * @throws InvalidFunctionArgumentType
      */
     void maxBy(FunctionArgumentList& arguments,
-                      const JsonComparator& comparator = std::less<Json>{});
+               const JsonComparator& comparator = std::less<Json>{});
     /**
      * @brief Checks whether @a array is a homogeneous array which contains
      * comparable types like strings and numbers.

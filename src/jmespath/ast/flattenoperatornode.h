@@ -55,7 +55,7 @@ public:
      * @return Returns true if this object is equal to the \a other, otherwise
      * false
      */
-    bool operator==(const FlattenOperatorNode&) const;
+    bool operator==(const FlattenOperatorNode& other) const;
 };
 }} // namespace jmespath::ast
 #endif // FLATTENOPERATORNODE_H

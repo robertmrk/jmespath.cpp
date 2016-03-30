@@ -35,8 +35,6 @@ namespace jmespath { namespace ast {
 /**
  * @brief The BinaryExpressionNode class is the base class for all node types
  * which consist of a left and a right hand side expression.
- * @tparam ExpressionNode The left hand node's type.
- * @tparam ExpressionNode The right hand node's type.
  */
 class BinaryExpressionNode : public AbstractNode
 {

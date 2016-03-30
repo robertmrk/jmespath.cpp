@@ -40,10 +40,10 @@ namespace jmespath { namespace interpreter {
 namespace rng = boost::range;
 namespace alg = boost::algorithm;
 
-Interpreter::Interpreter(const Json &contextValue)
+Interpreter::Interpreter(const Json &value)
     : AbstractVisitor()
 {
-    setContext(contextValue);
+    setContext(value);
     using std::placeholders::_1;
     using std::make_tuple;
     using std::bind;
