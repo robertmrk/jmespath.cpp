@@ -4,10 +4,8 @@ project(jmespath.cpp)
 set(JMESPATH_COVERAGE_INFO OFF CACHE BOOL "Generate code coverage information")
 set(JMESPATH_PROJECT_NAME jmespath.cpp)
 set(JMESPATH_TARGET_NAME jmespath)
-if ((${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-        OR (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+if ((${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
         OR (${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang"))
-    #std=c++1y - use c++14 language standard
     set(JMESPATH_COMPILE_FLAGS "-Weverything -Wno-padded \
         -Wno-c++98-compat-pedantic -Wno-disabled-macro-expansion \
         -Wno-weak-vtables -Wno-shadow")
