@@ -4,6 +4,7 @@ project(jmespath.cpp)
 set(JMESPATH_COVERAGE_INFO OFF CACHE BOOL "Generate code coverage information")
 set(JMESPATH_PROJECT_NAME jmespath.cpp)
 set(JMESPATH_TARGET_NAME jmespath)
+set(JMESPATH_COMPILE_FLAGS " ")
 if ((${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
         OR (${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang"))
     set(JMESPATH_COMPILE_FLAGS "-Weverything -Wno-padded \
