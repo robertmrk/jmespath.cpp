@@ -71,6 +71,8 @@ int nodeRank(const boost::variant<Args...>& variant)
     return boost::apply_visitor(NodeRankVisitor{}, variant);
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunneeded-internal-declaration"
 template <>
 int nodeRank(const ast::ExpressionNode& node)
 {
@@ -83,6 +85,7 @@ int nodeRank(const ast::ExpressionNode& node)
         return nodeRank(node.value);
     }
 }
+#pragma clang diagnostic pop
 
 template <>
 int nodeRank(const ast::SubexpressionNode&)
