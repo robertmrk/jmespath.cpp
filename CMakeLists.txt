@@ -18,6 +18,7 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
     #bigobj - fix for error C1128 (increase the number of sections in .obj file)
     set(CMAKE_CXX_FLAGS "/EHsc /wd4348 /bigobj")
 endif()
+enable_testing()
 
 find_package(Boost 1.57 REQUIRED)
 
