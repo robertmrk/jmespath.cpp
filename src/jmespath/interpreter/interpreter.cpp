@@ -946,6 +946,8 @@ void Interpreter::type(FunctionArgumentList &arguments)
     }
 
     String result;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcovered-switch-default"
     switch (value->type())
     {
     case Json::value_t::number_float:
@@ -955,8 +957,11 @@ void Interpreter::type(FunctionArgumentList &arguments)
     case Json::value_t::boolean: result = "boolean"; break;
     case Json::value_t::array: result = "array"; break;
     case Json::value_t::object: result = "object"; break;
+    case Json::value_t::discarded:
+    case Json::value_t::null:
     default: result = "null";
     }
+#pragma clang diagnostic pop
     m_context = std::move(result);
 }
 
