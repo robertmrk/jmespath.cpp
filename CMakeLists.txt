@@ -15,7 +15,7 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
     #wd4068 - ingore warning C4068 (The compiler ignored an unrecognized pragma)
     #EHsc - set synchronous exception handling
     #bigobj - fix for error C1128 (increase the number of sections in .obj file)
-    set(JMESPATH_COMPILE_FLAGS "/EHsc /wd4348 /bigobj")
+    set(JMESPATH_COMPILE_FLAGS "/EHsc /wd4348 /wd4068 /bigobj")
 endif()
 enable_testing()
 
