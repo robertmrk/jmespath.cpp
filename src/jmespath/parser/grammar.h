@@ -32,6 +32,7 @@
 #include "jmespath/parser/noderank.h"
 #include "jmespath/parser/insertnodeaction.h"
 #include "jmespath/parser/appendutf8action.h"
+#include "jmespath/parser/encodesurrogatepairaction.h"
 #include "jmespath/parser/nodeinsertpolicy.h"
 #include "jmespath/parser/nodeinsertcondition.h"
 #include <boost/spirit/include/qi.hpp>
@@ -101,6 +102,9 @@ public:
         // laxy function for appending UTF-32 characters to a string encoded
         // in UTF-8
         phx::function<AppendUtf8Action> appendUtf8;
+        // lazy function for for combining surrogate pair characters into a
+        // single codepoint
+        phx::function<EncodeSurrogatePairAction> encodeSurrogatePair;
 
         // match a standalone index expression or hash wildcard expression or
         // not expression or function expression or identifier or multiselect
@@ -366,10 +370,7 @@ public:
         m_surrogatePairCharacterRule
             = lexeme[ (m_unicodeCharRule >> m_escapeRule >> m_unicodeCharRule)
                 [_pass = (_1 >= 0xD800 && _1 <= 0xDBFF),
-                _val = phx::bind(&Grammar::parseSurrogatePair,
-                                this,
-                                _1,
-                                _2)] ];
+                _val = encodeSurrogatePair(_1, _2)] ];
 
         // match a unicode character escape and convert it into a
         // single codepoint
@@ -479,22 +480,6 @@ private:
     qi::rule<Iterator>                      m_escapeRule;
     qi::symbols<UnicodeChar, UnicodeChar>   m_controlCharacterSymbols;
     qi::rule<Iterator, detail::Index()>     m_indexRule;
-
-    /**
-     * @brief Parses a surrogate pair character
-     * @param highSurrogate High surrogate
-     * @param lowSurrogate Low surrogate
-     * @return The result of @a highSurrogate and @a lowSurrogate combined
-     * into a single codepoint
-     */
-    UnicodeChar parseSurrogatePair(UnicodeChar const& highSurrogate,
-                                   UnicodeChar const& lowSurrogate)
-    {
-        UnicodeChar unicodeChar = 0x10000;
-        unicodeChar += (highSurrogate & 0x03FF) << 10;
-        unicodeChar += (lowSurrogate & 0x03FF);
-        return unicodeChar;
-    }
 };
 }} // namespace jmespath::parser
 #endif // GRAMMAR_H

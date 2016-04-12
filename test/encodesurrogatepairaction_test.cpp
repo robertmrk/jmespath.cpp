@@ -25,37 +25,18 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef APPENDUTF8ACTION_H
-#define APPENDUTF8ACTION_H
-#include "jmespath/detail/types.h"
+#include "fakeit.hpp"
+#include "jmespath/parser/encodesurrogatepairaction.h"
 
-namespace jmespath { namespace parser {
-
-/**
- * @brief The AppendUtf8Action class is a functor for appending UTF-32
- * characters to UTF-8 encoded strings.
- */
-class AppendUtf8Action
+TEST_CASE("EncodeSurrogatePairAction")
 {
-public:
-    /**
-     * The action's result type
-     */
-    using result_type = void;
-    /**
-    * @brief Appends the \a utf32Char character to the \a utf8String encoded in
-    * UTF-8.
-    * @param utf8String The string where the encoded value of the \a utf32Char
-    * will be appended.
-    * @param utf32Char The input character encoded in UTF-32
-    */
-    result_type operator()(detail::String& utf8String,
-                           detail::UnicodeChar utf32Char) const
+    using namespace fakeit;
+
+    jmespath::parser::EncodeSurrogatePairAction action;
+
+    SECTION("Encodes surrogate pair")
     {
-        auto outIt = std::back_inserter(utf8String);
-        boost::utf8_output_iterator<decltype(outIt)> utf8OutIt(outIt);
-        *utf8OutIt++ = utf32Char;
+        REQUIRE(action(0xD801, 0xDC37) == 0x10437);
+        REQUIRE(action(0xD852, 0xDF62) == 0x24B62);
     }
-};
-}} // namespace jmespath::parser
-#endif // APPENDUTF8ACTION_H
+}

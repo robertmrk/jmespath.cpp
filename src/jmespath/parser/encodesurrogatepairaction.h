@@ -25,37 +25,38 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef APPENDUTF8ACTION_H
-#define APPENDUTF8ACTION_H
+#ifndef ENCODESURROGATEPAIRACTION_H
+#define ENCODESURROGATEPAIRACTION_H
 #include "jmespath/detail/types.h"
 
 namespace jmespath { namespace parser {
 
 /**
- * @brief The AppendUtf8Action class is a functor for appending UTF-32
- * characters to UTF-8 encoded strings.
+ * @brief The EncodeSurrogatePairAction class is a functor for encoding
+ * surrogate pair characters in UTF-32.
  */
-class AppendUtf8Action
+class EncodeSurrogatePairAction
 {
 public:
     /**
      * The action's result type
      */
-    using result_type = void;
+    using result_type =  detail::UnicodeChar;
     /**
-    * @brief Appends the \a utf32Char character to the \a utf8String encoded in
-    * UTF-8.
-    * @param utf8String The string where the encoded value of the \a utf32Char
-    * will be appended.
-    * @param utf32Char The input character encoded in UTF-32
-    */
-    result_type operator()(detail::String& utf8String,
-                           detail::UnicodeChar utf32Char) const
+     * @brief Encodes a surrogate pair character
+     * @param highSurrogate High surrogate
+     * @param lowSurrogate Low surrogate
+     * @return The result of @a highSurrogate and @a lowSurrogate combined
+     * into a single codepoint
+     */
+    result_type operator()(detail::UnicodeChar const& highSurrogate,
+                           detail::UnicodeChar const& lowSurrogate) const
     {
-        auto outIt = std::back_inserter(utf8String);
-        boost::utf8_output_iterator<decltype(outIt)> utf8OutIt(outIt);
-        *utf8OutIt++ = utf32Char;
+        detail::UnicodeChar unicodeChar = 0x10000;
+        unicodeChar += (highSurrogate & 0x03FF) << 10;
+        unicodeChar += (lowSurrogate & 0x03FF);
+        return unicodeChar;
     }
 };
 }} // namespace jmespath::parser
-#endif // APPENDUTF8ACTION_H
+#endif // ENCODESURROGATEPAIRACTION_H
