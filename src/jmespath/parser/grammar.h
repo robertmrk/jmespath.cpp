@@ -31,7 +31,6 @@
 #include "jmespath/ast/allnodes.h"
 #include "jmespath/parser/noderank.h"
 #include "jmespath/parser/insertnodeaction.h"
-#include "jmespath/parser/nodechildextractionpolicy.h"
 #include "jmespath/parser/nodeinsertpolicy.h"
 #include "jmespath/parser/nodeinsertcondition.h"
 #include <boost/spirit/include/qi.hpp>
@@ -96,7 +95,6 @@ public:
 
         // lazy function for inserting binary nodes to the appropriate position
         phx::function<InsertNodeAction<
-                NodeChildExtractionPolicy,
                 NodeInsertPolicy,
                 NodeInsertCondition> > insertNode;
 

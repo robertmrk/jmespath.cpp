@@ -16,9 +16,10 @@ list(APPEND JMESPATH_SOURCE_FILES
     ${JMESPATH_PARSER_SOURCE_DIR}/parser.h
     ${JMESPATH_PARSER_SOURCE_DIR}/noderank.h
     ${JMESPATH_PARSER_SOURCE_DIR}/insertnodeaction.h
-    ${JMESPATH_PARSER_SOURCE_DIR}/nodechildextractionpolicy.h
+    ${JMESPATH_PARSER_SOURCE_DIR}/leftchildextractor.h
     ${JMESPATH_PARSER_SOURCE_DIR}/nodeinsertpolicy.h
     ${JMESPATH_PARSER_SOURCE_DIR}/nodeinsertcondition.h
+    ${JMESPATH_PARSER_SOURCE_DIR}/leftedgeiterator.h
     ${JMESPATH_AST_SOURCE_DIR}/allnodes.h
     ${JMESPATH_AST_SOURCE_DIR}/abstractnode.h
     ${JMESPATH_AST_SOURCE_DIR}/binaryexpressionnode.h

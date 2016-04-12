@@ -42,7 +42,7 @@ TEST_CASE("NodeInsertCondition")
             ast::IdentifierNode{}};
         ast::RawStringNode node;
 
-        REQUIRE_FALSE(condition(&targetNode, &node));
+        REQUIRE_FALSE(condition(targetNode, node));
     }
 
     SECTION("Returns false for subexpression and a terminal node")
@@ -51,7 +51,7 @@ TEST_CASE("NodeInsertCondition")
             ast::SubexpressionNode{}};
         ast::IdentifierNode node;
 
-        REQUIRE_FALSE(condition(&targetNode, &node));
+        REQUIRE_FALSE(condition(targetNode, node));
     }
 
     SECTION("Returns true for an empty node and a terminal node")
@@ -59,7 +59,7 @@ TEST_CASE("NodeInsertCondition")
         ast::ExpressionNode targetNode{};
         ast::IdentifierNode node;
 
-        REQUIRE(condition(&targetNode, &node));
+        REQUIRE(condition(targetNode, node));
     }
 
     SECTION("Returns true for a terminal node and a subexpression")
@@ -68,7 +68,7 @@ TEST_CASE("NodeInsertCondition")
             ast::IdentifierNode{}};
         ast::SubexpressionNode node;
 
-        REQUIRE(condition(&targetNode, &node));
+        REQUIRE(condition(targetNode, node));
     }
 
     SECTION("Returns false for two subexpression")
@@ -77,7 +77,7 @@ TEST_CASE("NodeInsertCondition")
             ast::SubexpressionNode{}};
         ast::SubexpressionNode node;
 
-        REQUIRE_FALSE(condition(&targetNode, &node));
+        REQUIRE_FALSE(condition(targetNode, node));
     }
 
     SECTION("Returns false for a subexpression and array item")
@@ -88,7 +88,7 @@ TEST_CASE("NodeInsertCondition")
             ast::BracketSpecifierNode{
                 ast::ArrayItemNode{}}};
 
-        REQUIRE_FALSE(condition(&targetNode, &node));
+        REQUIRE_FALSE(condition(targetNode, node));
     }
 
     SECTION("Returns false for two flatten operators")
@@ -101,7 +101,7 @@ TEST_CASE("NodeInsertCondition")
             ast::BracketSpecifierNode{
                 ast::FlattenOperatorNode{}}};
 
-        REQUIRE_FALSE(condition(&targetNode, &node));
+        REQUIRE_FALSE(condition(targetNode, node));
     }
 
     SECTION("Returns true for two list wildcards")
@@ -114,7 +114,7 @@ TEST_CASE("NodeInsertCondition")
             ast::BracketSpecifierNode{
                 ast::ListWildcardNode{}}};
 
-        REQUIRE(condition(&targetNode, &node));
+        REQUIRE(condition(targetNode, node));
     }
 
     SECTION("Returns true for two hash wildcards")
@@ -123,7 +123,7 @@ TEST_CASE("NodeInsertCondition")
             ast::HashWildcardNode{}};
         ast::HashWildcardNode node{};
 
-        REQUIRE(condition(&targetNode, &node));
+        REQUIRE(condition(targetNode, node));
     }
 
     SECTION("Returns true for a list wildcard and flatten operator")
@@ -136,7 +136,7 @@ TEST_CASE("NodeInsertCondition")
             ast::BracketSpecifierNode{
                 ast::FlattenOperatorNode{}}};
 
-        REQUIRE(condition(&targetNode, &node));
+        REQUIRE(condition(targetNode, node));
     }
 
     SECTION("Returns false for a flatten operator and a list wildcard")
@@ -149,6 +149,6 @@ TEST_CASE("NodeInsertCondition")
             ast::BracketSpecifierNode{
                 ast::ListWildcardNode{}}};
 
-        REQUIRE_FALSE(condition(&targetNode, &node));
+        REQUIRE_FALSE(condition(targetNode, node));
     }
 }

@@ -42,7 +42,7 @@ TEST_CASE("NodeInsertPolicy")
         ast::ExpressionNode targetNode;        
         ast::IdentifierNode node;
 
-        policy(&targetNode, &node);
+        policy(targetNode, node);
 
         REQUIRE(targetNode == node);
     }
@@ -52,7 +52,7 @@ TEST_CASE("NodeInsertPolicy")
         ast::ExpressionNode targetNode;
         ast::SubexpressionNode node;
 
-        policy(&targetNode, &node);
+        policy(targetNode, node);
 
         REQUIRE(targetNode == node);
     }
@@ -70,7 +70,7 @@ TEST_CASE("NodeInsertPolicy")
                 ast::ExpressionNode{
                     ast::IdentifierNode{}}}};
 
-        policy(&targetNode, &node);
+        policy(targetNode, node);
 
         REQUIRE(targetNode == expectedResult);
     }
@@ -85,7 +85,7 @@ TEST_CASE("NodeInsertPolicy")
             ast::ExpressionNode{
                 ast::IdentifierNode{}}};
 
-        policy(&targetNode, &node);
+        policy(targetNode, node);
 
         REQUIRE(targetNode == expectedResult);
     }
