@@ -37,10 +37,10 @@ TEST_CASE("AppendUtf8Action")
     {
         jmespath::detail::String string;
 
-        action(string, U'a');
-        action(string, U'™');
-        action(string, U'€');
+        action(string, 'a');
+        action(string, 0x2122);
+        action(string, 0x20AC);
 
-        REQUIRE(string == u8"a™€");
+        REQUIRE(string == "\x61\xE2\x84\xA2\xE2\x82\xAC");
     }
 }
