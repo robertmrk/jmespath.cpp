@@ -424,16 +424,16 @@ void Interpreter::visit(const ast::FilterExpressionNode *node)
     if (m_context.is_array())
     {
         result = Json(Json::value_t::array);
-        Json contextArray = m_context;
-        for (const auto& item: contextArray)
+        Json contextArray = std::move(m_context);
+        std::copy_if(std::make_move_iterator(std::begin(contextArray)),
+                     std::make_move_iterator(std::end(contextArray)),
+                     std::back_inserter(result),
+                     [&](const auto& item)
         {
             m_context = item;
-            visit(&node->expression);
-            if (toBoolean(m_context))
-            {
-                result.push_back(std::move(item));
-            }
-        }
+            this->visit(&node->expression);
+            return this->toBoolean(m_context);
+        });
     }
     m_context = std::move(result);
 }
