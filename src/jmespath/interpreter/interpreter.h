@@ -115,9 +115,9 @@ private:
      */
     using JsonComparator = std::function<bool(const Json&, const Json&)>;
     /**
-     * The type of comparator functions used for comparing size_t values
+     * Function argument arity validator predicate.
      */
-    using SizeComparator = std::function<bool(const size_t&, const size_t&)>;
+    using ArgumentArityValidator = std::function<bool(const size_t&)>;
     /**
      * Describes a built in function implementation. The tuple's first item
      * stores the number of arguments expected by the function, the second
@@ -125,7 +125,7 @@ private:
      * of arguments with the expected argument count, while the third item
      * stores the callable functions wrapper.
      */
-    using FunctionDescriptor = std::tuple<size_t, SizeComparator, Function>;
+    using FunctionDescriptor = std::pair<ArgumentArityValidator, Function>;
     /**
      * List of unevaluated function arguments.
      */
