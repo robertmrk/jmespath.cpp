@@ -28,7 +28,9 @@
 #ifndef INSERTBINARYEXPRESSIONNODEACTION_H
 #define INSERTBINARYEXPRESSIONNODEACTION_H
 #include "jmespath/parser/noderank.h"
+#include "jmespath/parser/leftedgeiterator.h"
 #include "jmespath/ast/allnodes.h"
+#include <algorithm>
 #include <boost/variant/polymorphic_get.hpp>
 #include <boost/optional.hpp>
 
@@ -38,14 +40,11 @@ namespace jmespath { namespace parser {
  * @brief The InsertNodeAction class is a functor for inserting the given
  * @a node into the AST whose root node is specified with @a targetNode.
  *
- * The functor iterates over a sequence of nodes and if @a NodeInsertConditionT
- * returns true for the given combination of @a targetNode and @a node the
- * @a node will be inserted using @a NodeInserterT. If @a NodeInsertConditionT
- * returns false it will try to insert @a node at the next location supplied by
- * @a ChildExtractorT.
- * @tparam ChildExtractorT Policy type for getting the subsequent node of the
- * passed node. The functor should have an overloaded function call operator
- * with a signature of ast::ExpressionNode*(ast::ExpressionNode* node) const.
+ * The functor iterates over the left edge of the AST and if
+ * @a NodeInsertConditionT returns true for the given combination of
+ * @a targetNode and @a node the @a node will be inserted using
+ * @a NodeInserterT. If @a NodeInsertConditionT returns false it will try to
+ * insert @a node at the next location on the left edge of the AST.
  * @tparam NodeInserterT Policy type for inserting the a node at the position
  * of the target node into the AST. The functor should have an overloaded
  * function call operator with a signature of
@@ -55,8 +54,7 @@ namespace jmespath { namespace parser {
  * an overloaded function call operator with a signature of
  * bool(ast::ExpressionNode* targetNode, T* node) const.
  */
-template <typename ChildExtractorT,
-          typename NodeInserterT,
+template <typename NodeInserterT,
           typename NodeInsertConditionT>
 class InsertNodeAction
 {
@@ -65,38 +63,28 @@ public:
      * The action's result type
      */
     using result_type = void;
-
     /**
      * @brief Inserts the given @a node into the AST whose root node is
      * specified with @a targetNode.
      * @param targetNode The root node of the AST.
      * @param node The node which should be inserted.
-     * @{
      */
     template <typename T>
     void operator()(ast::ExpressionNode& targetNode, T& node) const
     {
-        (*this)(&targetNode, node);
-    }
-
-    template <typename T>
-    void operator()(ast::ExpressionNode* targetNode, T& node) const
-    {
-        if (targetNode)
+        LeftEdgeIterator begin(targetNode);
+        LeftEdgeIterator end;
+        auto it = std::find_if(begin, end, [&](ast::ExpressionNode& currentNode)
         {
-            if (m_insertCondition(targetNode, &node))
-            {
-                m_nodeInserter(targetNode, &node);
-            }
-            else
-            {
-                (*this)(m_childExtractor(targetNode), node);
-            }
+            return m_insertCondition(currentNode, node);
+        });
+        if (it != end)
+        {
+            m_nodeInserter(*it, node);
         }
     }
-    /** @}*/
+
 private:
-    ChildExtractorT m_childExtractor;
     NodeInserterT m_nodeInserter;
     NodeInsertConditionT m_insertCondition;
 };

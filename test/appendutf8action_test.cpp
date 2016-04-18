@@ -26,45 +26,21 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/detail/types.h"
-#include "jmespath/parser/nodechildextractionpolicy.h"
-#include "jmespath/ast/allnodes.h"
+#include "jmespath/parser/appendutf8action.h"
 
-TEST_CASE("LeftChildPolicy")
+TEST_CASE("AppendUtf8Action")
 {
-    using namespace jmespath::parser;
-    using namespace jmespath::detail;
-    namespace ast = jmespath::ast;
     using namespace fakeit;
+    jmespath::parser::AppendUtf8Action action;
 
-    NodeChildExtractionPolicy policy;
-
-    SECTION("Returns left child of binary expression node")
+    SECTION("append characters encoded in UTF-8")
     {
-        ast::ExpressionNode node{
-            ast::SubexpressionNode{
-                ast::ExpressionNode{
-                    ast::IdentifierNode{"id1"}},
-                ast::ExpressionNode{
-                    ast::IdentifierNode{"id2"}}}};
+        jmespath::detail::String string;
 
-        REQUIRE(policy(&node)
-                == &(boost::get<ast::SubexpressionNode>(
-                    &node.value)->leftExpression));
-    }
+        action(string, 'a');
+        action(string, 0x2122);
+        action(string, 0x20AC);
 
-    SECTION("Returns nullptr for non binary expression node")
-    {
-        ast::ExpressionNode node{
-            ast::IdentifierNode{}};
-
-        REQUIRE(policy(&node) == nullptr);
-    }
-
-    SECTION("Returns nullptr for empty expression")
-    {
-        ast::ExpressionNode node{};
-
-        REQUIRE(policy(&node) == nullptr);
+        REQUIRE(string == "\x61\xE2\x84\xA2\xE2\x82\xAC");
     }
 }

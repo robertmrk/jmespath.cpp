@@ -31,7 +31,8 @@
 #include "jmespath/ast/allnodes.h"
 #include "jmespath/parser/noderank.h"
 #include "jmespath/parser/insertnodeaction.h"
-#include "jmespath/parser/nodechildextractionpolicy.h"
+#include "jmespath/parser/appendutf8action.h"
+#include "jmespath/parser/encodesurrogatepairaction.h"
 #include "jmespath/parser/nodeinsertpolicy.h"
 #include "jmespath/parser/nodeinsertcondition.h"
 #include <boost/spirit/include/qi.hpp>
@@ -96,9 +97,14 @@ public:
 
         // lazy function for inserting binary nodes to the appropriate position
         phx::function<InsertNodeAction<
-                NodeChildExtractionPolicy,
                 NodeInsertPolicy,
                 NodeInsertCondition> > insertNode;
+        // laxy function for appending UTF-32 characters to a string encoded
+        // in UTF-8
+        phx::function<AppendUtf8Action> appendUtf8;
+        // lazy function for for combining surrogate pair characters into a
+        // single codepoint
+        phx::function<EncodeSurrogatePairAction> encodeSurrogatePair;
 
         // match a standalone index expression or hash wildcard expression or
         // not expression or function expression or identifier or multiselect
@@ -279,10 +285,7 @@ public:
 
         // match zero or more literal characters enclosed in grave accents
         m_literalRule = lexeme[ lit('\x60')
-                >> *m_literalCharRule[phx::bind(&Grammar::appendUtf8,
-                                                this,
-                                                at_c<0>(_val),
-                                                _1)]
+                >> *m_literalCharRule[appendUtf8(at_c<0>(_val), _1)]
                 >> lit('\x60') ];
 
         // match a character in the range of 0x00-0x5B or 0x5D-0x5F or
@@ -299,10 +302,7 @@ public:
 
         // match zero or more raw string characters enclosed in apostrophes
         m_rawStringRule = lexeme[ lit("\'")
-                >> *m_rawStringCharRule[phx::bind(&Grammar::appendUtf8,
-                                                  this,
-                                                  at_c<0>(_val),
-                                                  _1)]
+                >> *m_rawStringCharRule[appendUtf8(at_c<0>(_val), _1)]
                 >> lit("\'") ];
 
         // match a single character in the range of 0x07-0x0D or 0x20-0x26 or
@@ -327,27 +327,18 @@ public:
         m_unquotedStringRule
             = lexeme[ ((char_(U'\x41', U'\x5A')
                         | char_(U'\x61', U'\x7A')
-                        | char_(U'\x5F'))[phx::bind(&Grammar::appendUtf8,
-                                                    this,
-                                                    _val,
-                                                    _1)]
+                        | char_(U'\x5F'))[appendUtf8(_val, _1)]
             >> *(char_(U'\x30', U'\x39')
                  | char_(U'\x41', U'\x5A')
                  | char_(U'\x5F')
-                 | char_(U'\x61', U'\x7A'))[phx::bind(&Grammar::appendUtf8,
-                                                      this,
-                                                      _val,
-                                                      _1)]) ];
+                 | char_(U'\x61', U'\x7A'))[appendUtf8(_val, _1)]) ];
 
         // match unescaped or escaped characters enclosed in quotes one or more
         // times and append them to the rule's string attribute encoded as UTF-8
         m_quotedStringRule
             = lexeme[ m_quoteRule
             >> +(m_unescapedCharRule
-                 | m_escapedCharRule)[phx::bind(&Grammar::appendUtf8,
-                                                this,
-                                                _val,
-                                                _1)]
+                 | m_escapedCharRule)[appendUtf8(_val, _1)]
             >> m_quoteRule ];
 
         // match characters in the range of 0x20-0x21 or 0x23-0x5B or
@@ -379,10 +370,7 @@ public:
         m_surrogatePairCharacterRule
             = lexeme[ (m_unicodeCharRule >> m_escapeRule >> m_unicodeCharRule)
                 [_pass = (_1 >= 0xD800 && _1 <= 0xDBFF),
-                _val = phx::bind(&Grammar::parseSurrogatePair,
-                                this,
-                                _1,
-                                _2)] ];
+                _val = encodeSurrogatePair(_1, _2)] ];
 
         // match a unicode character escape and convert it into a
         // single codepoint
@@ -492,35 +480,6 @@ private:
     qi::rule<Iterator>                      m_escapeRule;
     qi::symbols<UnicodeChar, UnicodeChar>   m_controlCharacterSymbols;
     qi::rule<Iterator, detail::Index()>     m_indexRule;
-
-    /**
-    * @brief Appends the \a utf32Char character to the \a utf8String encoded in
-    * UTF-8.
-    * @param utf8String The string where the encoded value of the \a utf32Char
-    * will be appended.
-    * @param utf32Char The input character encoded in UTF-32
-    */
-    void appendUtf8(String& utf8String, UnicodeChar utf32Char) const
-    {
-        auto outIt = std::back_inserter(utf8String);
-        boost::utf8_output_iterator<decltype(outIt)> utf8OutIt(outIt);
-        *utf8OutIt++ = utf32Char;
-    }
-    /**
-     * @brief Parses a surrogate pair character
-     * @param highSurrogate High surrogate
-     * @param lowSurrogate Low surrogate
-     * @return The result of @a highSurrogate and @a lowSurrogate combined
-     * into a single codepoint
-     */
-    UnicodeChar parseSurrogatePair(UnicodeChar const& highSurrogate,
-                                   UnicodeChar const& lowSurrogate)
-    {
-        UnicodeChar unicodeChar = 0x10000;
-        unicodeChar += (highSurrogate & 0x03FF) << 10;
-        unicodeChar += (lowSurrogate & 0x03FF);
-        return unicodeChar;
-    }
 };
 }} // namespace jmespath::parser
 #endif // GRAMMAR_H

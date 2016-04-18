@@ -25,18 +25,19 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef NODECHILDEXTRACTIONPOLICY_H
-#define NODECHILDEXTRACTIONPOLICY_H
+#ifndef LEFTCHILDEXTRACTOR_H
+#define LEFTCHILDEXTRACTOR_H
 #include "jmespath/ast/binaryexpressionnode.h"
+#include "jmespath/ast/notexpressionnode.h"
 
 namespace jmespath { namespace parser {
 
 /**
- * @brief The NodeChildExtractionPolicy class is a functor that extracts the
+ * @brief The LeftChildExtractor class is a functor that extracts the
  * child expression node from the given @a node which should be evaluated
  * before the given @a node itself.
  */
-class NodeChildExtractionPolicy
+class LeftChildExtractor
         : public boost::static_visitor<ast::ExpressionNode*>
 {
 public:
@@ -90,4 +91,4 @@ public:
     /** @}*/
 };
 }} // namespace jmespath::parser
-#endif // NODECHILDEXTRACTIONPOLICY_H
+#endif // LEFTCHILDEXTRACTOR_H

@@ -28,6 +28,7 @@
 #ifndef TYPES_H
 #define TYPES_H
 #include <string>
+#include <limits>
 #include <boost/regex/pending/unicode_iterator.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 #include <json.hpp>
@@ -73,10 +74,10 @@ using Json      = nlohmann::json;
  */
 using Index = boost::multiprecision::number<
     boost::multiprecision::cpp_int_backend<
-        CHAR_BIT * sizeof(size_t) * 2,
-        CHAR_BIT * sizeof(size_t) * 2,
+        std::numeric_limits<size_t>::digits,
+        std::numeric_limits<size_t>::digits,
         boost::multiprecision::signed_magnitude,
-        boost::multiprecision::unchecked,
+        boost::multiprecision::checked,
         void> >;
 }} // namespace jmespath::detail
 #endif // TYPES_H

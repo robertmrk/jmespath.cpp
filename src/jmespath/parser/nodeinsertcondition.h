@@ -58,14 +58,14 @@ public:
         std::enable_if<
             std::is_base_of<ast::BinaryExpressionNode,
                             T>::value, int>::type = 0>
-    bool operator()(ast::ExpressionNode* targetNode,
-                    T* node) const
+    bool operator()(const ast::ExpressionNode& targetNode,
+                    const T& node) const
     {
-        int targetNodeRank = nodeRank(*targetNode);
-        int currentNodeRank = nodeRank(*node);
-        ast::BinaryExpressionNode* targetBinaryNode
+        int targetNodeRank = nodeRank(targetNode);
+        int currentNodeRank = nodeRank(node);
+        const ast::BinaryExpressionNode* targetBinaryNode
                 = boost::polymorphic_get<ast::BinaryExpressionNode>(
-                    &targetNode->value);
+                    &targetNode.value);
         return (targetNodeRank < currentNodeRank)
                 || ((targetNodeRank == currentNodeRank)
                     && targetBinaryNode
@@ -77,11 +77,11 @@ public:
         std::enable_if<
             !std::is_base_of<ast::BinaryExpressionNode,
                              T>::value, int>::type = 0>
-    bool operator()(ast::ExpressionNode* targetNode,
-                    T* node) const
+    bool operator()(const ast::ExpressionNode& targetNode,
+                    const T& node) const
     {
-        int targetNodeRank = nodeRank(*targetNode);
-        int currentNodeRank = nodeRank(*node);
+        int targetNodeRank = nodeRank(targetNode);
+        int currentNodeRank = nodeRank(node);
         return (targetNodeRank < currentNodeRank);
     }
     /** @}*/

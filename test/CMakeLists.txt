@@ -40,9 +40,12 @@ add_executable(${JMESPATH_UNITTEST_TARGET_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/filterexpressionnode_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/functionexpressionnode_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/expressionargumentnode_test.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/nodechildextractionpolicy_test.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/leftchildextractor_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/nodeinsertpolicy_test.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/nodeinsertcondition_test.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/nodeinsertcondition_test.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/leftedgeiterator_test.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/appendutf8action_test.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/encodesurrogatepairaction_test.cpp)
 target_link_libraries(${JMESPATH_UNITTEST_TARGET_NAME}
     ${JMESPATH_TARGET_NAME} FakeIt)
 set_target_properties(${JMESPATH_UNITTEST_TARGET_NAME} PROPERTIES

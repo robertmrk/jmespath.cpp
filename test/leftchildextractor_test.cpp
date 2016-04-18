@@ -26,67 +26,45 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/parser/nodeinsertpolicy.h"
+#include "jmespath/detail/types.h"
+#include "jmespath/parser/leftchildextractor.h"
 #include "jmespath/ast/allnodes.h"
 
-TEST_CASE("NodeInsertPolicy")
+TEST_CASE("LeftChildExtractor")
 {
     using namespace jmespath::parser;
+    using namespace jmespath::detail;
     namespace ast = jmespath::ast;
     using namespace fakeit;
 
-    NodeInsertPolicy policy;
+    LeftChildExtractor policy;
 
-    SECTION("Replaces target node with terminal node")
+    SECTION("Returns left child of binary expression node")
     {
-        ast::ExpressionNode targetNode;        
-        ast::IdentifierNode node;
-
-        policy(targetNode, node);
-
-        REQUIRE(targetNode == node);
-    }
-
-    SECTION("Replaces target node with subexpression node")
-    {
-        ast::ExpressionNode targetNode;
-        ast::SubexpressionNode node;
-
-        policy(targetNode, node);
-
-        REQUIRE(targetNode == node);
-    }
-
-    SECTION("Replaces target node with binary node and makes target its "
-            "right node")
-    {
-        ast::ExpressionNode targetNode{
-            ast::IdentifierNode{}};
-        ast::IndexExpressionNode node{};
-        ast::ExpressionNode expectedResult{
-            ast::IndexExpressionNode{
-                ast::ExpressionNode{},
-                ast::BracketSpecifierNode{},
+        ast::ExpressionNode node{
+            ast::SubexpressionNode{
                 ast::ExpressionNode{
-                    ast::IdentifierNode{}}}};
+                    ast::IdentifierNode{"id1"}},
+                ast::ExpressionNode{
+                    ast::IdentifierNode{"id2"}}}};
 
-        policy(targetNode, node);
-
-        REQUIRE(targetNode == expectedResult);
+        REQUIRE(policy(&node)
+                == &(boost::get<ast::SubexpressionNode>(
+                    &node.value)->leftExpression));
     }
 
-    SECTION("Replaces target node with not expression node, and makes target "
-            "its child")
+    SECTION("Returns nullptr for non binary expression node")
     {
-        ast::ExpressionNode targetNode{
+        ast::ExpressionNode node{
             ast::IdentifierNode{}};
-        ast::NotExpressionNode node{};
-        ast::NotExpressionNode expectedResult{
-            ast::ExpressionNode{
-                ast::IdentifierNode{}}};
 
-        policy(targetNode, node);
+        REQUIRE(policy(&node) == nullptr);
+    }
 
-        REQUIRE(targetNode == expectedResult);
+    SECTION("Returns nullptr for empty expression")
+    {
+        ast::ExpressionNode node{};
+
+        REQUIRE(policy(&node) == nullptr);
     }
 }
