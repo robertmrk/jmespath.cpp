@@ -687,7 +687,7 @@ void Interpreter::map(FunctionArgumentList &arguments)
         BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
     }
 
-    rng::for_each(*array, [this, expression](Json& item)
+    rng::for_each(*array, [&](Json& item)
     {
         m_context = std::move(item);
         this->visit(expression);
@@ -989,7 +989,7 @@ void Interpreter::maxBy(FunctionArgumentList &arguments,
 
     Json expressionResults(Json::value_t::array);
     rng::transform(*array, std::back_inserter(expressionResults),
-                   [this, expression](const Json& item)
+                   [&](const Json& item)
     {
         m_context = item;
         this->visit(expression);
