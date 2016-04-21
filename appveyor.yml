@@ -6,11 +6,15 @@ install:
 
     git submodule update
 
+    cd..
+
     appveyor DownloadFile http://sourceforge.net/projects/boost/files/boost/1.57.0/boost_1_57_0.7z/download -FileName boost.7z
 
     7z x boost.7z -y > nul
 
     set "BOOST_ROOT=%cd%\boost_1_57_0"
+
+    cd jmespath-cpp
 build_script:
 - cmd: >-
     set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;%PATH%

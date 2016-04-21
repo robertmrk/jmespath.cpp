@@ -11,11 +11,13 @@ matrix:
           sources: ['george-edison55-precise-backports', 'ubuntu-toolchain-r-test']
           packages: ['cmake', 'cmake-data', 'g++-4.9', 'gcc-4.9']
       before_install:
+        - cd ..
         - wget http://sourceforge.net/projects/boost/files/boost/1.57.0/boost_1_57_0.tar.bz2/download -O boost.tar.bz2
         - tar -xjf boost.tar.bz2
         - export BOOST_ROOT=$PWD/boost_1_57_0
         - export CMAKE_CXX=g++-4.9
         - export CMAKE_CC=gcc-4.9
+        - cd jmespath.cpp
       env: COMPILER=g++-4.9
     - os: linux
       compiler: gcc
@@ -24,11 +26,13 @@ matrix:
           sources: ['george-edison55-precise-backports', 'ubuntu-toolchain-r-test']
           packages: ['cmake', 'cmake-data', 'g++-5', 'gcc-5']
       before_install:
+        - cd ..
         - wget http://sourceforge.net/projects/boost/files/boost/1.57.0/boost_1_57_0.tar.bz2/download -O boost.tar.bz2
         - tar -xjf boost.tar.bz2
         - export BOOST_ROOT=$PWD/boost_1_57_0
         - export CMAKE_CXX=g++-5
         - export CMAKE_CC=gcc-5
+        - cd jmespath.cpp
       env: COMPILER=g++-5
     - os: linux
       compiler: clang
@@ -37,11 +41,13 @@ matrix:
           sources: ['george-edison55-precise-backports', 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.5']
           packages: ['cmake', 'cmake-data', 'clang-3.5']
       before_install:
+        - cd ..
         - wget http://sourceforge.net/projects/boost/files/boost/1.57.0/boost_1_57_0.tar.bz2/download -O boost.tar.bz2
         - tar -xjf boost.tar.bz2
         - export BOOST_ROOT=$PWD/boost_1_57_0
         - export CMAKE_CXX=clang++-3.5
         - export CMAKE_CC=clang-3.5
+        - cd jmespath.cpp
       env: COMPILER=clang++-3.5
     - os: linux
       compiler: clang
@@ -50,11 +56,13 @@ matrix:
           sources: ['george-edison55-precise-backports', 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.6']
           packages: ['cmake', 'cmake-data', 'clang-3.6']
       before_install:
+        - cd ..
         - wget http://sourceforge.net/projects/boost/files/boost/1.57.0/boost_1_57_0.tar.bz2/download -O boost.tar.bz2
         - tar -xjf boost.tar.bz2
         - export BOOST_ROOT=$PWD/boost_1_57_0
         - export CMAKE_CXX=clang++-3.6
         - export CMAKE_CC=clang-3.6
+        - cd jmespath.cpp
       env: COMPILER=clang++-3.6
     - os: linux
       compiler: clang
@@ -63,11 +71,13 @@ matrix:
           sources: ['george-edison55-precise-backports', 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.7']
           packages: ['cmake', 'cmake-data', 'clang-3.7', 'python-pip', 'python-yaml']
       before_install:
+        - cd ..
         - wget http://sourceforge.net/projects/boost/files/boost/1.57.0/boost_1_57_0.tar.bz2/download -O boost.tar.bz2
         - tar -xjf boost.tar.bz2
         - export BOOST_ROOT=$PWD/boost_1_57_0
         - export CMAKE_CXX=clang++-3.7
         - export CMAKE_CC=clang-3.7
+        - cd jmespath.cpp
         - pip install --user git+git://github.com/eddyxu/cpp-coveralls.git
       after_success:
         - make clean
