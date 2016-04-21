@@ -40,7 +40,7 @@ Json search(const Expression &expression, const Json &document)
 #pragma clang diagnostic pop
     s_interpreter.setContext(document);
     // evaluate the expression by calling visit with the root of the AST
-    s_interpreter.visit(&expression.m_astRoot);
+    s_interpreter.visit(expression.m_astRoot.get());
 
     // return the current evaluation context as the result
     return s_interpreter.currentContext();
