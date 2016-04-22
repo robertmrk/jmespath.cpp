@@ -123,3 +123,9 @@ script:
   - ./unit
   - ./compliance
   - cd ..
+  - cd ../example
+  - mkdir build;cd build
+  - cmake -DCMAKE_C_COMPILER=$CMAKE_CC -DCMAKE_CXX_COMPILER=$CMAKE_CXX ..
+  - make 
+  - ./example
+  - cd ../../build
