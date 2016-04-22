@@ -33,3 +33,14 @@ test_script:
     Release\unit.exe
 
     Release\compliance.exe
+
+    cd ..\..\example
+
+    mkdir build & cd build
+
+    cmake -G"Visual Studio 14 2015" ..
+
+    cmake --build . --config Release
+
+    Release\example.exe
+    
