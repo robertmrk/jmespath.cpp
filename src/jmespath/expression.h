@@ -27,14 +27,15 @@
 ****************************************************************************/
 #ifndef EXPRESSION_H
 #define EXPRESSION_H
+#include <memory>
 #include "jmespath/detail/types.h"
 #include "jmespath/detail/exceptions.h"
-#include "jmespath/ast/allnodes.h"
-#include "jmespath/parser/parser.h"
-#include "jmespath/parser/grammar.h"
 
 namespace jmespath {
 
+namespace ast {
+class ExpressionNode;
+}
 /**
  * @brief The Expression class represents a JMESPath expression.
  *
@@ -44,10 +45,6 @@ namespace jmespath {
 class Expression
 {
     friend detail::Json search(const Expression&, const detail::Json&);
-    /**
-     * @brief The type of the parser used for parsing expressions.
-     */
-    using ParserType = parser::Parser<parser::Grammar>;
 public:
     /**
      * @brief Constructs an empty Expression object.
@@ -138,13 +135,28 @@ public:
 
 private:
     /**
+     * @brief The ExpressionDeleter struct is a custom destruction policy
+     * for deleting ast::ExpressionNode objects.
+     *
+     * Unlike std::default_deleter it can be used to delete forward declared
+     * ast::ExpressionNode.
+     */
+    struct ExpressionDeleter
+    {
+        /**
+         * @brief operator () Destroys the given @a node object.
+         * @param node An instance of ast::ExpressionNode
+         */
+        void operator()(ast::ExpressionNode* node) const;
+    };
+    /**
      * @brief The string representation of the JMESPath expression.
      */
     detail::String m_expressionString;
     /**
      * @brief The root node of the ast.
      */
-    ast::ExpressionNode m_astRoot;
+    std::unique_ptr<ast::ExpressionNode, ExpressionDeleter> m_astRoot;
     /**
      * @brief Parses the @a expressionString and updates the AST.
      * @param expressionString The string representation of the JMESPath

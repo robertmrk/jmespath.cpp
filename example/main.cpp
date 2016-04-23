@@ -25,24 +25,23 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "jmespath/jmespath.h"
-#include "jmespath/interpreter/interpreter.h"
+#include <iostream>
+#include <jmespath/jmespath.h>
 
-namespace jmespath {
+namespace jp = jmespath;
 
-Json search(const Expression &expression, const Json &document)
+int main(int argc, char *argv[])
 {
-    using interpreter::Interpreter;
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wexit-time-destructors"
-    static Interpreter s_interpreter;
-#pragma clang diagnostic pop
-    s_interpreter.setContext(document);
-    // evaluate the expression by calling visit with the root of the AST
-    s_interpreter.visit(expression.m_astRoot.get());
-
-    // return the current evaluation context as the result
-    return s_interpreter.currentContext();
+    jp::Json data = {
+        {"locations", {
+            {{"name", "Seattle"}, {"state", "WA"}},
+            {{"name", "New York"}, {"state", "NY"}},
+            {{"name", "Bellevue"}, {"state", "WA"}},
+            {{"name", "Olympia"}, {"state", "WA"}}
+        }}
+    };
+    jp::Expression expression = "locations[?state == 'WA'].name | sort(@) | "
+                                "{WashingtonCities: join(', ', @)}";
+    std::cout << jp::search(expression, data) << std::endl;
+    return 0;
 }
-} // namespace jmespath

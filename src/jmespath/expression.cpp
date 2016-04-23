@@ -26,15 +26,18 @@
 **
 ****************************************************************************/
 #include "jmespath/expression.h"
-#include "jmespath/ast/allnodes.h"
+#include "jmespath/parser/parser.h"
+#include "jmespath/parser/grammar.h"
 
 namespace jmespath {
 
 Expression::Expression()
+    : m_astRoot(new ast::ExpressionNode)
 {
 }
 
 Expression::Expression(const Expression &other)
+    : Expression()
 {
     *this = other;
 }
@@ -49,7 +52,7 @@ Expression& Expression::operator=(const Expression &other)
     if (this != &other)
     {
         m_expressionString = other.m_expressionString;
-        m_astRoot = other.m_astRoot;
+        *m_astRoot = *other.m_astRoot;
     }
     return *this;
 }
@@ -71,17 +74,22 @@ detail::String Expression::toString() const
 
 bool Expression::isEmpty() const
 {
-    return m_astRoot.isNull();
+    return (!m_astRoot || m_astRoot->isNull());
 }
 
 void Expression::parseExpression(const detail::String& expressionString)
 {
+    using ParserType = parser::Parser<parser::Grammar>;
+    if (!m_astRoot)
+    {
+        m_astRoot.reset(new ast::ExpressionNode);
+    }
     if (!expressionString.empty())
     {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wexit-time-destructors"
         static ParserType s_parser;
-        m_astRoot = s_parser.parse(expressionString);
+        *m_astRoot = s_parser.parse(expressionString);
 #pragma clang diagnostic pop
     }
 }
@@ -105,8 +113,16 @@ bool Expression::operator==(const Expression &other) const
     if (this != &other)
     {
         return (m_expressionString == other.m_expressionString)
-                && (m_astRoot == other.m_astRoot);
+                && (*m_astRoot == *other.m_astRoot);
     }
     return true;
+}
+
+void Expression::ExpressionDeleter::operator()(ast::ExpressionNode *node) const
+{
+    if (node)
+    {
+        delete node;
+    }
 }
 } // namespace jmespath
