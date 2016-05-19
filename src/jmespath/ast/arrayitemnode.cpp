@@ -35,7 +35,7 @@ ArrayItemNode::ArrayItemNode()
 {
 }
 
-ArrayItemNode::ArrayItemNode(detail::Index itemIndex)
+ArrayItemNode::ArrayItemNode(Index itemIndex)
     : AbstractNode(),
       index(itemIndex)
 {

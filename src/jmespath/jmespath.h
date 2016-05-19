@@ -28,8 +28,8 @@
 #ifndef JMESPATH_H
 #define JMESPATH_H
 #include <string>
-#include "jmespath/detail/types.h"
-#include "jmespath/detail/exceptions.h"
+#include "jmespath/types.h"
+#include "jmespath/exceptions.h"
 #include "jmespath/expression.h"
 
 /**
@@ -38,7 +38,6 @@
  */
 namespace jmespath {
 
-using namespace detail;
 /**
  * @brief Finds or creates the results for the \a expression evaluated on the
  * given \a document.

@@ -27,7 +27,7 @@
 ****************************************************************************/
 #ifndef ENCODESURROGATEPAIRACTION_H
 #define ENCODESURROGATEPAIRACTION_H
-#include "jmespath/detail/types.h"
+#include "jmespath/types.h"
 
 namespace jmespath { namespace parser {
 
@@ -41,7 +41,7 @@ public:
     /**
      * The action's result type
      */
-    using result_type =  detail::UnicodeChar;
+    using result_type =  UnicodeChar;
     /**
      * @brief Encodes a surrogate pair character
      * @param highSurrogate High surrogate
@@ -49,10 +49,10 @@ public:
      * @return The result of @a highSurrogate and @a lowSurrogate combined
      * into a single codepoint
      */
-    result_type operator()(detail::UnicodeChar const& highSurrogate,
-                           detail::UnicodeChar const& lowSurrogate) const
+    result_type operator()(UnicodeChar const& highSurrogate,
+                           UnicodeChar const& lowSurrogate) const
     {
-        detail::UnicodeChar unicodeChar = 0x10000;
+        UnicodeChar unicodeChar = 0x10000;
         unicodeChar += (highSurrogate & 0x03FF) << 10;
         unicodeChar += (lowSurrogate & 0x03FF);
         return unicodeChar;

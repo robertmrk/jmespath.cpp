@@ -28,12 +28,11 @@
 #ifndef IDENTIFIERNODE_H
 #define IDENTIFIERNODE_H
 #include "jmespath/ast/abstractnode.h"
-#include "jmespath/detail/types.h"
+#include "jmespath/types.h"
 #include <boost/fusion/include/adapt_struct.hpp>
 
 namespace jmespath { namespace ast {
 
-using jmespath::detail::String;
 /**
  * @brief The IdentifierNode class represents a JMESPath identifier
  */
@@ -72,6 +71,6 @@ public:
 
 BOOST_FUSION_ADAPT_STRUCT(
     jmespath::ast::IdentifierNode,
-    (jmespath::detail::String, identifier)
+    (jmespath::String, identifier)
 )
 #endif // IDENTIFIERNODE_H

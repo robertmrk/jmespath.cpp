@@ -83,7 +83,7 @@ TEST_CASE("Expression")
 
     SECTION("toString returns expression string")
     {
-        detail::String expressionString{"\"id\"[5]"};
+        String expressionString{"\"id\"[5]"};
         Expression expression{expressionString};
 
         REQUIRE(expression.toString() == expressionString);
@@ -91,7 +91,7 @@ TEST_CASE("Expression")
 
     SECTION("can be assigned with expression string")
     {
-        detail::String expressionString{"\"id\"[5]"};
+        String expressionString{"\"id\"[5]"};
         Expression expression;
 
         expression = expressionString;
@@ -101,8 +101,8 @@ TEST_CASE("Expression")
 
     SECTION("can be move assigned with expression string")
     {
-        detail::String expressionString{"\"id\"[5]"};
-        detail::String expressionStringCopy{expressionString};
+        String expressionString{"\"id\"[5]"};
+        String expressionStringCopy{expressionString};
         Expression expression;
 
         expression = std::move(expressionStringCopy);
@@ -112,24 +112,24 @@ TEST_CASE("Expression")
 
     SECTION("throws when constructed from an invalid expression string")
     {
-        REQUIRE_THROWS_AS(Expression{"\"id\"["}, detail::SyntaxError);
+        REQUIRE_THROWS_AS(Expression{"\"id\"["}, SyntaxError);
     }
 
     SECTION("throws when assigned with an invalid expression string")
     {
-        detail::String expressionString{"\"id\"["};
+        String expressionString{"\"id\"["};
         Expression expression;
 
-        REQUIRE_THROWS_AS(expression = expressionString, detail::SyntaxError);
+        REQUIRE_THROWS_AS(expression = expressionString, SyntaxError);
     }
 
     SECTION("throws when move assigned with an invalid expression string")
     {
-        detail::String expressionString{"\"id\"["};
+        String expressionString{"\"id\"["};
         Expression expression;
 
         REQUIRE_THROWS_AS(expression = std::move(expressionString),
-                          detail::SyntaxError);
+                          SyntaxError);
     }
 
     SECTION("is comparable")

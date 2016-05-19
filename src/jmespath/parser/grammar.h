@@ -27,7 +27,7 @@
 ****************************************************************************/
 #ifndef GRAMMAR_H
 #define GRAMMAR_H
-#include "jmespath/detail/types.h"
+#include "jmespath/types.h"
 #include "jmespath/ast/allnodes.h"
 #include "jmespath/parser/noderank.h"
 #include "jmespath/parser/insertnodeaction.h"
@@ -47,7 +47,6 @@ namespace jmespath { namespace parser {
 namespace qi = boost::spirit::qi;
 namespace encoding = qi::unicode;
 namespace phx = boost::phoenix;
-using namespace detail;
 
 /**
  * @brief The Grammar class contains the PEG rule definition based
@@ -175,7 +174,7 @@ public:
                 | m_flattenOperatorRule;
 
         // match an integer of type Index
-        m_indexRule = int_parser<detail::Index>();
+        m_indexRule = int_parser<Index>();
 
         // match an index
         m_arrayItemRule = m_indexRule;
@@ -479,7 +478,7 @@ private:
     qi::rule<Iterator>                      m_quoteRule;
     qi::rule<Iterator>                      m_escapeRule;
     qi::symbols<UnicodeChar, UnicodeChar>   m_controlCharacterSymbols;
-    qi::rule<Iterator, detail::Index()>     m_indexRule;
+    qi::rule<Iterator, Index()>     m_indexRule;
 };
 }} // namespace jmespath::parser
 #endif // GRAMMAR_H

@@ -33,7 +33,7 @@
 namespace qi = boost::spirit::qi;
 namespace encoding = qi::ascii;
 namespace phx = boost::phoenix;
-using namespace jmespath::detail;
+using namespace jmespath;
 
 template <typename Iterator, typename Skipper = encoding::space_type>
 class GrammarStub : public qi::grammar<Iterator, String(), Skipper>
@@ -61,7 +61,6 @@ TEST_CASE("Parser")
 {
     namespace qi = boost::spirit::qi;
     namespace encoding = qi::ascii;
-    using namespace jmespath::detail;
     using jmespath::parser::Parser;
 
     Parser<GrammarStub> parser;

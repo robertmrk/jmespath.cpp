@@ -35,7 +35,7 @@ TEST_CASE("AppendUtf8Action")
 
     SECTION("append characters encoded in UTF-8")
     {
-        jmespath::detail::String string;
+        jmespath::String string;
 
         action(string, 'a');
         action(string, 0x2122);

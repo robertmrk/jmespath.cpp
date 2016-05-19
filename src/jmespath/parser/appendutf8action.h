@@ -27,7 +27,7 @@
 ****************************************************************************/
 #ifndef APPENDUTF8ACTION_H
 #define APPENDUTF8ACTION_H
-#include "jmespath/detail/types.h"
+#include "jmespath/types.h"
 
 namespace jmespath { namespace parser {
 
@@ -49,8 +49,8 @@ public:
     * will be appended.
     * @param utf32Char The input character encoded in UTF-32
     */
-    result_type operator()(detail::String& utf8String,
-                           detail::UnicodeChar utf32Char) const
+    result_type operator()(String& utf8String,
+                           UnicodeChar utf32Char) const
     {
         auto outIt = std::back_inserter(utf8String);
         boost::utf8_output_iterator<decltype(outIt)> utf8OutIt(outIt);

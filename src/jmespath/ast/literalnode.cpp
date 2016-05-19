@@ -35,7 +35,7 @@ LiteralNode::LiteralNode()
 {
 }
 
-LiteralNode::LiteralNode(const detail::String &value)
+LiteralNode::LiteralNode(const String &value)
     : AbstractNode(),
       literal(value)
 {

@@ -28,8 +28,8 @@
 #ifndef EXPRESSION_H
 #define EXPRESSION_H
 #include <memory>
-#include "jmespath/detail/types.h"
-#include "jmespath/detail/exceptions.h"
+#include "jmespath/types.h"
+#include "jmespath/exceptions.h"
 
 namespace jmespath {
 
@@ -44,7 +44,7 @@ class ExpressionNode;
  */
 class Expression
 {
-    friend detail::Json search(const Expression&, const detail::Json&);
+    friend Json search(const Expression&, const Json&);
 public:
     /**
      * @brief Constructs an empty Expression object.
@@ -65,14 +65,14 @@ public:
      * @brief Constructs an Expression object by forwarding @a argument.
      *
      * This constructor participates in overload resolution only if U is
-     * implicitly convertible to detail::String. @a Argument should describe a
+     * implicitly convertible to String. @a Argument should describe a
      * valid JMESPath expression.
      * @param argument The value that should be forwarded.
      * @tparam U The type of @a argument.
      */
     template <typename U, typename
         std::enable_if<
-            std::is_convertible<U, detail::String>::value>::type* = nullptr>
+            std::is_convertible<U, String>::value>::type* = nullptr>
     Expression(U&& argument)
         : m_expressionString(std::forward<U>(argument))
     {
@@ -101,7 +101,7 @@ public:
      * expression.
      * @return Reference to this expression.
      */
-    Expression& operator= (const detail::String& expressionString);
+    Expression& operator= (const String& expressionString);
     /**
      * @brief Move-assigns @a expressionString to this expression and returns a
      * reference to this expression.
@@ -111,7 +111,7 @@ public:
      * expression.
      * @return Reference to this expression.
      */
-    Expression& operator= (detail::String&& expressionString);
+    Expression& operator= (String&& expressionString);
     /**
      * @brief Equality compares this expression to the \a other.
      * @param other The expression that should be compared.
@@ -124,7 +124,7 @@ public:
      * JMESPath expression.
      * @return String representation of the JMESPath expression.
      */
-    detail::String toString() const;
+    String toString() const;
     /**
      * @brief Checks whether this object has been initialized.
      * expression.
@@ -152,7 +152,7 @@ private:
     /**
      * @brief The string representation of the JMESPath expression.
      */
-    detail::String m_expressionString;
+    String m_expressionString;
     /**
      * @brief The root node of the ast.
      */
@@ -162,7 +162,7 @@ private:
      * @param expressionString The string representation of the JMESPath
      * expression.
      */
-    void parseExpression(const detail::String &expressionString);
+    void parseExpression(const String &expressionString);
 };
 } // namespace jmespath
 #endif // EXPRESSION_H

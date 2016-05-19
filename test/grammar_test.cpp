@@ -27,14 +27,14 @@
 ****************************************************************************/
 #include "fakeit.hpp"
 #include "jmespath/parser/grammar.h"
-#include "jmespath/detail/types.h"
+#include "jmespath/types.h"
 #include <limits>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/optional/optional_io.hpp>
 #include <boost/multiprecision/cpp_int/serialize.hpp>
 
+using namespace jmespath;
 using namespace jmespath::parser;
-using namespace jmespath::detail;
 
 template <typename GrammarT>
 typename GrammarT::start_type::attr_type
@@ -55,10 +55,11 @@ parseExpression(const GrammarT& grammar, const String& expression)
 
 TEST_CASE("Grammar")
 {
+    using namespace jmespath;
     using namespace jmespath::parser;
     namespace qi = boost::spirit::qi;
     namespace ast = jmespath::ast;
-    using jmespath::detail::Index;
+    using jmespath::Index;
 
     Grammar<UnicodeIteratorAdaptor> grammar;
 

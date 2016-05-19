@@ -40,6 +40,7 @@ std::ostream& operator<<(std::ostream& stream, const ExpressionArgumentNode&)
 
 TEST_CASE("FunctionExpressionNode")
 {
+    using namespace jmespath;
     using namespace jmespath::ast;
     using namespace jmespath::interpreter;
     using namespace fakeit;

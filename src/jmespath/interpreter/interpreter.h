@@ -28,7 +28,7 @@
 #ifndef INTERPRETER_H
 #define INTERPRETER_H
 #include "jmespath/interpreter/abstractvisitor.h"
-#include "jmespath/detail/types.h"
+#include "jmespath/types.h"
 #include "jmespath/ast/expressionnode.h"
 #include "jmespath/ast/functionexpressionnode.h"
 #include <functional>
@@ -38,8 +38,6 @@
 
 namespace jmespath { namespace interpreter {
 
-using detail::Json;
-using detail::String;
 /**
  * @brief The Interpreter class evaluates the AST structure.
  */
@@ -148,9 +146,9 @@ private:
      * @param step The slice's step variable value.
      * @return Returns the endpoint's new value.
      */
-    detail::Index adjustSliceEndpoint(size_t length,
-                                      detail::Index endpoint,
-                                      detail::Index step) const;
+    Index adjustSliceEndpoint(size_t length,
+                              Index endpoint,
+                              Index step) const;
     /**
      * @brief Converts the @a json value to a boolean.
      * @param json The JSON value that needs to be converted.

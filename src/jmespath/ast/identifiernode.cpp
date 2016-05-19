@@ -35,7 +35,7 @@ IdentifierNode::IdentifierNode()
 {
 }
 
-IdentifierNode::IdentifierNode(const detail::String &name)
+IdentifierNode::IdentifierNode(const String &name)
     : AbstractNode(),
       identifier(name)
 {

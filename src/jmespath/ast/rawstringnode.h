@@ -28,12 +28,11 @@
 #ifndef RAWSTRINGNODE_H
 #define RAWSTRINGNODE_H
 #include "jmespath/ast/abstractnode.h"
-#include "jmespath/detail/types.h"
+#include "jmespath/types.h"
 #include <boost/fusion/include/adapt_struct.hpp>
 
 namespace jmespath { namespace ast {
 
-using jmespath::detail::String;
 /**
  * @brief The RawStringNode class represents a JMESPath raw string literal.
  */
@@ -72,6 +71,6 @@ public:
 
 BOOST_FUSION_ADAPT_STRUCT(
     jmespath::ast::RawStringNode,
-    (jmespath::detail::String, rawString)
+    (jmespath::String, rawString)
 )
 #endif // RAWSTRINGNODE_H

@@ -28,7 +28,7 @@
 #ifndef SLICEEXPRESSIONNODE_H
 #define SLICEEXPRESSIONNODE_H
 #include "jmespath/ast/abstractnode.h"
-#include "jmespath/detail/types.h"
+#include "jmespath/types.h"
 #include "jmespath/interpreter/abstractvisitor.h"
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/optional.hpp>
@@ -41,7 +41,7 @@ namespace jmespath { namespace ast {
 class SliceExpressionNode : public AbstractNode
 {
 public:
-    using IndexType = boost::optional<detail::Index>;
+    using IndexType = boost::optional<Index>;
     /**
      * @brief Constructs a SliceExpressionNode object with the given index
      * values.

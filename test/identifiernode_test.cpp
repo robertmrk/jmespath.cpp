@@ -33,6 +33,7 @@ TEST_CASE("IdentifierNode")
 {
     using namespace jmespath::ast;
     using namespace jmespath::interpreter;
+    using jmespath::String;
     using namespace fakeit;
 
     SECTION("can be default constructed")

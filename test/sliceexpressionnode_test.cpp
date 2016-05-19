@@ -34,7 +34,7 @@ TEST_CASE("SliceExpressionNode")
     using namespace jmespath::ast;
     using namespace jmespath::interpreter;
     using namespace fakeit;
-    using jmespath::detail::Index;
+    using jmespath::Index;
 
     SECTION("can be constructed")
     {

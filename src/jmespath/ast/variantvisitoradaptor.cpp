@@ -26,7 +26,7 @@
 **
 ****************************************************************************/
 #include "jmespath/ast/variantvisitoradaptor.h"
-#include "jmespath/detail/exceptions.h"
+#include "jmespath/exceptions.h"
 
 namespace jmespath{ namespace ast {
 
@@ -36,7 +36,7 @@ VariantVisitorAdaptor::VariantVisitorAdaptor(interpreter::AbstractVisitor *visit
 {
     if (!m_visitor)
     {
-        BOOST_THROW_EXCEPTION(detail::InvalidAgrument());
+        BOOST_THROW_EXCEPTION(InvalidAgrument());
     }
 }
 }} // namespace jmespath::ast

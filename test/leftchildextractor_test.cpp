@@ -26,14 +26,13 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/detail/types.h"
+#include "jmespath/types.h"
 #include "jmespath/parser/leftchildextractor.h"
 #include "jmespath/ast/allnodes.h"
 
 TEST_CASE("LeftChildExtractor")
 {
     using namespace jmespath::parser;
-    using namespace jmespath::detail;
     namespace ast = jmespath::ast;
     using namespace fakeit;
 

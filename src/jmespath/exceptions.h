@@ -30,7 +30,7 @@
 #include <stdexcept>
 #include <boost/exception/all.hpp>
 
-namespace jmespath { namespace detail {
+namespace jmespath {
 /**
  * @brief InfoSearchExpression contains the JMESPath expression being evaluated
  */
@@ -83,5 +83,5 @@ struct InvalidFunctionArgumentArity : virtual Exception {};
  * built in function with an unexpected type of argument.
  */
 struct InvalidFunctionArgumentType : virtual Exception {};
-}} // namespace jmespath::detail
+} // namespace jmespath
 #endif // EXCEPTIONS_H

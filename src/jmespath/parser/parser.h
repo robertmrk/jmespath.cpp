@@ -27,15 +27,14 @@
 ****************************************************************************/
 #ifndef PARSER_H
 #define PARSER_H
-#include "jmespath/detail/types.h"
-#include "jmespath/detail/exceptions.h"
+#include "jmespath/types.h"
+#include "jmespath/exceptions.h"
 #include <boost/spirit/include/qi.hpp>
 
 namespace jmespath { namespace parser {
 
 namespace qi = boost::spirit::qi;
 namespace encoding = qi::unicode;
-using namespace detail;
 
 /**
  * @brief The Parser class parses expressions with the specified grammar.

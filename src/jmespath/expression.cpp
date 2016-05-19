@@ -67,7 +67,7 @@ Expression& Expression::operator=(Expression &&other)
     return *this;
 }
 
-detail::String Expression::toString() const
+String Expression::toString() const
 {
     return m_expressionString;
 }
@@ -77,7 +77,7 @@ bool Expression::isEmpty() const
     return (!m_astRoot || m_astRoot->isNull());
 }
 
-void Expression::parseExpression(const detail::String& expressionString)
+void Expression::parseExpression(const String& expressionString)
 {
     using ParserType = parser::Parser<parser::Grammar>;
     if (!m_astRoot)
@@ -94,14 +94,14 @@ void Expression::parseExpression(const detail::String& expressionString)
     }
 }
 
-Expression& Expression::operator=(const detail::String& expressionString)
+Expression& Expression::operator=(const String& expressionString)
 {
     parseExpression(expressionString);
     m_expressionString = expressionString;
     return *this;
 }
 
-Expression& Expression::operator=(detail::String &&expressionString)
+Expression& Expression::operator=(String &&expressionString)
 {
     parseExpression(expressionString);
     m_expressionString = std::move(expressionString);

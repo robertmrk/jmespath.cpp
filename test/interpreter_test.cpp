@@ -28,7 +28,7 @@
 #include "fakeit.hpp"
 #include "jmespath/interpreter/interpreter.h"
 #include "jmespath/ast/allnodes.h"
-#include "jmespath/detail/exceptions.h"
+#include "jmespath/exceptions.h"
 #include <boost/range/algorithm.hpp>
 
 namespace jmespath { namespace ast {
@@ -40,11 +40,11 @@ std::ostream& operator<< (std::ostream& stream, ExpressionNode const&)
 }} // namespace jmespath::ast
 
 TEST_CASE("Interpreter")
-{
+{    
+    using namespace jmespath;
     using jmespath::interpreter::Interpreter;    
     namespace ast = jmespath::ast;
     namespace rng = boost::range;
-    using namespace jmespath::detail;
     using namespace fakeit;
 
     Interpreter interpreter;

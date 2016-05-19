@@ -27,14 +27,14 @@
 ****************************************************************************/
 #include "fakeit.hpp"
 #include "jmespath/ast/variantvisitoradaptor.h"
-#include "jmespath/detail/exceptions.h"
+#include "jmespath/exceptions.h"
 #include "jmespath/ast/identifiernode.h"
 
 TEST_CASE("VariantVisitorAdaptor")
 {
+    using namespace jmespath;
     using namespace jmespath::ast;
     using namespace jmespath::interpreter;
-    using namespace jmespath::detail;
     using namespace fakeit;
 
     SECTION("can be constructed with visitor")

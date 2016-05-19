@@ -31,6 +31,7 @@
 
 TEST_CASE("LiteralNode")
 {
+    using namespace jmespath;
     using namespace jmespath::ast;
     using namespace jmespath::interpreter;
     using namespace fakeit;

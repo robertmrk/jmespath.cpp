@@ -35,7 +35,7 @@ RawStringNode::RawStringNode()
 {
 }
 
-RawStringNode::RawStringNode(const detail::String &string)
+RawStringNode::RawStringNode(const String &string)
     : AbstractNode(),
       rawString(string)
 {

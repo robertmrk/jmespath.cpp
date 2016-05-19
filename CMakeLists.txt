@@ -88,8 +88,6 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${JMESPATH_CONFIG_FILE_NAME}"
 
 install(FILES "src/jmespath/jmespath.h"
     "src/jmespath/expression.h"
+    "src/jmespath/types.h"
+    "src/jmespath/exceptions.h"
     DESTINATION ${JMESPATH_INCLUDE_PREFIX_DIR})
-
-install(DIRECTORY "src/jmespath/detail"
-    DESTINATION ${JMESPATH_INCLUDE_PREFIX_DIR}
-    FILES_MATCHING PATTERN "*.h")

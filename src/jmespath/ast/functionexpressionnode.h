@@ -28,7 +28,7 @@
 #ifndef FUNCTIONEXPRESSIONNODE_H
 #define FUNCTIONEXPRESSIONNODE_H
 #include "jmespath/ast/abstractnode.h"
-#include "jmespath/detail/types.h"
+#include "jmespath/types.h"
 #include <vector>
 #include <initializer_list>
 #include <boost/variant.hpp>
@@ -38,7 +38,6 @@ namespace jmespath { namespace ast {
 
 class ExpressionNode;
 class ExpressionArgumentNode;
-using jmespath::detail::String;
 /**
  * @brief The FunctionExpressionNode class represents a JMESPath function
  * expression.
@@ -87,7 +86,7 @@ public:
 
 BOOST_FUSION_ADAPT_STRUCT(
     jmespath::ast::FunctionExpressionNode,
-    (jmespath::detail::String, functionName)
+    (jmespath::String, functionName)
     (std::vector<jmespath::ast::FunctionExpressionNode::ArgumentType>,
      arguments)
 )

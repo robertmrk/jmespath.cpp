@@ -27,7 +27,7 @@
 ****************************************************************************/
 #include "jmespath/interpreter/interpreter.h"
 #include "jmespath/ast/allnodes.h"
-#include "jmespath/detail/exceptions.h"
+#include "jmespath/exceptions.h"
 #include <numeric>
 #include <boost/range.hpp>
 #include <boost/range/algorithm.hpp>
@@ -217,16 +217,16 @@ void Interpreter::visit(const ast::SliceExpressionNode *node)
     Json result;
     if (m_context.is_array())
     {
-        detail::Index startIndex = 0;
-        detail::Index stopIndex = 0;
-        detail::Index step = 1;
+        Index startIndex = 0;
+        Index stopIndex = 0;
+        Index step = 1;
         size_t length = m_context.size();
 
         if (node->step)
         {
             if (*node->step == 0)
             {
-                BOOST_THROW_EXCEPTION(detail::InvalidValue{});
+                BOOST_THROW_EXCEPTION(InvalidValue{});
             }
             step = *node->step;
         }
@@ -240,7 +240,7 @@ void Interpreter::visit(const ast::SliceExpressionNode *node)
         }
         if (!node->stop)
         {
-            stopIndex = step < 0 ? -1 : detail::Index{length};
+            stopIndex = step < 0 ? -1 : Index{length};
         }
         else
         {
@@ -325,7 +325,7 @@ void Interpreter::visit(const ast::ComparatorExpressionNode *node)
 
     if (node->comparator == Comparator::Unknown)
     {
-        BOOST_THROW_EXCEPTION(detail::InvalidAgrument{});
+        BOOST_THROW_EXCEPTION(InvalidAgrument{});
     }
 
     Json childContext = m_context;
@@ -424,8 +424,8 @@ void Interpreter::visit(const ast::FunctionExpressionNode *node)
     auto it = m_functionMap.find(node->functionName);
     if (it == m_functionMap.end())
     {
-        BOOST_THROW_EXCEPTION(detail::UnknownFunction()
-                              << detail::InfoFunctionName(node->functionName));
+        BOOST_THROW_EXCEPTION(UnknownFunction()
+                              << InfoFunctionName(node->functionName));
     }
 
     const auto& descriptor = it->second;
@@ -433,7 +433,7 @@ void Interpreter::visit(const ast::FunctionExpressionNode *node)
     const auto& function = std::get<1>(descriptor);
     if (!argumentArityValidator(node->arguments.size()))
     {
-        BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentArity());
+        BOOST_THROW_EXCEPTION(InvalidFunctionArgumentArity());
     }
 
     FunctionArgumentList argumentList = evaluateArguments(node->arguments);
@@ -444,9 +444,9 @@ void Interpreter::visit(const ast::ExpressionArgumentNode *)
 {
 }
 
-detail::Index Interpreter::adjustSliceEndpoint(size_t length,
-                                               detail::Index endpoint,
-                                               detail::Index step) const
+Index Interpreter::adjustSliceEndpoint(size_t length,
+                                               Index endpoint,
+                                               Index step) const
 {
     if (endpoint < 0)
     {
@@ -508,7 +508,7 @@ void Interpreter::abs(FunctionArgumentList &arguments)
     const Json* value = boost::get<Json>(&arguments[0]);
     if (!value || !value->is_number())
     {
-        BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+        BOOST_THROW_EXCEPTION(InvalidFunctionArgumentType());
     }
     if (value->is_number_integer())
     {
@@ -541,14 +541,14 @@ void Interpreter::avg(FunctionArgumentList &arguments)
             }
             else
             {
-                BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+                BOOST_THROW_EXCEPTION(InvalidFunctionArgumentType());
             }
         });
         m_context = itemsSum / items->size();
     }
     else
     {
-        BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+        BOOST_THROW_EXCEPTION(InvalidFunctionArgumentType());
     }
 }
 
@@ -558,7 +558,7 @@ void Interpreter::contains(FunctionArgumentList &arguments)
     const Json* item = boost::get<Json>(&arguments[1]);
     if (!subject || (!subject->is_array() && !subject->is_string()) || !item)
     {
-        BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+        BOOST_THROW_EXCEPTION(InvalidFunctionArgumentType());
     }
     bool result = false;
     if (subject->is_array())
@@ -580,7 +580,7 @@ void Interpreter::ceil(FunctionArgumentList &arguments)
     const Json* value = boost::get<Json>(&arguments[0]);
     if (!value || !value->is_number())
     {
-        BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+        BOOST_THROW_EXCEPTION(InvalidFunctionArgumentType());
     }
     if (value->is_number_integer())
     {
@@ -598,7 +598,7 @@ void Interpreter::endsWith(FunctionArgumentList &arguments)
     const Json* suffix = boost::get<Json>(&arguments[1]);
     if (!subject || !subject->is_string() || !suffix || !suffix->is_string())
     {
-        BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+        BOOST_THROW_EXCEPTION(InvalidFunctionArgumentType());
     }
     auto stringSubject = subject->get_ptr<const String*>();
     auto stringSuffix = suffix->get_ptr<const String*>();
@@ -610,7 +610,7 @@ void Interpreter::floor(FunctionArgumentList &arguments)
     const Json* value = boost::get<Json>(&arguments[0]);
     if (!value || !value->is_number())
     {
-        BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+        BOOST_THROW_EXCEPTION(InvalidFunctionArgumentType());
     }
     if (value->is_number_integer())
     {
@@ -629,7 +629,7 @@ void Interpreter::join(FunctionArgumentList &arguments)
     if (!glue || !glue->is_string() || !array || !array->is_array()
        || alg::any_of(*array, [](const auto& item) {return !item.is_string();}))
     {
-        BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+        BOOST_THROW_EXCEPTION(InvalidFunctionArgumentType());
     }
 
     std::vector<String> stringArray;
@@ -645,7 +645,7 @@ void Interpreter::keys(FunctionArgumentList &arguments)
     const Json* object = boost::get<Json>(&arguments[0]);
     if (!object || !object->is_object())
     {
-        BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+        BOOST_THROW_EXCEPTION(InvalidFunctionArgumentType());
     }
 
     m_context = Json(Json::value_t::array);
@@ -661,14 +661,14 @@ void Interpreter::length(FunctionArgumentList &arguments)
     if (!subject || !(subject->is_array() || subject->is_object()
                       || subject->is_string()))
     {
-        BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+        BOOST_THROW_EXCEPTION(InvalidFunctionArgumentType());
     }
 
     if (subject->is_string())
     {
         const String* stringSubject = subject->get_ptr<const String*>();
-        auto begin = detail::UnicodeIteratorAdaptor(std::begin(*stringSubject));
-        auto end = detail::UnicodeIteratorAdaptor(std::end(*stringSubject));
+        auto begin = UnicodeIteratorAdaptor(std::begin(*stringSubject));
+        auto end = UnicodeIteratorAdaptor(std::end(*stringSubject));
         m_context = std::distance(begin, end);
     }
     else
@@ -684,7 +684,7 @@ void Interpreter::map(FunctionArgumentList &arguments)
     Json* array = boost::get<Json>(&arguments[1]);
     if (!expression || !array || !array->is_array())
     {
-        BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+        BOOST_THROW_EXCEPTION(InvalidFunctionArgumentType());
     }
 
     rng::for_each(*array, [&](Json& item)
@@ -704,7 +704,7 @@ void Interpreter::merge(FunctionArgumentList &arguments)
         Json* object = boost::get<Json>(&argument);
         if (!object || !object->is_object())
         {
-            BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+            BOOST_THROW_EXCEPTION(InvalidFunctionArgumentType());
         }
 
         if (m_context.empty())
@@ -729,7 +729,7 @@ void Interpreter::notNull(FunctionArgumentList &arguments)
         Json* item = boost::get<Json>(&argument);
         if (!item)
         {
-            BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+            BOOST_THROW_EXCEPTION(InvalidFunctionArgumentType());
         }
         if (!item->is_null())
         {
@@ -744,7 +744,7 @@ void Interpreter::reverse(FunctionArgumentList &arguments)
     Json* subject = boost::get<Json>(&arguments[0]);
     if (!subject || !(subject->is_array() || subject->is_string()))
     {
-        BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+        BOOST_THROW_EXCEPTION(InvalidFunctionArgumentType());
     }
 
     if (subject->is_array())
@@ -763,7 +763,7 @@ void Interpreter::sort(FunctionArgumentList &arguments)
     Json* array = boost::get<Json>(&arguments[0]);
     if (!array || !isComparableArray(*array))
     {
-        BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+        BOOST_THROW_EXCEPTION(InvalidFunctionArgumentType());
     }
 
     std::sort(std::begin(*array), std::end(*array));
@@ -777,7 +777,7 @@ void Interpreter::sortBy(FunctionArgumentList &arguments)
             = boost::get<ast::ExpressionNode>(&arguments[1]);
     if (!array || !expression || !array->is_array())
     {
-        BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+        BOOST_THROW_EXCEPTION(InvalidFunctionArgumentType());
     }
 
     std::unordered_map<Json, Json> expressionResultsMap;
@@ -788,7 +788,7 @@ void Interpreter::sortBy(FunctionArgumentList &arguments)
         visit(expression);
         if (!(m_context.is_number() || m_context.is_string()))
         {
-            BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+            BOOST_THROW_EXCEPTION(InvalidFunctionArgumentType());
         }
         if (firstItemType == Json::value_t::discarded)
         {
@@ -796,7 +796,7 @@ void Interpreter::sortBy(FunctionArgumentList &arguments)
         }
         else if (m_context.type() != firstItemType)
         {
-            BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+            BOOST_THROW_EXCEPTION(InvalidFunctionArgumentType());
         }
         expressionResultsMap[item] = std::move(m_context);
     }
@@ -815,7 +815,7 @@ void Interpreter::startsWith(FunctionArgumentList &arguments)
     const Json* prefix = boost::get<Json>(&arguments[1]);
     if (!subject || !subject->is_string() || !prefix || !prefix->is_string())
     {
-        BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+        BOOST_THROW_EXCEPTION(InvalidFunctionArgumentType());
     }
     auto stringSubject = subject->get_ptr<const String*>();
     auto stringPrefix = prefix->get_ptr<const String*>();
@@ -843,14 +843,14 @@ void Interpreter::sum(FunctionArgumentList &arguments)
             }
             else
             {
-                BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+                BOOST_THROW_EXCEPTION(InvalidFunctionArgumentType());
             }
         });
         m_context = itemsSum;
     }
     else
     {
-        BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+        BOOST_THROW_EXCEPTION(InvalidFunctionArgumentType());
     }
 }
 
@@ -859,7 +859,7 @@ void Interpreter::toArray(FunctionArgumentList &arguments)
     const Json* value = boost::get<Json>(&arguments[0]);
     if (!value)
     {
-        BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+        BOOST_THROW_EXCEPTION(InvalidFunctionArgumentType());
     }
 
     if (value->is_array())
@@ -878,7 +878,7 @@ void Interpreter::toString(FunctionArgumentList &arguments)
     const Json* value = boost::get<Json>(&arguments[0]);
     if (!value)
     {
-        BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+        BOOST_THROW_EXCEPTION(InvalidFunctionArgumentType());
     }
 
     if (value->is_string())
@@ -896,7 +896,7 @@ void Interpreter::toNumber(FunctionArgumentList &arguments)
     const Json* value = boost::get<Json>(&arguments[0]);
     if (!value)
     {
-        BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+        BOOST_THROW_EXCEPTION(InvalidFunctionArgumentType());
     }
 
     m_context = {};
@@ -921,7 +921,7 @@ void Interpreter::type(FunctionArgumentList &arguments)
     const Json* value = boost::get<Json>(&arguments[0]);
     if (!value)
     {
-        BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+        BOOST_THROW_EXCEPTION(InvalidFunctionArgumentType());
     }
 
     String result;
@@ -949,7 +949,7 @@ void Interpreter::values(FunctionArgumentList &arguments)
     const Json* object = boost::get<Json>(&arguments[0]);
     if (!object || !object->is_object())
     {
-        BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+        BOOST_THROW_EXCEPTION(InvalidFunctionArgumentType());
     }
 
     m_context = {};
@@ -965,7 +965,7 @@ void Interpreter::max(FunctionArgumentList &arguments,
     const Json* array = boost::get<Json>(&arguments[0]);
     if (!array || !isComparableArray(*array))
     {
-        BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+        BOOST_THROW_EXCEPTION(InvalidFunctionArgumentType());
     }
 
     m_context = {};
@@ -984,7 +984,7 @@ void Interpreter::maxBy(FunctionArgumentList &arguments,
             = boost::get<ast::ExpressionNode>(&arguments[1]);
     if (!array || !expression || !array->is_array())
     {
-        BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+        BOOST_THROW_EXCEPTION(InvalidFunctionArgumentType());
     }
 
     Json expressionResults(Json::value_t::array);
@@ -995,7 +995,7 @@ void Interpreter::maxBy(FunctionArgumentList &arguments,
         this->visit(expression);
         if (!(m_context.is_number() || m_context.is_string()))
         {
-            BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
+            BOOST_THROW_EXCEPTION(InvalidFunctionArgumentType());
         }
         return m_context;
     });

@@ -33,11 +33,7 @@
 #include <boost/multiprecision/cpp_int.hpp>
 #include <json.hpp>
 
-/**
- * @namespace jmespath::detail
- * @brief Contains the implementation details of the library
- */
-namespace jmespath { namespace detail {
+namespace jmespath {
 /**
  * @brief 8 bit character type
  */
@@ -79,5 +75,5 @@ using Index = boost::multiprecision::number<
         boost::multiprecision::signed_magnitude,
         boost::multiprecision::checked,
         void> >;
-}} // namespace jmespath::detail
+} // namespace jmespath
 #endif // TYPES_H
