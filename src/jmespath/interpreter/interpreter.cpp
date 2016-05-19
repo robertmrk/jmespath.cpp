@@ -45,61 +45,42 @@ Interpreter::Interpreter(const Json &value)
 {
     setContext(value);
     using std::placeholders::_1;
-    using std::make_tuple;
     using std::bind;
+    auto exactlyOne = bind(std::equal_to<size_t>{}, _1, 1);
+    auto exactlyTwo = bind(std::equal_to<size_t>{}, _1, 2);
+    auto zeroOrMore = bind(std::greater_equal<size_t>{}, _1, 0);
+    auto oneOrMore = bind(std::greater_equal<size_t>{}, _1, 1);
     m_functionMap = {
-        {"abs", make_tuple(1, std::equal_to<size_t>{},
-                           bind(&Interpreter::abs, this, _1))},
-        {"avg", make_tuple(1, std::equal_to<size_t>{},
-                           bind(&Interpreter::avg, this, _1))},
-        {"contains", make_tuple(2, std::equal_to<size_t>{},
-                                bind(&Interpreter::contains, this, _1))},
-        {"ceil", make_tuple(1, std::equal_to<size_t>{},
-                            bind(&Interpreter::ceil, this, _1))},
-        {"ends_with", make_tuple(2, std::equal_to<size_t>{},
-                                 bind(&Interpreter::endsWith, this, _1))},
-        {"floor", make_tuple(1, std::equal_to<size_t>{},
-                             bind(&Interpreter::floor, this, _1))},
-        {"join", make_tuple(2, std::equal_to<size_t>{},
-                            bind(&Interpreter::join, this, _1))},
-        {"keys", make_tuple(1, std::equal_to<size_t>{},
-                            bind(&Interpreter::keys, this, _1))},
-        {"length", make_tuple(1, std::equal_to<size_t>{},
-                              bind(&Interpreter::length, this, _1))},
-        {"map", make_tuple(2, std::equal_to<size_t>{},
-                           bind(&Interpreter::map, this, _1))},
-        {"max", make_tuple(1, std::equal_to<size_t>{},
-                         bind(&Interpreter::max, this, _1, std::less<Json>{}))},
-        {"max_by", make_tuple(2, std::equal_to<size_t>{},
-                       bind(&Interpreter::maxBy, this, _1, std::less<Json>{}))},
-        {"merge", make_tuple(0, std::greater_equal<size_t>{},
-                             bind(&Interpreter::merge, this, _1))},
-        {"min", make_tuple(1, std::equal_to<size_t>{},
-                      bind(&Interpreter::max, this, _1, std::greater<Json>{}))},
-        {"min_by", make_tuple(2, std::equal_to<size_t>{},
-                    bind(&Interpreter::maxBy, this, _1, std::greater<Json>{}))},
-        {"not_null", make_tuple(1, std::greater_equal<size_t>{},
-                                bind(&Interpreter::notNull, this, _1))},
-        {"reverse", make_tuple(1, std::equal_to<size_t>{},
-                               bind(&Interpreter::reverse, this, _1))},
-        {"sort", make_tuple(1, std::equal_to<size_t>{},
-                            bind(&Interpreter::sort, this, _1))},
-        {"sort_by", make_tuple(2, std::equal_to<size_t>{},
-                               bind(&Interpreter::sortBy, this, _1))},
-        {"starts_with", make_tuple(2, std::equal_to<size_t>{},
-                                   bind(&Interpreter::startsWith, this, _1))},
-        {"sum", make_tuple(1, std::equal_to<size_t>{},
-                           bind(&Interpreter::sum, this, _1))},
-        {"to_array", make_tuple(1, std::equal_to<size_t>{},
-                                bind(&Interpreter::toArray, this, _1))},
-        {"to_string", make_tuple(1, std::equal_to<size_t>{},
-                                 bind(&Interpreter::toString, this, _1))},
-        {"to_number", make_tuple(1, std::equal_to<size_t>{},
-                                 bind(&Interpreter::toNumber, this, _1))},
-        {"type", make_tuple(1, std::equal_to<size_t>{},
-                            bind(&Interpreter::type, this, _1))},
-        {"values", make_tuple(1, std::equal_to<size_t>{},
-                              bind(&Interpreter::values, this, _1))}
+        {"abs", {exactlyOne, bind(&Interpreter::abs, this, _1)}},
+        {"avg", {exactlyOne, bind(&Interpreter::avg, this, _1)}},
+        {"contains", {exactlyTwo, bind(&Interpreter::contains, this, _1)}},
+        {"ceil", {exactlyOne, bind(&Interpreter::ceil, this, _1)}},
+        {"ends_with", {exactlyTwo, bind(&Interpreter::endsWith, this, _1)}},
+        {"floor", {exactlyOne, bind(&Interpreter::floor, this, _1)}},
+        {"join", {exactlyTwo, bind(&Interpreter::join, this, _1)}},
+        {"keys", {exactlyOne, bind(&Interpreter::keys, this, _1)}},
+        {"length", {exactlyOne, bind(&Interpreter::length, this, _1)}},
+        {"map", {exactlyTwo, bind(&Interpreter::map, this, _1)}},
+        {"max", {exactlyOne,
+                 bind(&Interpreter::max, this, _1, std::less<Json>{})}},
+        {"max_by", {exactlyTwo,
+                    bind(&Interpreter::maxBy, this, _1, std::less<Json>{})}},
+        {"merge", {zeroOrMore, bind(&Interpreter::merge, this, _1)}},
+        {"min", {exactlyOne,
+                 bind(&Interpreter::max, this, _1, std::greater<Json>{})}},
+        {"min_by", {exactlyTwo,
+                    bind(&Interpreter::maxBy, this, _1, std::greater<Json>{})}},
+        {"not_null", {oneOrMore, bind(&Interpreter::notNull, this, _1)}},
+        {"reverse", {exactlyOne, bind(&Interpreter::reverse, this, _1)}},
+        {"sort", {exactlyOne, bind(&Interpreter::sort, this, _1)}},
+        {"sort_by", {exactlyTwo, bind(&Interpreter::sortBy, this, _1)}},
+        {"starts_with", {exactlyTwo, bind(&Interpreter::startsWith, this, _1)}},
+        {"sum", {exactlyOne, bind(&Interpreter::sum, this, _1)}},
+        {"to_array", {exactlyOne, bind(&Interpreter::toArray, this, _1)}},
+        {"to_string", {exactlyOne, bind(&Interpreter::toString, this, _1)}},
+        {"to_number", {exactlyOne, bind(&Interpreter::toNumber, this, _1)}},
+        {"type", {exactlyOne, bind(&Interpreter::type, this, _1)}},
+        {"values", {exactlyOne, bind(&Interpreter::values, this, _1)}}
     };
 }
 
@@ -424,16 +405,16 @@ void Interpreter::visit(const ast::FilterExpressionNode *node)
     if (m_context.is_array())
     {
         result = Json(Json::value_t::array);
-        Json contextArray = m_context;
-        for (const auto& item: contextArray)
+        Json contextArray = std::move(m_context);
+        std::copy_if(std::make_move_iterator(std::begin(contextArray)),
+                     std::make_move_iterator(std::end(contextArray)),
+                     std::back_inserter(result),
+                     [&](const auto& item)
         {
             m_context = item;
-            visit(&node->expression);
-            if (toBoolean(m_context))
-            {
-                result.push_back(std::move(item));
-            }
-        }
+            this->visit(&node->expression);
+            return this->toBoolean(m_context);
+        });
     }
     m_context = std::move(result);
 }
@@ -448,10 +429,9 @@ void Interpreter::visit(const ast::FunctionExpressionNode *node)
     }
 
     const auto& descriptor = it->second;
-    size_t expectedArgumentCount = std::get<0>(descriptor);
-    const auto& sizeComparator = std::get<1>(descriptor);
-    const auto& function = std::get<2>(descriptor);
-    if (!sizeComparator(node->arguments.size(), expectedArgumentCount))
+    const auto& argumentArityValidator = std::get<0>(descriptor);
+    const auto& function = std::get<1>(descriptor);
+    if (!argumentArityValidator(node->arguments.size()))
     {
         BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentArity());
     }
@@ -707,7 +687,7 @@ void Interpreter::map(FunctionArgumentList &arguments)
         BOOST_THROW_EXCEPTION(detail::InvalidFunctionArgumentType());
     }
 
-    rng::for_each(*array, [this, expression](Json& item)
+    rng::for_each(*array, [&](Json& item)
     {
         m_context = std::move(item);
         this->visit(expression);
@@ -1009,7 +989,7 @@ void Interpreter::maxBy(FunctionArgumentList &arguments,
 
     Json expressionResults(Json::value_t::array);
     rng::transform(*array, std::back_inserter(expressionResults),
-                   [this, expression](const Json& item)
+                   [&](const Json& item)
     {
         m_context = item;
         this->visit(expression);
