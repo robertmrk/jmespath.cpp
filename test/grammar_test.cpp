@@ -38,7 +38,9 @@ using namespace jmespath::parser;
 
 template <typename GrammarT>
 typename GrammarT::start_type::attr_type
-parseExpression(const GrammarT& grammar, const String& expression)
+parseExpression(const GrammarT& grammar,
+                const String& expression,
+                bool* parseResult = nullptr)
 {
     namespace qi = boost::spirit::qi;
     namespace encoding = qi::unicode;
@@ -47,9 +49,13 @@ parseExpression(const GrammarT& grammar, const String& expression)
     UnicodeIteratorAdaptor it(expression.cbegin());
     UnicodeIteratorAdaptor endIt(expression.cend());
 
-    qi::phrase_parse(it, endIt,
-                     grammar, encoding::space,
-                     result);
+    bool _parseResult = qi::phrase_parse(it, endIt,
+                                         grammar, encoding::space,
+                                         result);
+    if (parseResult)
+    {
+        *parseResult = _parseResult;
+    }
     return result;
 }
 
@@ -65,6 +71,15 @@ TEST_CASE("Grammar")
 
     SECTION("can be used to parse")
     {
+        SECTION("empty expression string")
+        {
+            bool parseResult = false;
+
+            REQUIRE(parseExpression(grammar, " \t\t\n ", &parseResult)
+                    == ast::ExpressionNode{});
+            REQUIRE(parseResult);
+        }
+
         SECTION("unquoted string")
         {
             REQUIRE(parseExpression(grammar, "identifierName")

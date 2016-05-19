@@ -61,7 +61,6 @@ namespace phx = boost::phoenix;
 template <typename Iterator, typename Skipper = encoding::space_type>
 class Grammar : public qi::grammar<Iterator,
                                    ast::ExpressionNode(),
-                                   qi::locals<ast::ExpressionNode>,
                                    Skipper>
 {
 public:
@@ -69,7 +68,7 @@ public:
      * @brief Constructs a Grammar object
      */
     Grammar()
-        : Grammar::base_type(m_expressionRule)
+        : Grammar::base_type(m_topLevelExpressionRule)
     {
         using encoding::char_;
         using qi::lit;
@@ -104,6 +103,11 @@ public:
         // lazy function for for combining surrogate pair characters into a
         // single codepoint
         phx::function<EncodeSurrogatePairAction> encodeSurrogatePair;
+
+        // optionally match an expression
+        // this ensures that the parsing of empty expressions which contain
+        // only whitespaces will be successful
+        m_topLevelExpressionRule = -m_expressionRule[insertNode(_val, _1)];
 
         // match a standalone index expression or hash wildcard expression or
         // not expression or function expression or identifier or multiselect
@@ -157,7 +161,7 @@ public:
         m_indexExpressionRule = m_bracketSpecifierRule[at_c<1>(_val) = _1]
             >> -m_subexpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_hashWildcardSubexpressionRule(_r1)[insertNode(_r1, _1)]
-            >> -m_indexExpressionRule(_r1)[insertNode(_r1, _1)]                
+            >> -m_indexExpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_pipeExpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_comparatorExpressionRule(_r1)[insertNode(_r1, _1)]
             >> -m_orExpressionRule(_r1)[insertNode(_r1, _1)]
@@ -388,6 +392,9 @@ public:
 private:
     qi::rule<Iterator,
              ast::ExpressionNode(),
+             Skipper> m_topLevelExpressionRule;
+    qi::rule<Iterator,
+             ast::ExpressionNode(),
              qi::locals<ast::ExpressionNode>,
              Skipper > m_expressionRule;
     qi::rule<Iterator,
@@ -395,7 +402,7 @@ private:
              Skipper> m_subexpressionRule;
     qi::rule<Iterator,
              ast::IndexExpressionNode(ast::ExpressionNode&),
-             Skipper> m_indexExpressionRule;                
+             Skipper> m_indexExpressionRule;
     qi::rule<Iterator,
              ast::HashWildcardNode(ast::ExpressionNode&),
              Skipper> m_hashWildcardRule;
@@ -410,7 +417,7 @@ private:
              Skipper> m_arrayItemRule;
     qi::rule<Iterator,
              ast::FlattenOperatorNode(),
-             Skipper> m_flattenOperatorRule;                
+             Skipper> m_flattenOperatorRule;
     qi::rule<Iterator,
              ast::FilterExpressionNode(),
              Skipper> m_filterExpressionRule;
@@ -431,7 +438,7 @@ private:
              Skipper> m_keyValuePairRule;
     qi::rule<Iterator,
              ast::NotExpressionNode(ast::ExpressionNode&),
-             Skipper> m_notExpressionRule;                
+             Skipper> m_notExpressionRule;
     qi::rule<Iterator,
              ast::PipeExpressionNode(ast::ExpressionNode&),
              Skipper> m_pipeExpressionRule;

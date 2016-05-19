@@ -84,14 +84,11 @@ void Expression::parseExpression(const String& expressionString)
     {
         m_astRoot.reset(new ast::ExpressionNode);
     }
-    if (!expressionString.empty())
-    {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wexit-time-destructors"
-        static ParserType s_parser;
-        *m_astRoot = s_parser.parse(expressionString);
+    static ParserType s_parser;
+    *m_astRoot = s_parser.parse(expressionString);
 #pragma clang diagnostic pop
-    }
 }
 
 Expression& Expression::operator=(const String& expressionString)

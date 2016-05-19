@@ -156,4 +156,11 @@ TEST_CASE("Expression")
 
         REQUIRE_FALSE(exp.isEmpty());
     }
+
+    SECTION("isEmpty returns true if expression contains only whitespaces")
+    {
+        Expression exp{" \t\t\n "};
+
+        REQUIRE(exp.isEmpty());
+    }
 }
