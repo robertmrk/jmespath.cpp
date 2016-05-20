@@ -34,6 +34,10 @@ Json search(const Expression &expression, const Json &document)
 {
     using interpreter::Interpreter;
 
+    if (expression.isEmpty())
+    {
+        return {};
+    }
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wexit-time-destructors"
     static Interpreter s_interpreter;

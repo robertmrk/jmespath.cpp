@@ -34,7 +34,7 @@ TEST_CASE("Search function")
 
     SECTION("returns null if search expression is empty")
     {
-        auto result = search("", {});
+        auto result = search("", "[1, 2, 3]"_json);
 
         REQUIRE(result.is_null());
     }
