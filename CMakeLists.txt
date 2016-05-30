@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.0)
 project(jmespath.cpp VERSION 0.1.0)
 
+set(JMESPATH_CONAN_BUILD_INFO "${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
+if (EXISTS ${JMESPATH_CONAN_BUILD_INFO})
+    include(${JMESPATH_CONAN_BUILD_INFO})
+    conan_basic_setup()
+endif()
+
 set(JMESPATH_COVERAGE_INFO OFF CACHE BOOL "Generate code coverage information")
 set(JMESPATH_PROJECT_NAME ${PROJECT_NAME})
 set(JMESPATH_TARGET_NAME "jmespath")
