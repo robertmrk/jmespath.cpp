@@ -38,6 +38,8 @@ add_subdirectory(third_party)
 
 add_library(${JMESPATH_TARGET_NAME} ${JMESPATH_SOURCE_FILES})
 
+add_dependencies(${JMESPATH_TARGET_NAME}
+    ${JMESPATH_SYMLINK_THIRD_PARTY_TARGET_NAME})
 target_include_directories(${JMESPATH_TARGET_NAME}
     PUBLIC ${JMESPATH_INCLUDE_DIRECTORIES})
 target_include_directories(${JMESPATH_TARGET_NAME} SYSTEM
