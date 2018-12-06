@@ -41,7 +41,7 @@ TEST_CASE("VariantNode")
 
     SECTION("can be constructed with acceptable variant value")
     {
-        REQUIRE_NOTHROW(VariantNode<IdentifierNode>IdentifierNode);
+        REQUIRE_NOTHROW(VariantNode<IdentifierNode>{IdentifierNode{}});
     }
 
     SECTION("accepts variant value assignments")
