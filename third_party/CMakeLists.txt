@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 
 set(JMESPATH_JSON_RELATIVE_INCLUDE_DIR "third_party/json")
-set(JMESPATH_JSON_SOURCE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/json/src/json.hpp")
+set(JMESPATH_JSON_SOURCE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/json/single_include/nlohmann/json.hpp")
 set(JMESPATH_SYMLINK_THIRD_PARTY_TARGET_NAME "symlink_third_party"
     CACHE STRING "")
 set(JSON_SOURCE_INSTALL_PATH
