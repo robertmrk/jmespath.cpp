@@ -537,26 +537,33 @@ void Interpreter::avg(FunctionArgumentList &arguments)
     const Json* items = boost::get<Json>(&arguments[0]);
     if (items && items->is_array())
     {
-        double itemsSum = std::accumulate(items->cbegin(),
-                                          items->cend(),
-                                          0.0,
-                                          [](double sum,
-                                             const Json& item) -> double
+        if (!items->empty())
         {
-            if (item.is_number_integer())
+            double itemsSum = std::accumulate(items->cbegin(),
+                                              items->cend(),
+                                              0.0,
+                                              [](double sum,
+                                                 const Json& item) -> double
             {
-                return sum + item.get<Json::number_integer_t>();
-            }
-            else if (item.is_number_float())
-            {
-                return sum + item.get<Json::number_float_t>();
-            }
-            else
-            {
-                BOOST_THROW_EXCEPTION(InvalidFunctionArgumentType());
-            }
-        });
-        m_context = itemsSum / items->size();
+                if (item.is_number_integer())
+                {
+                    return sum + item.get<Json::number_integer_t>();
+                }
+                else if (item.is_number_float())
+                {
+                    return sum + item.get<Json::number_float_t>();
+                }
+                else
+                {
+                    BOOST_THROW_EXCEPTION(InvalidFunctionArgumentType());
+                }
+            });
+            m_context = itemsSum / items->size();
+        }
+        else
+        {
+            m_context = Json{};
+        }
     }
     else
     {

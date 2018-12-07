@@ -1466,6 +1466,18 @@ TEST_CASE("Interpreter")
         REQUIRE(interpreter.currentContext() == "-1"_json);
     }
 
+    SECTION("evaluates avg function to null on empty list")
+    {
+        ast::FunctionExpressionNode node{
+            "avg",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[]"}}}};
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContext() == "null"_json);
+    }
+
     SECTION("contains function throws on invalid number of arguments")
     {
         ast::FunctionExpressionNode node0{"contains"};
