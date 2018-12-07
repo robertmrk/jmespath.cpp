@@ -35,6 +35,51 @@ matrix:
         - cd jmespath.cpp
       env: COMPILER=g++-5
     - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources: ['george-edison55-precise-backports', 'ubuntu-toolchain-r-test']
+          packages: ['cmake', 'cmake-data', 'g++-6', 'gcc-6']
+      before_install:
+        - cd ..
+        - wget http://sourceforge.net/projects/boost/files/boost/1.57.0/boost_1_57_0.tar.bz2/download -O boost.tar.bz2
+        - tar -xjf boost.tar.bz2
+        - export BOOST_ROOT=$PWD/boost_1_57_0
+        - export CMAKE_CXX=g++-6
+        - export CMAKE_CC=gcc-6
+        - cd jmespath.cpp
+      env: COMPILER=g++-6
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources: ['george-edison55-precise-backports', 'ubuntu-toolchain-r-test']
+          packages: ['cmake', 'cmake-data', 'g++-7', 'gcc-7']
+      before_install:
+        - cd ..
+        - wget http://sourceforge.net/projects/boost/files/boost/1.57.0/boost_1_57_0.tar.bz2/download -O boost.tar.bz2
+        - tar -xjf boost.tar.bz2
+        - export BOOST_ROOT=$PWD/boost_1_57_0
+        - export CMAKE_CXX=g++-7
+        - export CMAKE_CC=gcc-7
+        - cd jmespath.cpp
+      env: COMPILER=g++-7
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources: ['george-edison55-precise-backports', 'ubuntu-toolchain-r-test']
+          packages: ['cmake', 'cmake-data', 'g++-8', 'gcc-8']
+      before_install:
+        - cd ..
+        - wget http://sourceforge.net/projects/boost/files/boost/1.57.0/boost_1_57_0.tar.bz2/download -O boost.tar.bz2
+        - tar -xjf boost.tar.bz2
+        - export BOOST_ROOT=$PWD/boost_1_57_0
+        - export CMAKE_CXX=g++-8
+        - export CMAKE_CC=gcc-8
+        - cd jmespath.cpp
+      env: COMPILER=g++-8
+    - os: linux
       compiler: clang
       addons:
         apt:
