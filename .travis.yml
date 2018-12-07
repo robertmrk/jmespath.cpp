@@ -1,6 +1,6 @@
 language: cpp
 
-sudo: false
+dist: trusty
 
 matrix:
   include:
@@ -8,8 +8,8 @@ matrix:
       compiler: gcc
       addons:
         apt:
-          sources: ['george-edison55-precise-backports', 'ubuntu-toolchain-r-test']
-          packages: ['cmake', 'cmake-data', 'g++-4.9', 'gcc-4.9']
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-4.9', 'gcc-4.9']
       before_install:
         - cd ..
         - wget http://sourceforge.net/projects/boost/files/boost/1.68.0/boost_1_68_0.tar.bz2/download -O boost.tar.bz2
@@ -23,8 +23,8 @@ matrix:
       compiler: gcc
       addons:
         apt:
-          sources: ['george-edison55-precise-backports', 'ubuntu-toolchain-r-test']
-          packages: ['cmake', 'cmake-data', 'g++-5', 'gcc-5']
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-5', 'gcc-5']
       before_install:
         - cd ..
         - wget http://sourceforge.net/projects/boost/files/boost/1.68.0/boost_1_68_0.tar.bz2/download -O boost.tar.bz2
@@ -38,8 +38,8 @@ matrix:
       compiler: gcc
       addons:
         apt:
-          sources: ['george-edison55-precise-backports', 'ubuntu-toolchain-r-test']
-          packages: ['cmake', 'cmake-data', 'g++-6', 'gcc-6']
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-6', 'gcc-6']
       before_install:
         - cd ..
         - wget http://sourceforge.net/projects/boost/files/boost/1.68.0/boost_1_68_0.tar.bz2/download -O boost.tar.bz2
@@ -53,8 +53,8 @@ matrix:
       compiler: gcc
       addons:
         apt:
-          sources: ['george-edison55-precise-backports', 'ubuntu-toolchain-r-test']
-          packages: ['cmake', 'cmake-data', 'g++-7', 'gcc-7']
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-7', 'gcc-7']
       before_install:
         - cd ..
         - wget http://sourceforge.net/projects/boost/files/boost/1.68.0/boost_1_68_0.tar.bz2/download -O boost.tar.bz2
@@ -68,8 +68,8 @@ matrix:
       compiler: gcc
       addons:
         apt:
-          sources: ['george-edison55-precise-backports', 'ubuntu-toolchain-r-test']
-          packages: ['cmake', 'cmake-data', 'g++-8', 'gcc-8']
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-8', 'gcc-8']
       before_install:
         - cd ..
         - wget http://sourceforge.net/projects/boost/files/boost/1.68.0/boost_1_68_0.tar.bz2/download -O boost.tar.bz2
@@ -83,45 +83,75 @@ matrix:
       compiler: clang
       addons:
         apt:
-          sources: ['george-edison55-precise-backports', 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.5']
-          packages: ['cmake', 'cmake-data', 'clang-3.5']
+          sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-3.9']
+          packages: ['clang-3.9']
       before_install:
         - cd ..
         - wget http://sourceforge.net/projects/boost/files/boost/1.68.0/boost_1_68_0.tar.bz2/download -O boost.tar.bz2
         - tar -xjf boost.tar.bz2
         - export BOOST_ROOT=$PWD/boost_1_68_0
-        - export CMAKE_CXX=clang++-3.5
-        - export CMAKE_CC=clang-3.5
+        - export CMAKE_CXX=clang++-3.9
+        - export CMAKE_CC=clang-3.9
         - cd jmespath.cpp
-      env: COMPILER=clang++-3.5
+      env: COMPILER=clang++-3.9
     - os: linux
       compiler: clang
       addons:
         apt:
-          sources: ['george-edison55-precise-backports', 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.6']
-          packages: ['cmake', 'cmake-data', 'clang-3.6']
+          sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-4.0']
+          packages: ['clang-4.0']
       before_install:
         - cd ..
         - wget http://sourceforge.net/projects/boost/files/boost/1.68.0/boost_1_68_0.tar.bz2/download -O boost.tar.bz2
         - tar -xjf boost.tar.bz2
         - export BOOST_ROOT=$PWD/boost_1_68_0
-        - export CMAKE_CXX=clang++-3.6
-        - export CMAKE_CC=clang-3.6
+        - export CMAKE_CXX=clang++-4.0
+        - export CMAKE_CC=clang-4.0
         - cd jmespath.cpp
-      env: COMPILER=clang++-3.6
+      env: COMPILER=clang++-4.0
     - os: linux
       compiler: clang
       addons:
         apt:
-          sources: ['george-edison55-precise-backports', 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.7']
-          packages: ['cmake', 'cmake-data', 'clang-3.7', 'python-pip', 'python-yaml']
+          sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-5.0']
+          packages: ['clang-5.0']
       before_install:
         - cd ..
         - wget http://sourceforge.net/projects/boost/files/boost/1.68.0/boost_1_68_0.tar.bz2/download -O boost.tar.bz2
         - tar -xjf boost.tar.bz2
         - export BOOST_ROOT=$PWD/boost_1_68_0
-        - export CMAKE_CXX=clang++-3.7
-        - export CMAKE_CC=clang-3.7
+        - export CMAKE_CXX=clang++-5.0
+        - export CMAKE_CC=clang-5.0
+        - cd jmespath.cpp
+      env: COMPILER=clang++-5.0
+    - os: linux
+      compiler: clang
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-6.0']
+          packages: [clang-5.0']
+      before_install:
+        - cd ..
+        - wget http://sourceforge.net/projects/boost/files/boost/1.68.0/boost_1_68_0.tar.bz2/download -O boost.tar.bz2
+        - tar -xjf boost.tar.bz2
+        - export BOOST_ROOT=$PWD/boost_1_68_0
+        - export CMAKE_CXX=clang++-6.0
+        - export CMAKE_CC=clang-6.0
+        - cd jmespath.cpp
+      env: COMPILER=clang++-6.0
+    - os: linux
+      compiler: clang
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-7']
+          packages: ['clang-7', 'python-pip', 'python-yaml']
+      before_install:
+        - cd ..
+        - wget http://sourceforge.net/projects/boost/files/boost/1.68.0/boost_1_68_0.tar.bz2/download -O boost.tar.bz2
+        - tar -xjf boost.tar.bz2
+        - export BOOST_ROOT=$PWD/boost_1_68_0
+        - export CMAKE_CXX=clang++-7
+        - export CMAKE_CC=clang-7
         - cd jmespath.cpp
         - pip install --user git+git://github.com/eddyxu/cpp-coveralls.git
       after_success:
@@ -131,7 +161,7 @@ matrix:
         - ./test/unit
         - cd ..
         - ~/.local/bin/coveralls --exclude test --exclude third_party --include src --gcov-options '\-lp'
-      env: COMPILER=clang++-3.7
+      env: COMPILER=clang++-7
     - os: osx
       osx_image: xcode7.2 # clang 3.7
       compiler: clang
