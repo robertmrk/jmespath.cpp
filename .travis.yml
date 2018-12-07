@@ -69,7 +69,7 @@ matrix:
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-4.0']
-          packages: ['clang-4.0']
+          packages: ['g++-6', 'clang-4.0']
       before_install:
         - cd ..
         - wget http://sourceforge.net/projects/boost/files/boost/1.68.0/boost_1_68_0.tar.bz2/download -O boost.tar.bz2
@@ -84,7 +84,7 @@ matrix:
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-5.0']
-          packages: ['clang-5.0']
+          packages: ['g++-6', 'clang-5.0']
       before_install:
         - cd ..
         - wget http://sourceforge.net/projects/boost/files/boost/1.68.0/boost_1_68_0.tar.bz2/download -O boost.tar.bz2
@@ -99,7 +99,7 @@ matrix:
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-6.0']
-          packages: [clang-6.0']
+          packages: ['g++-6', 'clang-6.0']
       before_install:
         - cd ..
         - wget http://sourceforge.net/projects/boost/files/boost/1.68.0/boost_1_68_0.tar.bz2/download -O boost.tar.bz2
@@ -114,7 +114,7 @@ matrix:
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-7']
-          packages: ['clang-7', 'python-pip', 'python-yaml']
+          packages: ['g++-6', 'clang-7', 'python-pip', 'python-yaml']
       before_install:
         - cd ..
         - wget http://sourceforge.net/projects/boost/files/boost/1.68.0/boost_1_68_0.tar.bz2/download -O boost.tar.bz2
