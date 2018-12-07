@@ -9,21 +9,6 @@ matrix:
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test']
-          packages: ['g++-4.9', 'gcc-4.9']
-      before_install:
-        - cd ..
-        - wget http://sourceforge.net/projects/boost/files/boost/1.68.0/boost_1_68_0.tar.bz2/download -O boost.tar.bz2
-        - tar -xjf boost.tar.bz2
-        - export BOOST_ROOT=$PWD/boost_1_68_0
-        - export CMAKE_CXX=g++-4.9
-        - export CMAKE_CC=gcc-4.9
-        - cd jmespath.cpp
-      env: COMPILER=g++-4.9
-    - os: linux
-      compiler: gcc
-      addons:
-        apt:
-          sources: ['ubuntu-toolchain-r-test']
           packages: ['g++-5', 'gcc-5']
       before_install:
         - cd ..
@@ -129,7 +114,7 @@ matrix:
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-6.0']
-          packages: [clang-5.0']
+          packages: [clang-6.0']
       before_install:
         - cd ..
         - wget http://sourceforge.net/projects/boost/files/boost/1.68.0/boost_1_68_0.tar.bz2/download -O boost.tar.bz2
