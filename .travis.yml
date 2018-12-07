@@ -68,21 +68,6 @@ matrix:
       compiler: clang
       addons:
         apt:
-          sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-3.9']
-          packages: ['clang-3.9']
-      before_install:
-        - cd ..
-        - wget http://sourceforge.net/projects/boost/files/boost/1.68.0/boost_1_68_0.tar.bz2/download -O boost.tar.bz2
-        - tar -xjf boost.tar.bz2
-        - export BOOST_ROOT=$PWD/boost_1_68_0
-        - export CMAKE_CXX=clang++-3.9
-        - export CMAKE_CC=clang-3.9
-        - cd jmespath.cpp
-      env: COMPILER=clang++-3.9
-    - os: linux
-      compiler: clang
-      addons:
-        apt:
           sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-4.0']
           packages: ['clang-4.0']
       before_install:
