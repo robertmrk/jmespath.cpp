@@ -141,6 +141,15 @@ TEST_CASE("Grammar")
                     == ast::RawStringNode{"\\u03a6"});
         }
 
+        SECTION("raw string with escaped non quote")
+        {
+            REQUIRE(parseExpression(grammar, "'\\z'")
+                    == ast::RawStringNode{"\\z"});
+
+            REQUIRE(parseExpression(grammar, "'\\\\'")
+                    == ast::RawStringNode{"\\\\"});
+        }
+
         SECTION("literals")
         {
             REQUIRE(parseExpression(grammar, "`\"foo\\`bar\"`")

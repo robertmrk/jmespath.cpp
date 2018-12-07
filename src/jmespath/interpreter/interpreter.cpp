@@ -336,29 +336,41 @@ void Interpreter::visit(const ast::ComparatorExpressionNode *node)
     visit(&node->rightExpression);
     Json rightResult = std::move(m_context);
 
-    if (node->comparator == Comparator::Less)
-    {
-        m_context = leftResult < rightResult;
-    }
-    else if (node->comparator == Comparator::LessOrEqual)
-    {
-        m_context = leftResult <= rightResult;
-    }
-    else if (node->comparator == Comparator::Equal)
+    if (node->comparator == Comparator::Equal)
     {
         m_context = leftResult == rightResult;
-    }
-    else if (node->comparator == Comparator::GreaterOrEqual)
-    {
-        m_context = leftResult >= rightResult;
-    }
-    else if (node->comparator == Comparator::Greater)
-    {
-        m_context = leftResult > rightResult;
     }
     else if (node->comparator == Comparator::NotEqual)
     {
         m_context = leftResult != rightResult;
+    }
+    else
+    {
+        // if a non number is involved in an ordering comparison the result
+        // should be null
+        if (!leftResult.is_number() || !rightResult.is_number())
+        {
+            m_context = Json{};
+        }
+        else
+        {
+            if (node->comparator == Comparator::Less)
+            {
+                m_context = leftResult < rightResult;
+            }
+            else if (node->comparator == Comparator::LessOrEqual)
+            {
+                m_context = leftResult <= rightResult;
+            }
+            else if (node->comparator == Comparator::GreaterOrEqual)
+            {
+                m_context = leftResult >= rightResult;
+            }
+            else if (node->comparator == Comparator::Greater)
+            {
+                m_context = leftResult > rightResult;
+            }
+        }
     }
 }
 

@@ -32,6 +32,7 @@
 #include "jmespath/parser/noderank.h"
 #include "jmespath/parser/insertnodeaction.h"
 #include "jmespath/parser/appendutf8action.h"
+#include "jmespath/parser/appendescapesequenceaction.h"
 #include "jmespath/parser/encodesurrogatepairaction.h"
 #include "jmespath/parser/nodeinsertpolicy.h"
 #include "jmespath/parser/nodeinsertcondition.h"
@@ -97,9 +98,12 @@ public:
         phx::function<InsertNodeAction<
                 NodeInsertPolicy,
                 NodeInsertCondition> > insertNode;
-        // laxy function for appending UTF-32 characters to a string encoded
+        // lazy function for appending UTF-32 characters to a string encoded
         // in UTF-8
         phx::function<AppendUtf8Action> appendUtf8;
+        // lazy function for appending UTF-32 encoded escape sequence to a
+        // string encoded in UTF-8
+        phx::function<AppendEscapeSequenceAction> appendEscape;
         // lazy function for for combining surrogate pair characters into a
         // single codepoint
         phx::function<EncodeSurrogatePairAction> encodeSurrogatePair;
@@ -305,7 +309,8 @@ public:
 
         // match zero or more raw string characters enclosed in apostrophes
         m_rawStringRule = lexeme[ lit("\'")
-                >> *m_rawStringCharRule[appendUtf8(at_c<0>(_val), _1)]
+                >> * (m_rawStringEscapeRule[appendEscape(at_c<0>(_val), _1)]
+                      | m_rawStringCharRule[appendUtf8(at_c<0>(_val), _1)])
                 >> lit("\'") ];
 
         // match a single character in the range of 0x07-0x0D or 0x20-0x26 or
@@ -313,12 +318,12 @@ public:
         m_rawStringCharRule = (char_(U'\x07', U'\x0D')
                                | char_(U'\x20', U'\x26')
                                | char_(U'\x28', U'\x5B')
-                               | char_(U'\x5D', U'\U0010FFFF'))
-                | m_rawStringEscapeRule;
+                               | char_(U'\x5D', U'\U0010FFFF'));
 
-        // match escaped apostrophes
-        m_rawStringEscapeRule = (m_escapeRule >> char_(U'\''))
-                                | (char_(U'\\') >> & (!lit('`')));
+        // match escape sequences
+        m_rawStringEscapeRule = char_(U'\\') >>
+                (char_(U'\x07', U'\x0D')
+                | char_(U'\x20', U'\U0010FFFF'));
 
         // match unquoted or quoted strings
         m_identifierRule = m_unquotedStringRule | m_quotedStringRule;
@@ -475,7 +480,9 @@ private:
     qi::rule<Iterator, UnicodeChar()>       m_literalCharRule;
     qi::rule<Iterator, UnicodeChar()>       m_literalEscapeRule;
     qi::rule<Iterator, UnicodeChar()>       m_rawStringCharRule;
-    qi::rule<Iterator, UnicodeChar()>       m_rawStringEscapeRule;
+    qi::rule<Iterator,
+             std::pair<UnicodeChar,
+                       UnicodeChar>()>      m_rawStringEscapeRule;
     qi::rule<Iterator, String()>            m_quotedStringRule;
     qi::rule<Iterator, String()>            m_unquotedStringRule;
     qi::rule<Iterator, UnicodeChar()>       m_unescapedCharRule;

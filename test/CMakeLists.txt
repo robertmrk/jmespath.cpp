@@ -45,6 +45,7 @@ add_executable(${JMESPATH_UNITTEST_TARGET_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/nodeinsertcondition_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/leftedgeiterator_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/appendutf8action_test.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/appendescapesequenceaction_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/encodesurrogatepairaction_test.cpp)
 target_link_libraries(${JMESPATH_UNITTEST_TARGET_NAME}
     ${JMESPATH_TARGET_NAME} Catch2)

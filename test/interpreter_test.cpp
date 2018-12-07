@@ -819,6 +819,32 @@ TEST_CASE("Interpreter")
         REQUIRE_FALSE(result2);
     }
 
+    SECTION("evaluates comparator expression with less operator to "
+            "null with non number")
+    {
+        ast::ComparatorExpressionNode node1{
+            ast::ExpressionNode{
+                ast::LiteralNode{"null"}},
+            ast::ComparatorExpressionNode::Comparator::Less,
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}}};
+        ast::ComparatorExpressionNode node2{
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}},
+            ast::ComparatorExpressionNode::Comparator::Less,
+            ast::ExpressionNode{
+                ast::LiteralNode{"true"}}};
+        Json trueResult = true;
+
+        interpreter.visit(&node1);
+        Json result1 = interpreter.currentContext();
+        interpreter.visit(&node2);
+        Json result2 = interpreter.currentContext();
+
+        REQUIRE(result1 == "null"_json);
+        REQUIRE(result2 == "null"_json);
+    }
+
     SECTION("evaluates comparator expression with less or equal operator")
     {
         ast::ComparatorExpressionNode node1{
@@ -851,6 +877,41 @@ TEST_CASE("Interpreter")
         REQUIRE(result1);
         REQUIRE_FALSE(result2);
         REQUIRE(result3);
+    }
+
+    SECTION("evaluates comparator expression with less or equal operator to "
+            "null with non number")
+    {
+        ast::ComparatorExpressionNode node1{
+            ast::ExpressionNode{
+                ast::LiteralNode{"[]"}},
+            ast::ComparatorExpressionNode::Comparator::LessOrEqual,
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}}};
+        ast::ComparatorExpressionNode node2{
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}},
+            ast::ComparatorExpressionNode::Comparator::LessOrEqual,
+            ast::ExpressionNode{
+                ast::LiteralNode{"true"}}};
+        ast::ComparatorExpressionNode node3{
+            ast::ExpressionNode{
+                ast::LiteralNode{"null"}},
+            ast::ComparatorExpressionNode::Comparator::LessOrEqual,
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}}};
+        Json trueResult = true;
+
+        interpreter.visit(&node1);
+        Json result1 = interpreter.currentContext();
+        interpreter.visit(&node2);
+        Json result2 = interpreter.currentContext();
+        interpreter.visit(&node3);
+        Json result3 = interpreter.currentContext();
+
+        REQUIRE(result1 == "null"_json);
+        REQUIRE(result2 == "null"_json);
+        REQUIRE(result3 == "null"_json);
     }
 
     SECTION("evaluates comparator expression with equal operator")
@@ -912,6 +973,41 @@ TEST_CASE("Interpreter")
         REQUIRE(result3);
     }
 
+    SECTION("evaluates comparator expression with greater or equal operator "
+            "to null with non number")
+    {
+        ast::ComparatorExpressionNode node1{
+            ast::ExpressionNode{
+                ast::LiteralNode{"false"}},
+            ast::ComparatorExpressionNode::Comparator::GreaterOrEqual,
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}}};
+        ast::ComparatorExpressionNode node2{
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}},
+            ast::ComparatorExpressionNode::Comparator::GreaterOrEqual,
+            ast::ExpressionNode{
+                ast::LiteralNode{"[]"}}};
+        ast::ComparatorExpressionNode node3{
+            ast::ExpressionNode{
+                ast::LiteralNode{"null"}},
+            ast::ComparatorExpressionNode::Comparator::GreaterOrEqual,
+            ast::ExpressionNode{
+                ast::LiteralNode{"5"}}};
+        Json trueResult = true;
+
+        interpreter.visit(&node1);
+        Json result1 = interpreter.currentContext();
+        interpreter.visit(&node2);
+        Json result2 = interpreter.currentContext();
+        interpreter.visit(&node3);
+        Json result3 = interpreter.currentContext();
+
+        REQUIRE(result1 == "null"_json);
+        REQUIRE(result2 == "null"_json);
+        REQUIRE(result3 == "null"_json);
+    }
+
     SECTION("evaluates comparator expression with greater operator")
     {
         ast::ComparatorExpressionNode node1{
@@ -935,6 +1031,32 @@ TEST_CASE("Interpreter")
 
         REQUIRE_FALSE(result1);
         REQUIRE(result2);
+    }
+
+    SECTION("evaluates comparator expression with greater operator "
+            "to null with non number")
+    {
+        ast::ComparatorExpressionNode node1{
+            ast::ExpressionNode{
+                ast::LiteralNode{"2"}},
+            ast::ComparatorExpressionNode::Comparator::Greater,
+            ast::ExpressionNode{
+                ast::LiteralNode{"false"}}};
+        ast::ComparatorExpressionNode node2{
+            ast::ExpressionNode{
+                ast::LiteralNode{"null"}},
+            ast::ComparatorExpressionNode::Comparator::Greater,
+            ast::ExpressionNode{
+                ast::LiteralNode{"2"}}};
+        Json trueResult = true;
+
+        interpreter.visit(&node1);
+        Json result1 = interpreter.currentContext();
+        interpreter.visit(&node2);
+        Json result2 = interpreter.currentContext();
+
+        REQUIRE(result1 == "null"_json);
+        REQUIRE(result2 == "null"_json);
     }
 
     SECTION("evaluates comparator expression with not equal operator")
@@ -1198,6 +1320,27 @@ TEST_CASE("Interpreter")
         interpreter.visit(&node);
 
         REQUIRE(interpreter.currentContext() == expectedResult);
+
+    }
+
+    SECTION("evaluates filter expression on arrays to an array filtered with "
+            "the filter's subexpression 2")
+    {
+        Json context2 = "[{\"name\": \"a\"}, {\"name\": \"b\"}]"_json;
+        interpreter.setContext(context2);
+        ast::FilterExpressionNode node2{
+            ast::ExpressionNode{
+                ast::ComparatorExpressionNode{
+                    ast::ExpressionNode{
+                        ast::IdentifierNode{"name"}},
+                    ast::ComparatorExpressionNode::Comparator::Equal,
+                    ast::ExpressionNode{
+                        ast::RawStringNode{"a"}}}}};
+        Json expectedResult2 = "[{\"name\": \"a\"}]"_json;
+
+        interpreter.visit(&node2);
+
+        REQUIRE(interpreter.currentContext() == expectedResult2);
     }
 
     SECTION("function expression evaluation throws on non existing function "
