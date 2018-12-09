@@ -63,6 +63,14 @@ matrix:
         - export CMAKE_CXX=g++-8
         - export CMAKE_CC=gcc-8
         - cd jmespath.cpp
+        - pip install --user cpp-coveralls
+      after_success:
+        - make clean
+        - cmake .. -DCMAKE_BUILD_TYPE=Debug -DJMESPATH_COVERAGE_INFO=ON -DCMAKE_C_COMPILER=$CMAKE_CC -DCMAKE_CXX_COMPILER=$CMAKE_CXX
+        - make unit
+        - ./test/unit
+        - cd ..
+        - coveralls --exclude test --exclude third_party --include src --gcov-options '\-lp' --gcov $(which gcov-8)
       env: COMPILER=g++-8
     - os: linux
       compiler: clang
@@ -123,14 +131,6 @@ matrix:
         - export CMAKE_CXX=clang++-7
         - export CMAKE_CC=clang-7
         - cd jmespath.cpp
-        - pip install --user git+git://github.com/eddyxu/cpp-coveralls.git
-      after_success:
-        - make clean
-        - cmake .. -DCMAKE_BUILD_TYPE=Debug -DJMESPATH_COVERAGE_INFO=ON
-        - make unit
-        - ./test/unit
-        - cd ..
-        - ~/.local/bin/coveralls --exclude test --exclude third_party --include src --gcov-options '\-lp'
       env: COMPILER=clang++-7
     - os: osx
       osx_image: xcode10.1

@@ -56,8 +56,8 @@ target_compile_definitions(${JMESPATH_TARGET_NAME}
     PUBLIC "BOOST_SPIRIT_UNICODE=1")
 if (${JMESPATH_COVERAGE_INFO})
     set_target_properties(${JMESPATH_TARGET_NAME} PROPERTIES
-        COMPILE_FLAGS "--coverage"
-        LINK_FLAGS "--coverage")
+        COMPILE_FLAGS "-fprofile-arcs  -ftest-coverage"
+        LINK_FLAGS "-fprofile-arcs  -ftest-coverage -lgcov")
 endif ()
 
 include(CMakePackageConfigHelpers)

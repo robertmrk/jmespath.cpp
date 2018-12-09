@@ -56,8 +56,8 @@ set_target_properties(${JMESPATH_UNITTEST_TARGET_NAME} PROPERTIES
     CXX_STANDARD_REQUIRED ON)
 if (${JMESPATH_COVERAGE_INFO})
     set_target_properties(${JMESPATH_UNITTEST_TARGET_NAME} PROPERTIES
-        COMPILE_FLAGS "--coverage"
-        LINK_FLAGS "--coverage")
+        COMPILE_FLAGS "-fprofile-arcs  -ftest-coverage"
+        LINK_FLAGS "-fprofile-arcs  -ftest-coverage -lgcov")
 endif ()
 add_test(NAME ${JMESPATH_UNITTEST_TARGET_NAME}
     COMMAND ${JMESPATH_UNITTEST_TARGET_NAME})
