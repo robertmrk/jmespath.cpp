@@ -39,7 +39,7 @@ matrix:
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test']
-          packages: ['g++-7', 'gcc-7']
+          packages: ['g++-7', 'gcc-7', 'lcov']
       before_install:
         - cd ..
         - wget http://sourceforge.net/projects/boost/files/boost/1.68.0/boost_1_68_0.tar.bz2/download -O boost.tar.bz2
@@ -48,6 +48,16 @@ matrix:
         - export CMAKE_CXX=g++-7
         - export CMAKE_CC=gcc-7
         - cd jmespath.cpp
+        - gem install coveralls-lcov
+      after_success:
+        - make clean
+        - cmake .. -DCMAKE_BUILD_TYPE=Debug -DJMESPATH_COVERAGE_INFO=ON -DCMAKE_C_COMPILER=$CMAKE_CC -DCMAKE_CXX_COMPILER=$CMAKE_CXX
+        - make unit
+        - ./test/unit
+        - cd ..
+        - lcov --compat-libtool --directory . --capture --output-file coverage.info --no-external --gcov-tool $(which gcov-7)
+        - lcov -r coverage.info -o coverage.info '*/third_party/*' '*/test/*'
+        - coveralls-lcov coverage.info
       env: COMPILER=g++-7
     - os: linux
       compiler: gcc
@@ -63,14 +73,6 @@ matrix:
         - export CMAKE_CXX=g++-8
         - export CMAKE_CC=gcc-8
         - cd jmespath.cpp
-        - pip install --user cpp-coveralls
-      after_success:
-        - make clean
-        - cmake .. -DCMAKE_BUILD_TYPE=Debug -DJMESPATH_COVERAGE_INFO=ON -DCMAKE_C_COMPILER=$CMAKE_CC -DCMAKE_CXX_COMPILER=$CMAKE_CXX
-        - make unit
-        - ./test/unit
-        - cd ..
-        - coveralls --exclude test --exclude third_party --include src --gcov-options '\-lp' --gcov $(which gcov-8)
       env: COMPILER=g++-8
     - os: linux
       compiler: clang
