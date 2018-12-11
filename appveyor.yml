@@ -6,7 +6,7 @@ install:
 
     git submodule update
 
-    set "BOOST_ROOT=C:\Libraries\boost_1_67_0"
+    set "BOOST_ROOT=C:\Libraries\boost_1_65_1"
 build_script:
 - cmd: >-
     mkdir build
