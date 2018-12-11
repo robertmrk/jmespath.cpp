@@ -1,29 +1,19 @@
 version: '{build}'
-os: Visual Studio 2015
+os: Visual Studio 2017
 install:
 - cmd: >-
     git submodule init
 
     git submodule update
 
-    cd..
-
-    appveyor DownloadFile http://sourceforge.net/projects/boost/files/boost/1.57.0/boost_1_57_0.7z/download -FileName boost.7z
-
-    7z x boost.7z -y > nul
-
-    set "BOOST_ROOT=%cd%\boost_1_57_0"
-
-    cd jmespath-cpp
+    set "BOOST_ROOT=C:\Libraries\boost_1_67_0"
 build_script:
 - cmd: >-
-    set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;%PATH%
-
     mkdir build
 
     cd build
 
-    cmake -Wno-dev -G"Visual Studio 14 2015" ..
+    cmake -Wno-dev -G"Visual Studio 15 2017" ..
 
     cmake --build . --config Release
 test_script:
@@ -38,7 +28,7 @@ test_script:
 
     mkdir build & cd build
 
-    cmake -G"Visual Studio 14 2015" ..
+    cmake -G"Visual Studio 15 2017" ..
 
     cmake --build . --config Release
 

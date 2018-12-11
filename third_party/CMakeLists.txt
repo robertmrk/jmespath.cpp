@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 
 set(JMESPATH_JSON_RELATIVE_INCLUDE_DIR "third_party/json")
-set(JMESPATH_JSON_SOURCE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/json/src/json.hpp")
+set(JMESPATH_JSON_SOURCE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/json/single_include/nlohmann/json.hpp")
 set(JMESPATH_SYMLINK_THIRD_PARTY_TARGET_NAME "symlink_third_party"
     CACHE STRING "")
 set(JSON_SOURCE_INSTALL_PATH
@@ -28,3 +28,8 @@ add_library(FakeIt INTERFACE IMPORTED GLOBAL)
 set(FAKEIT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/FakeIt)
 set_target_properties(FakeIt PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
     "${FAKEIT_DIR}/include;${FAKEIT_DIR}/config/catch")
+
+add_library(Catch2 INTERFACE IMPORTED GLOBAL)
+set(CATCH2_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Catch2)
+set_target_properties(Catch2 PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+    "${CATCH2_DIR}/single_include/catch2")

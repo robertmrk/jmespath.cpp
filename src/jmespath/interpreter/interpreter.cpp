@@ -336,29 +336,41 @@ void Interpreter::visit(const ast::ComparatorExpressionNode *node)
     visit(&node->rightExpression);
     Json rightResult = std::move(m_context);
 
-    if (node->comparator == Comparator::Less)
-    {
-        m_context = leftResult < rightResult;
-    }
-    else if (node->comparator == Comparator::LessOrEqual)
-    {
-        m_context = leftResult <= rightResult;
-    }
-    else if (node->comparator == Comparator::Equal)
+    if (node->comparator == Comparator::Equal)
     {
         m_context = leftResult == rightResult;
-    }
-    else if (node->comparator == Comparator::GreaterOrEqual)
-    {
-        m_context = leftResult >= rightResult;
-    }
-    else if (node->comparator == Comparator::Greater)
-    {
-        m_context = leftResult > rightResult;
     }
     else if (node->comparator == Comparator::NotEqual)
     {
         m_context = leftResult != rightResult;
+    }
+    else
+    {
+        // if a non number is involved in an ordering comparison the result
+        // should be null
+        if (!leftResult.is_number() || !rightResult.is_number())
+        {
+            m_context = Json{};
+        }
+        else
+        {
+            if (node->comparator == Comparator::Less)
+            {
+                m_context = leftResult < rightResult;
+            }
+            else if (node->comparator == Comparator::LessOrEqual)
+            {
+                m_context = leftResult <= rightResult;
+            }
+            else if (node->comparator == Comparator::GreaterOrEqual)
+            {
+                m_context = leftResult >= rightResult;
+            }
+            else if (node->comparator == Comparator::Greater)
+            {
+                m_context = leftResult > rightResult;
+            }
+        }
     }
 }
 
@@ -525,26 +537,33 @@ void Interpreter::avg(FunctionArgumentList &arguments)
     const Json* items = boost::get<Json>(&arguments[0]);
     if (items && items->is_array())
     {
-        double itemsSum = std::accumulate(items->cbegin(),
-                                          items->cend(),
-                                          0.0,
-                                          [](double sum,
-                                             const Json& item) -> double
+        if (!items->empty())
         {
-            if (item.is_number_integer())
+            double itemsSum = std::accumulate(items->cbegin(),
+                                              items->cend(),
+                                              0.0,
+                                              [](double sum,
+                                                 const Json& item) -> double
             {
-                return sum + item.get<Json::number_integer_t>();
-            }
-            else if (item.is_number_float())
-            {
-                return sum + item.get<Json::number_float_t>();
-            }
-            else
-            {
-                BOOST_THROW_EXCEPTION(InvalidFunctionArgumentType());
-            }
-        });
-        m_context = itemsSum / items->size();
+                if (item.is_number_integer())
+                {
+                    return sum + item.get<Json::number_integer_t>();
+                }
+                else if (item.is_number_float())
+                {
+                    return sum + item.get<Json::number_float_t>();
+                }
+                else
+                {
+                    BOOST_THROW_EXCEPTION(InvalidFunctionArgumentType());
+                }
+            });
+            m_context = itemsSum / items->size();
+        }
+        else
+        {
+            m_context = Json{};
+        }
     }
     else
     {

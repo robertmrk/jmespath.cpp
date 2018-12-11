@@ -45,7 +45,10 @@ add_executable(${JMESPATH_UNITTEST_TARGET_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/nodeinsertcondition_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/leftedgeiterator_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/appendutf8action_test.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/appendescapesequenceaction_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/encodesurrogatepairaction_test.cpp)
+target_link_libraries(${JMESPATH_UNITTEST_TARGET_NAME}
+    ${JMESPATH_TARGET_NAME} Catch2)
 target_link_libraries(${JMESPATH_UNITTEST_TARGET_NAME}
     ${JMESPATH_TARGET_NAME} FakeIt)
 set_target_properties(${JMESPATH_UNITTEST_TARGET_NAME} PROPERTIES
@@ -53,8 +56,8 @@ set_target_properties(${JMESPATH_UNITTEST_TARGET_NAME} PROPERTIES
     CXX_STANDARD_REQUIRED ON)
 if (${JMESPATH_COVERAGE_INFO})
     set_target_properties(${JMESPATH_UNITTEST_TARGET_NAME} PROPERTIES
-        COMPILE_FLAGS "--coverage"
-        LINK_FLAGS "--coverage")
+        COMPILE_FLAGS "-fprofile-arcs  -ftest-coverage"
+        LINK_FLAGS "-fprofile-arcs  -ftest-coverage -lgcov")
 endif ()
 add_test(NAME ${JMESPATH_UNITTEST_TARGET_NAME}
     COMMAND ${JMESPATH_UNITTEST_TARGET_NAME})
@@ -64,6 +67,8 @@ add_executable(${JMESPATH_COMPLIANCETEST_TARGET_NAME}
 set_target_properties(${JMESPATH_COMPLIANCETEST_TARGET_NAME} PROPERTIES
     CXX_STANDARD 14
     CXX_STANDARD_REQUIRED ON)
+target_link_libraries(${JMESPATH_COMPLIANCETEST_TARGET_NAME}
+    ${JMESPATH_TARGET_NAME} Catch2)
 target_link_libraries(${JMESPATH_COMPLIANCETEST_TARGET_NAME}
     ${JMESPATH_TARGET_NAME} FakeIt)
 add_test(NAME ${JMESPATH_COMPLIANCETEST_TARGET_NAME}

@@ -28,7 +28,7 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
 endif()
 enable_testing()
 
-find_package(Boost 1.57 REQUIRED)
+find_package(Boost 1.66 REQUIRED)
 list(APPEND JMESPATH_SYSTEM_INCLUDE_DIRECTORIES
     ${Boost_INCLUDE_DIRS})
 
@@ -56,8 +56,8 @@ target_compile_definitions(${JMESPATH_TARGET_NAME}
     PUBLIC "BOOST_SPIRIT_UNICODE=1")
 if (${JMESPATH_COVERAGE_INFO})
     set_target_properties(${JMESPATH_TARGET_NAME} PROPERTIES
-        COMPILE_FLAGS "--coverage"
-        LINK_FLAGS "--coverage")
+        COMPILE_FLAGS "-fprofile-arcs  -ftest-coverage"
+        LINK_FLAGS "-fprofile-arcs  -ftest-coverage -lgcov")
 endif ()
 
 include(CMakePackageConfigHelpers)

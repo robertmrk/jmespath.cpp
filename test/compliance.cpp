@@ -130,7 +130,8 @@ private:
         std::ifstream jsonFile;
         jsonFile.open(s_relativePath + "/" + fileName);
         REQUIRE(jsonFile.is_open());
-        Json featureTest(jsonFile);
+        Json featureTest;
+        jsonFile >> featureTest;
         jsonFile.close();
         return featureTest;
     }
