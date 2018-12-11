@@ -28,7 +28,7 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
 endif()
 enable_testing()
 
-find_package(Boost 1.57 REQUIRED)
+find_package(Boost 1.67 REQUIRED)
 list(APPEND JMESPATH_SYSTEM_INCLUDE_DIRECTORIES
     ${Boost_INCLUDE_DIRS})
 
