@@ -62,7 +62,7 @@ public:
     /**
      * @brief Calls the appropriate visit method of the visitor object with the
      * address of the \a node and with the rvalue reference of \a value.
-     * @param json The second parameter to the visit metho of the \a visitor.
+     * @param value The second parameter to the visit method of the \a visitor.
      */
     void operator() (Json& value) const
     {
@@ -72,7 +72,7 @@ public:
      * @brief Calls the appropriate visit method of the visitor object with the
      * address of the \a node and with the const reference of the Json value
      * held by the \a value.
-     * @param value The second parameter to the visit metho of the \a visitor.
+     * @param value The second parameter to the visit method of the \a visitor.
      */
     void operator() (const std::reference_wrapper<const Json>& value) const
     {

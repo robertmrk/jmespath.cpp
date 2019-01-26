@@ -35,6 +35,7 @@
 #include <boost/range/numeric.hpp>
 #include <boost/algorithm/cxx11/any_of.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/hana.hpp>
 
 namespace jmespath { namespace interpreter {
 
@@ -106,22 +107,44 @@ Json Interpreter2::currentContext() const
 
 void Interpreter2::evaluateProjection(const ast::ExpressionNode *expression)
 {
-    Json result;
-    if (m_context.is_array())
+    // evaluate the projection if the context holds an array
+    if (getJsonValue(m_context2).is_array())
     {
-        result = Json(Json::value_t::array);
-        Json contextArray = std::move(m_context);
-        for (auto& item: contextArray)
+        // create the array of results
+        Json result(Json::value_t::array);
+        // move the evaluaton context to a temporary varaible
+        ContextValue contextArray {std::move(m_context2)};
+        // iterate over the array
+        const Json& jsonArray = getJsonValue(contextArray);
+        for (const auto& item: jsonArray)
         {
-            m_context = std::move(item);
+            // evaluate the current expression
+            m_context2 = assignContextValue(item);
             visit(expression);
-            if (!m_context.is_null())
+            // if the result of the expression is not null
+            if (!getJsonValue(m_context2).is_null())
             {
-                result.push_back(std::move(m_context));
+                // append a copy of the result if it's an lvalue reference
+                // otherwise move it
+                auto visitor = boost::hana::overload(
+                    [&result](const JsonRef& value) {
+                        result.push_back(value.get());
+                    },
+                    [&result](Json& value) {
+                        result.push_back(std::move(value));
+                    }
+                );
+                boost::apply_visitor(visitor, m_context2);
             }
         }
+        // set the results of the projection
+        m_context2 = std::move(result);
     }
-    m_context = std::move(result);
+    // otherwise evaluate to null
+    else
+    {
+        m_context2 = {};
+    }
 }
 
 void Interpreter2::visit(const ast::AbstractNode *node)
@@ -147,16 +170,18 @@ void Interpreter2::visit(const ast::IdentifierNode *node, JsonT &&context)
     // evaluete the identifier if the context holds an object
     if (context.is_object())
     {
-        // assign either a const reference of the result or move the result
-        // into the context depending on the type of the context parameter
-        m_context2 = assignContextValue(std::forward<JsonT>(
-                                            context[node->identifier]));
+        try
+        {
+            // assign either a const reference of the result or move the result
+            // into the context depending on the type of the context parameter
+            m_context2 = assignContextValue(std::forward<JsonT>(
+                                                context.at(node->identifier)));
+            return;
+        }
+        catch (const nlohmann::json::out_of_range&) {}
     }
     // otherwise evaluate to null
-    else
-    {
-        m_context2 = {};
-    }
+    m_context2 = {};
 }
 
 void Interpreter2::visit(const ast::RawStringNode *node)
@@ -230,13 +255,20 @@ void Interpreter2::visit(const ast::ArrayItemNode *node, JsonT &&context)
     m_context2 = {};
 }
 
-void Interpreter2::visit(const ast::FlattenOperatorNode *)
+void Interpreter2::visit(const ast::FlattenOperatorNode *node)
 {
-    Json result;
-    if (m_context.is_array())
+    // visit the node with either an lvalue const ref or rvalue ref context
+    boost::apply_visitor(ContextVisitor<ast::FlattenOperatorNode>(this, node),
+                         m_context2);
+}
+
+template <typename JsonT>
+void Interpreter2::visit(const ast::FlattenOperatorNode*, JsonT&& context)
+{
+    if (context.is_array())
     {
-        result = Json(Json::value_t::array);
-        for (auto& item: m_context)
+        Json result(Json::value_t::array);
+        for (auto& item: context)
         {
             if (item.is_array())
             {
@@ -249,8 +281,12 @@ void Interpreter2::visit(const ast::FlattenOperatorNode *)
                 result.push_back(std::move(item));
             }
         }
+        m_context2 = std::move(result);
     }
-    m_context = std::move(result);
+    else
+    {
+        m_context2 = {};
+    }
 }
 
 void Interpreter2::visit(const ast::BracketSpecifierNode *node)
@@ -260,13 +296,20 @@ void Interpreter2::visit(const ast::BracketSpecifierNode *node)
 
 void Interpreter2::visit(const ast::SliceExpressionNode *node)
 {
-    Json result;
-    if (m_context.is_array())
+    // visit the node with either an lvalue const ref or rvalue ref context
+    boost::apply_visitor(ContextVisitor<ast::SliceExpressionNode>(this, node),
+                         m_context2);
+}
+
+template <typename JsonT>
+void Interpreter2::visit(const ast::SliceExpressionNode* node, JsonT&& context)
+{
+    if (context.is_array())
     {
         Index startIndex = 0;
         Index stopIndex = 0;
         Index step = 1;
-        size_t length = m_context.size();
+        size_t length = context.size();
 
         if (node->step)
         {
@@ -293,37 +336,54 @@ void Interpreter2::visit(const ast::SliceExpressionNode *node)
             stopIndex = adjustSliceEndpoint(length, *node->stop, step);
         }
 
-        result = Json(Json::value_t::array);
+        Json result(Json::value_t::array);
         for (auto i = startIndex;
              step > 0 ? (i < stopIndex) : (i > stopIndex);
              i += step)
         {
             size_t arrayIndex = static_cast<size_t>(i);
-            result.push_back(std::move(m_context[arrayIndex]));
+            result.push_back(std::move(context[arrayIndex]));
         }
+        m_context2 = std::move(result);
     }
-    m_context = std::move(result);
+    else
+    {
+        m_context2 = {};
+    }
 }
 
 void Interpreter2::visit(const ast::ListWildcardNode*)
 {
-    if (!m_context.is_array())
+    if (!getJsonValue(m_context2).is_array())
     {
-        m_context = {};
+        m_context2 = {};
     }
 }
 
 void Interpreter2::visit(const ast::HashWildcardNode *node)
 {
+    // visit the node with either an lvalue const ref or rvalue ref context
+    boost::apply_visitor(ContextVisitor<ast::HashWildcardNode>(this, node),
+                         m_context2);
+}
+
+template <typename JsonT>
+void Interpreter2::visit(const ast::HashWildcardNode* node, JsonT&& context)
+{
     visit(&node->leftExpression);
-    Json result;
-    if (m_context.is_object())
+    if (context.is_object())
     {
-        std::move(std::begin(m_context),
-                  std::end(m_context),
+        Json result(Json::value_t::array);
+        std::move(std::begin(context),
+                  std::end(context),
                   std::back_inserter(result));
+
+        m_context2 = std::move(result);
     }
-    m_context = std::move(result);
+    else
+    {
+        m_context2 = {};
+    }
     evaluateProjection(&node->rightExpression);
 }
 
@@ -362,7 +422,7 @@ void Interpreter2::visit(const ast::MultiselectHashNode *node)
 void Interpreter2::visit(const ast::NotExpressionNode *node)
 {
     visit(&node->expression);
-    m_context = !toBoolean(m_context);
+    m_context2 = !toBoolean(getJsonValue(m_context2));
 }
 
 void Interpreter2::visit(const ast::ComparatorExpressionNode *node)
@@ -503,8 +563,8 @@ void Interpreter2::visit(const ast::ExpressionArgumentNode *)
 }
 
 Index Interpreter2::adjustSliceEndpoint(size_t length,
-                                               Index endpoint,
-                                               Index step) const
+                                        Index endpoint,
+                                        Index step) const
 {
     if (endpoint < 0)
     {

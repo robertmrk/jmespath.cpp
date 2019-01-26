@@ -128,7 +128,7 @@ TEST_CASE("assignContextValue")
         REQUIRE(jsonValue == Json{});
     }
 
-    SECTION("returns reference_wrapper for lvalue")
+    SECTION("returns reference_wrapper for Json lvalue ref")
     {
         Json jsonValue {{"key", "value"}};
         ContextValue contextValue;
@@ -372,7 +372,7 @@ TEST_CASE("Interpreter2")
         REQUIRE(getJsonValue(interpreter.m_context2) == expectedValue);
     }
 
-    SECTION("evaluates identifier node with rvalue ref")
+    SECTION("evaluates identifier node with rvalue")
     {
         ast::IdentifierNode node{"identifier"};
         int value = 15;
@@ -392,6 +392,30 @@ TEST_CASE("Interpreter2")
 
         interpreter.visit(&node);
 
+        REQUIRE(getJsonValue(interpreter.m_context2) == Json{});
+    }
+
+    SECTION("evaluates non existing identifier in an lvalue ref object to null")
+    {
+        Json jsonValue{{"identifier", "value"}};
+        interpreter.m_context2 = assignContextValue(jsonValue);
+        ast::IdentifierNode node{"non-existing"};
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.m_context2.which() == 0);
+        REQUIRE(getJsonValue(interpreter.m_context2) == Json{});
+    }
+
+    SECTION("evaluates non existing identifier in an rvalue ref object to null")
+    {
+        Json jsonValue{{"identifier", "value"}};
+        interpreter.m_context2 = assignContextValue({{"identifier", "value"}});
+        ast::IdentifierNode node{"non-existing"};
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.m_context2.which() == 0);
         REQUIRE(getJsonValue(interpreter.m_context2) == Json{});
     }
 
@@ -543,7 +567,7 @@ TEST_CASE("Interpreter2")
         REQUIRE(getJsonValue(interpreter.m_context2) == "two");
     }
 
-    SECTION("evaluates array item expression with rvalue ref")
+    SECTION("evaluates array item expression with rvalue")
     {
         ast::ArrayItemNode node{2};
         interpreter.m_context2 = assignContextValue(
@@ -600,216 +624,272 @@ TEST_CASE("Interpreter2")
         REQUIRE(getJsonValue(interpreter.m_context2) == Json{});
     }
 
-//    SECTION("evaluates projection")
-//    {
-//        Json context = {{{"id", 1}}, {{"id", 2}}, {{"id2", 3}}, {{"id", 4}}};
-//        REQUIRE(context.is_array());
-//        interpreter.setContext(context);
-//        ast::ExpressionNode expression{
-//            ast::IdentifierNode{"id"}};
-//        interpreter.setContext(context);
-//        Json expectedResult = {1, 2, 4};
-//        REQUIRE(expectedResult.is_array());
+    SECTION("evaluates projection on lvalue ref")
+    {
+        Json context = {{{"id", 1}}, {{"id", 2}}, {{"id2", 3}}, {{"id", 4}}};
+        REQUIRE(context.is_array());
+        ast::ExpressionNode expression{
+            ast::IdentifierNode{"id"}};
+        interpreter.m_context2 = assignContextValue(context);
+        Json expectedResult = {1, 2, 4};
+        REQUIRE(expectedResult.is_array());
 
-//        interpreter.evaluateProjection(&expression);
+        interpreter.evaluateProjection(&expression);
 
-//        REQUIRE(interpreter.currentContext() == expectedResult);
-//    }
+        REQUIRE(getJsonValue(interpreter.m_context2) == expectedResult);
+    }
 
-//    SECTION("evaluates projection on non arrays to null")
-//    {
-//        Json context = "string";
-//        REQUIRE(context.is_string());
-//        ast::ExpressionNode expression{
-//            ast::IdentifierNode{"id"}};
-//        interpreter.setContext(context);
+    SECTION("evaluates projection on rvalue")
+    {
+        Json context = {{{"id", 1}}, {{"id", 2}}, {{"id2", 3}}, {{"id", 4}}};
+        REQUIRE(context.is_array());
+        ast::ExpressionNode expression{
+            ast::IdentifierNode{"id"}};
+        interpreter.m_context2 = assignContextValue((Json{context}));
+        Json expectedResult = {1, 2, 4};
+        REQUIRE(expectedResult.is_array());
 
-//        interpreter.evaluateProjection(&expression);
+        interpreter.evaluateProjection(&expression);
 
-//        REQUIRE(interpreter.currentContext() == Json{});
-//    }
+        REQUIRE(getJsonValue(interpreter.m_context2) == expectedResult);
+    }
 
-//    SECTION("evaluates flatten operator")
-//    {
-//        Json context = "[1, 2, [3], [4, [5, 6, 7], 8], [9, 10] ]"_json;
-//        interpreter.setContext(context);
-//        Json expectedResult = "[1, 2, 3, 4, [5, 6, 7], 8, 9, 10]"_json;
-//        ast::FlattenOperatorNode flattenNode;
+    SECTION("evaluates projection on non arrays to null")
+    {
+        Json context = "string";
+        REQUIRE(context.is_string());
+        ast::ExpressionNode expression{
+            ast::IdentifierNode{"id"}};
+        interpreter.m_context2 = assignContextValue(context);
 
-//        interpreter.visit(&flattenNode);
+        interpreter.evaluateProjection(&expression);
 
-//        REQUIRE(interpreter.currentContext() == expectedResult);
-//    }
+        REQUIRE(getJsonValue(interpreter.m_context2) == Json{});
+    }
 
-//    SECTION("evaluates flatten operator on non array to null")
-//    {
-//        Json context = {{"id", "value"}};
-//        REQUIRE(context.is_object());
-//        interpreter.setContext(context);
-//        ast::FlattenOperatorNode flattenNode;
+    SECTION("evaluates flatten operator on lvalue ref")
+    {
+        Json context = "[1, 2, [3], [4, [5, 6, 7], 8], [9, 10] ]"_json;
+        Json contextCopy{context};
+        interpreter.m_context2 = assignContextValue(context);
+        Json expectedResult = "[1, 2, 3, 4, [5, 6, 7], 8, 9, 10]"_json;
+        ast::FlattenOperatorNode flattenNode;
 
-//        interpreter.visit(&flattenNode);
+        interpreter.visit(&flattenNode);
 
-//        REQUIRE(interpreter.currentContext() == Json{});
-//    }
+        REQUIRE(getJsonValue(interpreter.m_context2) == expectedResult);
+        REQUIRE(context == contextCopy);
+    }
+
+    SECTION("evaluates flatten operator on rvalue")
+    {
+        Json context = "[1, 2, [3], [4, [5, 6, 7], 8], [9, 10] ]"_json;
+        Json contextCopy{context};
+        interpreter.m_context2 = assignContextValue(std::move(context));
+        Json expectedResult = "[1, 2, 3, 4, [5, 6, 7], 8, 9, 10]"_json;
+        ast::FlattenOperatorNode flattenNode;
+
+        interpreter.visit(&flattenNode);
+
+        REQUIRE(getJsonValue(interpreter.m_context2) == expectedResult);
+    }
+
+    SECTION("evaluates flatten operator on non array to null")
+    {
+        Json context = {{"id", "value"}};
+        REQUIRE(context.is_object());
+        interpreter.m_context2 = assignContextValue(context);
+        ast::FlattenOperatorNode flattenNode;
+
+        interpreter.visit(&flattenNode);
+
+        REQUIRE(getJsonValue(interpreter.m_context2) == Json{});
+    }
 
 
-//    SECTION("evaluates slice expression on non array to null")
-//    {
-//        ast::SliceExpressionNode sliceNode{Index{2}, Index{5}};
+    SECTION("evaluates slice expression on non array to null")
+    {
+        ast::SliceExpressionNode sliceNode{Index{2}, Index{5}};
 
-//        interpreter.visit(&sliceNode);
+        interpreter.visit(&sliceNode);
 
-//        REQUIRE(interpreter.currentContext() == Json{});
-//    }
+        REQUIRE(getJsonValue(interpreter.m_context2) == Json{});
+    }
 
-//    SECTION("throws InvalidValue exception when slice expression"
-//            "step equals to zero")
-//    {
-//        interpreter.setContext("[]"_json);
-//        ast::SliceExpressionNode sliceNode{Index{2}, Index{5}, Index{0}};
+    SECTION("throws InvalidValue exception when slice expression"
+            "step equals to zero")
+    {
+        interpreter.m_context2 = assignContextValue("[]"_json);
+        ast::SliceExpressionNode sliceNode{Index{2}, Index{5}, Index{0}};
 
-//        REQUIRE_THROWS_AS(interpreter.visit(&sliceNode), InvalidValue);
-//    }
+        REQUIRE_THROWS_AS(interpreter.visit(&sliceNode), InvalidValue);
+    }
 
-//    SECTION("evaluates slice expression")
-//    {
-//        Json context = "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]"_json;
-//        interpreter.setContext(context);
-//        ast::SliceExpressionNode sliceNode{Index{2}, Index{5}};
-//        Json expectedResult = "[2, 3, 4]"_json;
+    SECTION("evaluates slice expression on lvalue ref")
+    {
+        Json context = "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]"_json;
+        interpreter.m_context2 = assignContextValue(context);
+        ast::SliceExpressionNode sliceNode{Index{2}, Index{5}};
+        Json expectedResult = "[2, 3, 4]"_json;
 
-//        interpreter.visit(&sliceNode);
+        interpreter.visit(&sliceNode);
 
-//        REQUIRE(interpreter.currentContext() == expectedResult);
-//    }
+        REQUIRE(getJsonValue(interpreter.m_context2) == expectedResult);
+    }
 
-//    SECTION("evaluates slice expression with step index")
-//    {
-//        Json context = "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]"_json;
-//        interpreter.setContext(context);
-//        ast::SliceExpressionNode sliceNode{Index{2}, Index{5}, Index{2}};
-//        Json expectedResult = "[2, 4]"_json;
+    SECTION("evaluates slice expression on rvalue")
+    {
+        Json context = "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]"_json;
+        interpreter.m_context2 = assignContextValue(Json{context});
+        ast::SliceExpressionNode sliceNode{Index{2}, Index{5}};
+        Json expectedResult = "[2, 3, 4]"_json;
 
-//        interpreter.visit(&sliceNode);
+        interpreter.visit(&sliceNode);
 
-//        REQUIRE(interpreter.currentContext() == expectedResult);
-//    }
+        REQUIRE(getJsonValue(interpreter.m_context2) == expectedResult);
+    }
 
-//    SECTION("evaluates slice expression with negative step index")
-//    {
-//        Json context = "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]"_json;
-//        interpreter.setContext(context);
-//        ast::SliceExpressionNode sliceNode{Index{5}, Index{2}, Index{-1}};
-//        Json expectedResult = "[5, 4, 3]"_json;
+    SECTION("evaluates slice expression with step index")
+    {
+        Json context = "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]"_json;
+        interpreter.m_context2 = assignContextValue(context);
+        ast::SliceExpressionNode sliceNode{Index{2}, Index{5}, Index{2}};
+        Json expectedResult = "[2, 4]"_json;
 
-//        interpreter.visit(&sliceNode);
+        interpreter.visit(&sliceNode);
 
-//        REQUIRE(interpreter.currentContext() == expectedResult);
-//    }
+        REQUIRE(getJsonValue(interpreter.m_context2) == expectedResult);
+    }
 
-//    SECTION("evaluates empty slice expression")
-//    {
-//        Json context = "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]"_json;
-//        interpreter.setContext(context);
-//        ast::SliceExpressionNode sliceNode;
+    SECTION("evaluates slice expression with negative step index")
+    {
+        Json context = "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]"_json;
+        interpreter.m_context2 = assignContextValue(context);
+        ast::SliceExpressionNode sliceNode{Index{5}, Index{2}, Index{-1}};
+        Json expectedResult = "[5, 4, 3]"_json;
 
-//        interpreter.visit(&sliceNode);
+        interpreter.visit(&sliceNode);
 
-//        REQUIRE(interpreter.currentContext() == context);
-//    }
+        REQUIRE(getJsonValue(interpreter.m_context2) == expectedResult);
+    }
 
-//    SECTION("evaluates slice expression with end value over the end of array")
-//    {
-//        Json context = "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]"_json;
-//        interpreter.setContext(context);
-//        ast::SliceExpressionNode sliceNode{Index{0}, Index{20}};
+    SECTION("evaluates empty slice expression")
+    {
+        Json context = "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]"_json;
+        interpreter.m_context2 = assignContextValue(context);
+        ast::SliceExpressionNode sliceNode;
 
-//        interpreter.visit(&sliceNode);
+        interpreter.visit(&sliceNode);
 
-//        REQUIRE(interpreter.currentContext() == context);
-//    }
+        REQUIRE(getJsonValue(interpreter.m_context2) == context);
+    }
 
-//    SECTION("evaluates slice expression with start value below the first item"
-//            "of array")
-//    {
-//        Json context = "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]"_json;
-//        interpreter.setContext(context);
-//        ast::SliceExpressionNode sliceNode{
-//            ast::SliceExpressionNode::IndexType{-50}};
+    SECTION("evaluates slice expression with end value over the end of array")
+    {
+        Json context = "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]"_json;
+        interpreter.m_context2 = assignContextValue(context);
+        ast::SliceExpressionNode sliceNode{Index{0}, Index{20}};
 
-//        interpreter.visit(&sliceNode);
+        interpreter.visit(&sliceNode);
 
-//        REQUIRE(interpreter.currentContext() == context);
-//    }
+        REQUIRE(getJsonValue(interpreter.m_context2) == context);
+    }
 
-//    SECTION("evaluates list wildcard expression on non array to null")
-//    {
-//        Json context = "string";
-//        interpreter.setContext(context);
-//        ast::ListWildcardNode node;
+    SECTION("evaluates slice expression with start value below the first item"
+            "of array")
+    {
+        Json context = "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]"_json;
+        interpreter.m_context2 = assignContextValue(context);
+        ast::SliceExpressionNode sliceNode{
+            ast::SliceExpressionNode::IndexType{-50}};
 
-//        interpreter.visit(&node);
+        interpreter.visit(&sliceNode);
 
-//        REQUIRE(interpreter.currentContext() == Json{});
-//    }
+        REQUIRE(getJsonValue(interpreter.m_context2) == context);
+    }
 
-//    SECTION("evaluates list wildcard expression on arrays to the array itself")
-//    {
-//        Json context = "[1, 2, 3]"_json;
-//        interpreter.setContext(context);
-//        ast::ListWildcardNode node;
+    SECTION("evaluates list wildcard expression on non array to null")
+    {
+        Json context = "string";
+        interpreter.m_context2 = assignContextValue(context);
+        ast::ListWildcardNode node;
 
-//        interpreter.visit(&node);
+        interpreter.visit(&node);
 
-//        REQUIRE(interpreter.currentContext() == context);
-//    }
+        REQUIRE(getJsonValue(interpreter.m_context2) == Json{});
+    }
 
-//    SECTION("evaluates hash wildcard expression on non object to null")
-//    {
-//        Json context = "[1, 2, 3]"_json;
-//        interpreter.setContext(context);
-//        ast::HashWildcardNode node;
+    SECTION("evaluates list wildcard expression on arrays to the array itself")
+    {
+        Json context = "[1, 2, 3]"_json;
+        interpreter.m_context2 = assignContextValue(context);
+        ast::ListWildcardNode node;
 
-//        interpreter.visit(&node);
+        interpreter.visit(&node);
 
-//        REQUIRE(interpreter.currentContext() == Json{});
-//    }
+        REQUIRE(getJsonValue(interpreter.m_context2) == context);
+    }
 
-//    SECTION("evaluates hash wildcard expression on objects to array of values")
-//    {
-//        Json context = "{\"a\": 1, \"b\":2, \"c\":3}"_json;
-//        Json values(Json::value_t::array);
-//        rng::copy(context, std::back_inserter(values));
-//        interpreter.setContext(context);
-//        ast::HashWildcardNode node;
+    SECTION("evaluates hash wildcard expression on non object to null")
+    {
+        Json context = "[1, 2, 3]"_json;
+        interpreter.m_context2 = assignContextValue(context);
+        ast::HashWildcardNode node;
 
-//        interpreter.visit(&node);
+        interpreter.visit(&node);
 
-//        REQUIRE(interpreter.currentContext() == values);
-//    }
+        REQUIRE(getJsonValue(interpreter.m_context2) == Json{});
+    }
 
-//    SECTION("evaluates left expression of hash wildcard expresion and projects"
-//            "right expression")
-//    {
-//        ast::HashWildcardNode node;
-//        Mock<Interpreter> interpreterMock(interpreter);
-//        When(OverloadedMethod(interpreterMock, visit,
-//                              void(const ast::ExpressionNode*)))
-//                .AlwaysReturn();
-//        When(Method(interpreterMock, evaluateProjection))
-//                .AlwaysReturn();
+    SECTION("evaluates hash wildcard expression on objects to array of values "
+            "from lvalue ref")
+    {
+        Json context = "{\"a\": 1, \"b\":2, \"c\":3}"_json;
+        Json values(Json::value_t::array);
+        rng::copy(context, std::back_inserter(values));
+        interpreter.m_context2 = assignContextValue(context);
+        ast::HashWildcardNode node;
 
-//        interpreterMock.get().visit(&node);
+        interpreter.visit(&node);
 
-//        Verify(OverloadedMethod(interpreterMock, visit,
-//                                void(const ast::ExpressionNode*))
-//                    .Using(&node.leftExpression)
-//               + Method(interpreterMock, evaluateProjection)
-//                    .Using(&node.rightExpression))
-//                .Once();
-//        VerifyNoOtherInvocations(interpreterMock);
-//    }
+        REQUIRE(getJsonValue(interpreter.m_context2) == values);
+    }
+
+    SECTION("evaluates hash wildcard expression on objects to array of values "
+            "from rvalue")
+    {
+        Json context = "{\"a\": 1, \"b\":2, \"c\":3}"_json;
+        Json values(Json::value_t::array);
+        rng::copy(context, std::back_inserter(values));
+        interpreter.m_context2 = assignContextValue(Json{context});
+        ast::HashWildcardNode node;
+
+        interpreter.visit(&node);
+
+        REQUIRE(getJsonValue(interpreter.m_context2) == values);
+    }
+
+    SECTION("evaluates left expression of hash wildcard expresion and projects"
+            "right expression")
+    {
+        ast::HashWildcardNode node;
+        Mock<Interpreter2> interpreterMock(interpreter);
+        When(OverloadedMethod(interpreterMock, visit,
+                              void(const ast::ExpressionNode*)))
+                .AlwaysReturn();
+        When(Method(interpreterMock, evaluateProjection))
+                .AlwaysReturn();
+
+        interpreterMock.get().visit(&node);
+
+        Verify(OverloadedMethod(interpreterMock, visit,
+                                void(const ast::ExpressionNode*))
+                    .Using(&node.leftExpression)
+               + Method(interpreterMock, evaluateProjection)
+                    .Using(&node.rightExpression))
+                .Once();
+        VerifyNoOtherInvocations(interpreterMock);
+    }
 
 //    SECTION("visits child expressions of multiselect list expression on "
 //            "evaluation")
@@ -941,159 +1021,160 @@ TEST_CASE("Interpreter2")
 //                                              "\"id3\":\"value4\"}"_json);
 //    }
 
-//    SECTION("evaluates child expression of not expression")
-//    {
-//        ast::NotExpressionNode node;
-//        Mock<Interpreter> interpreterMock(interpreter);
-//        When(OverloadedMethod(interpreterMock, visit,
-//                              void(const ast::ExpressionNode*))).AlwaysReturn();
+    SECTION("evaluates child expression of not expression")
+    {
+        ast::NotExpressionNode node;
+        Mock<Interpreter2> interpreterMock(interpreter);
+        When(OverloadedMethod(interpreterMock, visit,
+                              void(const ast::ExpressionNode*))).AlwaysReturn();
 
-//        interpreterMock.get().visit(&node);
+        interpreterMock.get().visit(&node);
 
-//        Verify(OverloadedMethod(interpreterMock, visit,
-//                                void(const ast::ExpressionNode*))
-//               .Using(&node.expression)).Once();
-//        VerifyNoOtherInvocations(interpreterMock);
-//    }
+        Verify(OverloadedMethod(interpreterMock, visit,
+                                void(const ast::ExpressionNode*))
+               .Using(&node.expression)).Once();
+        VerifyNoOtherInvocations(interpreterMock);
+    }
 
-//    SECTION("evaluates not expression on false to true")
-//    {
-//        ast::NotExpressionNode node{
-//            ast::ExpressionNode{
-//                ast::IdentifierNode{"id"}}};
-//        interpreter.setContext("{\"id\":false}"_json);
-//        Json expectedResult = true;
+    SECTION("evaluates not expression on false to true")
+    {
+        ast::NotExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id"}}};
+        interpreter.m_context2 = assignContextValue("{\"id\":false}"_json);
+        Json expectedResult = true;
 
-//        interpreter.visit(&node);
+        interpreter.visit(&node);
 
-//        REQUIRE(interpreter.currentContext() == expectedResult);
-//    }
+        REQUIRE(getJsonValue(interpreter.m_context2) == expectedResult);
+    }
 
-//    SECTION("evaluates not expression on true to false")
-//    {
-//        ast::NotExpressionNode node{
-//            ast::ExpressionNode{
-//                ast::IdentifierNode{"id"}}};
-//        interpreter.setContext("{\"id\":true}"_json);
-//        Json expectedResult = false;
+    SECTION("evaluates not expression on true to false")
+    {
+        ast::NotExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id"}}};
+        interpreter.m_context2 = assignContextValue("{\"id\":true}"_json);
+        Json expectedResult = false;
 
-//        interpreter.visit(&node);
+        interpreter.visit(&node);
 
-//        REQUIRE(interpreter.currentContext() == expectedResult);
-//    }
+        REQUIRE(getJsonValue(interpreter.m_context2) == expectedResult);
+    }
 
-//    SECTION("evaluates not expression on null to true")
-//    {
-//        ast::NotExpressionNode node{
-//            ast::ExpressionNode{
-//                ast::IdentifierNode{"id"}}};
-//        interpreter.setContext("{\"id\":null}"_json);
-//        Json expectedResult = true;
+    SECTION("evaluates not expression on null to true")
+    {
+        ast::NotExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id"}}};
+        interpreter.m_context2 = assignContextValue("{\"id\":null}"_json);
+        Json expectedResult = true;
 
-//        interpreter.visit(&node);
+        interpreter.visit(&node);
 
-//        REQUIRE(interpreter.currentContext() == expectedResult);
-//    }
+        REQUIRE(getJsonValue(interpreter.m_context2) == expectedResult);
+    }
 
-//    SECTION("evaluates not expression on all numbers to false")
-//    {
-//        ast::NotExpressionNode node{
-//            ast::ExpressionNode{
-//                ast::IdentifierNode{"id"}}};
-//        Json expectedResult = false;
+    SECTION("evaluates not expression on all numbers to false")
+    {
+        ast::NotExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id"}}};
+        Json expectedResult = false;
 
-//        interpreter.setContext("{\"id\":5}"_json);
-//        interpreter.visit(&node);
-//        auto result1 = interpreter.currentContext();
-//        interpreter.setContext("{\"id\":0}"_json);
-//        interpreter.visit(&node);
-//        auto result2 = interpreter.currentContext();
-//        interpreter.setContext("{\"id\":-5}"_json);
-//        interpreter.visit(&node);
-//        auto result3 = interpreter.currentContext();
+        interpreter.m_context2 = assignContextValue("{\"id\":5}"_json);
+        interpreter.visit(&node);
+        auto result1 = getJsonValue(interpreter.m_context2);
+        interpreter.m_context2 = assignContextValue("{\"id\":0}"_json);
+        interpreter.visit(&node);
+        auto result2 = getJsonValue(interpreter.m_context2);
+        interpreter.m_context2 = assignContextValue("{\"id\":-5}"_json);
+        interpreter.visit(&node);
+        auto result3 = getJsonValue(interpreter.m_context2);
 
-//        REQUIRE(result1 == expectedResult);
-//        REQUIRE(result2 == expectedResult);
-//        REQUIRE(result3 == expectedResult);
-//    }
+        REQUIRE(result1 == expectedResult);
+        REQUIRE(result2 == expectedResult);
+        REQUIRE(result3 == expectedResult);
+    }
 
-//    SECTION("evaluates not expression on empty string to true")
-//    {
-//        ast::NotExpressionNode node{
-//            ast::ExpressionNode{
-//                ast::IdentifierNode{"id"}}};
-//        interpreter.setContext("{\"id\":\"\"}"_json);
-//        Json expectedResult = true;
+    SECTION("evaluates not expression on empty string to true")
+    {
+        ast::NotExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id"}}};
+        interpreter.m_context2 = assignContextValue("{\"id\":\"\"}"_json);
+        Json expectedResult = true;
 
-//        interpreter.visit(&node);
+        interpreter.visit(&node);
 
-//        REQUIRE(interpreter.currentContext() == expectedResult);
-//    }
+        REQUIRE(getJsonValue(interpreter.m_context2) == expectedResult);
+    }
 
-//    SECTION("evaluates not expression on non empty string to false")
-//    {
-//        ast::NotExpressionNode node{
-//            ast::ExpressionNode{
-//                ast::IdentifierNode{"id"}}};
-//        interpreter.setContext("{\"id\":\"string\"}"_json);
-//        Json expectedResult = false;
+    SECTION("evaluates not expression on non empty string to false")
+    {
+        ast::NotExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id"}}};
+        interpreter.m_context2 = assignContextValue("{\"id\":\"string\"}"_json);
+        Json expectedResult = false;
 
-//        interpreter.visit(&node);
+        interpreter.visit(&node);
 
-//        REQUIRE(interpreter.currentContext() == expectedResult);
-//    }
+        REQUIRE(getJsonValue(interpreter.m_context2) == expectedResult);
+    }
 
-//    SECTION("evaluates not expression on empty array to true")
-//    {
-//        ast::NotExpressionNode node{
-//            ast::ExpressionNode{
-//                ast::IdentifierNode{"id"}}};
-//        interpreter.setContext("{\"id\":[]}"_json);
-//        Json expectedResult = true;
+    SECTION("evaluates not expression on empty array to true")
+    {
+        ast::NotExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id"}}};
+        interpreter.m_context2 = assignContextValue("{\"id\":[]}"_json);
+        Json expectedResult = true;
 
-//        interpreter.visit(&node);
+        interpreter.visit(&node);
 
-//        REQUIRE(interpreter.currentContext() == expectedResult);
-//    }
+        REQUIRE(getJsonValue(interpreter.m_context2) == expectedResult);
+    }
 
-//    SECTION("evaluates not expression on non empty array to false")
-//    {
-//        ast::NotExpressionNode node{
-//            ast::ExpressionNode{
-//                ast::IdentifierNode{"id"}}};
-//        interpreter.setContext("{\"id\":[1, 2, 3]}"_json);
-//        Json expectedResult = false;
+    SECTION("evaluates not expression on non empty array to false")
+    {
+        ast::NotExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id"}}};
+        interpreter.m_context2 = assignContextValue("{\"id\":[1, 2, 3]}"_json);
+        Json expectedResult = false;
 
-//        interpreter.visit(&node);
+        interpreter.visit(&node);
 
-//        REQUIRE(interpreter.currentContext() == expectedResult);
-//    }
+        REQUIRE(getJsonValue(interpreter.m_context2) == expectedResult);
+    }
 
-//    SECTION("evaluates not expression on empty object to true")
-//    {
-//        ast::NotExpressionNode node{
-//            ast::ExpressionNode{
-//                ast::IdentifierNode{"id"}}};
-//        interpreter.setContext("{\"id\":{}}"_json);
-//        Json expectedResult = true;
+    SECTION("evaluates not expression on empty object to true")
+    {
+        ast::NotExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id"}}};
+        interpreter.m_context2 = assignContextValue("{\"id\":{}}"_json);
+        Json expectedResult = true;
 
-//        interpreter.visit(&node);
+        interpreter.visit(&node);
 
-//        REQUIRE(interpreter.currentContext() == expectedResult);
-//    }
+        REQUIRE(getJsonValue(interpreter.m_context2) == expectedResult);
+    }
 
-//    SECTION("evaluates not expression on non empty object to false")
-//    {
-//        ast::NotExpressionNode node{
-//            ast::ExpressionNode{
-//                ast::IdentifierNode{"id"}}};
-//        interpreter.setContext("{\"id\":{\"id2\":\"string\"}}"_json);
-//        Json expectedResult = false;
+    SECTION("evaluates not expression on non empty object to false")
+    {
+        ast::NotExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id"}}};
+        interpreter.m_context2 = assignContextValue(
+                    "{\"id\":{\"id2\":\"string\"}}"_json);
+        Json expectedResult = false;
 
-//        interpreter.visit(&node);
+        interpreter.visit(&node);
 
-//        REQUIRE(interpreter.currentContext() == expectedResult);
-//    }
+        REQUIRE(getJsonValue(interpreter.m_context2) == expectedResult);
+    }
 
 //    SECTION("evaluates comparator expression")
 //    {
@@ -1520,83 +1601,84 @@ TEST_CASE("Interpreter2")
 //        REQUIRE(interpreter.currentContext() == expectedResult);
 //    }
 
-//    SECTION("evaluates child expression of paren expression")
-//    {
-//        ast::ParenExpressionNode node;
-//        Mock<Interpreter> interpreterMock(interpreter);
-//        When(OverloadedMethod(interpreterMock, visit,
-//                              void(const ast::ExpressionNode*))).AlwaysReturn();
+    SECTION("evaluates child expression of paren expression")
+    {
+        ast::ParenExpressionNode node;
+        Mock<Interpreter2> interpreterMock(interpreter);
+        When(OverloadedMethod(interpreterMock, visit,
+                              void(const ast::ExpressionNode*))).AlwaysReturn();
 
-//        interpreterMock.get().visit(&node);
+        interpreterMock.get().visit(&node);
 
-//        Verify(OverloadedMethod(interpreterMock, visit,
-//                                void(const ast::ExpressionNode*))
-//               .Using(&node.expression)).Once();
-//        VerifyNoOtherInvocations(interpreterMock);
-//    }
+        Verify(OverloadedMethod(interpreterMock, visit,
+                                void(const ast::ExpressionNode*))
+               .Using(&node.expression)).Once();
+        VerifyNoOtherInvocations(interpreterMock);
+    }
 
-//    SECTION("evaluates pipe expression")
-//    {
-//        ast::PipeExpressionNode node;
-//        Mock<Interpreter> interpreterMock(interpreter);
-//        When(OverloadedMethod(interpreterMock, visit,
-//                              void(const ast::ExpressionNode*))).AlwaysReturn();
+    SECTION("evaluates pipe expression")
+    {
+        ast::PipeExpressionNode node;
+        Mock<Interpreter2> interpreterMock(interpreter);
+        When(OverloadedMethod(interpreterMock, visit,
+                              void(const ast::ExpressionNode*))).AlwaysReturn();
 
-//        interpreterMock.get().visit(&node);
+        interpreterMock.get().visit(&node);
 
-//        Verify(OverloadedMethod(interpreterMock, visit,
-//                                void(const ast::ExpressionNode*))
-//                    .Using(&node.leftExpression)
-//               + OverloadedMethod(interpreterMock, visit,
-//                                void(const ast::ExpressionNode*))
-//                    .Using(&node.rightExpression)).Once();
-//        VerifyNoOtherInvocations(interpreterMock);
-//    }
+        Verify(OverloadedMethod(interpreterMock, visit,
+                                void(const ast::ExpressionNode*))
+                    .Using(&node.leftExpression)
+               + OverloadedMethod(interpreterMock, visit,
+                                void(const ast::ExpressionNode*))
+                    .Using(&node.rightExpression)).Once();
+        VerifyNoOtherInvocations(interpreterMock);
+    }
 
-//    SECTION("evaluates pipe expression by passing the left expression's result "
-//            "to the right expression")
-//    {
-//        ast::PipeExpressionNode node{
-//            ast::ExpressionNode{
-//                ast::IdentifierNode{"id1"}},
-//            ast::ExpressionNode{
-//                ast::IdentifierNode{"id2"}}};
-//        interpreter.setContext("{\"id1\": {\"id2\": \"value\"}}"_json);
-//        Json expectedResult = "value";
+    SECTION("evaluates pipe expression by passing the left expression's result "
+            "to the right expression")
+    {
+        ast::PipeExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id1"}},
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id2"}}};
+        interpreter.m_context2 = assignContextValue(
+                    "{\"id1\": {\"id2\": \"value\"}}"_json);
+        Json expectedResult = "value";
 
-//        interpreter.visit(&node);
+        interpreter.visit(&node);
 
-//        REQUIRE(interpreter.currentContext() == expectedResult);
-//    }
+        REQUIRE(getJsonValue(interpreter.m_context2) == expectedResult);
+    }
 
-//    SECTION("evaluates current node expression")
-//    {
-//        ast::CurrentNode node;
-//        Mock<Interpreter> interpreterMock(interpreter);
-//        When(OverloadedMethod(interpreterMock, visit,
-//                              void(const ast::ExpressionNode*))).AlwaysReturn();
-//        interpreterMock.get().setContext("value");
+    SECTION("evaluates current node expression")
+    {
+        ast::CurrentNode node;
+        Mock<Interpreter2> interpreterMock(interpreter);
+        When(OverloadedMethod(interpreterMock, visit,
+                              void(const ast::ExpressionNode*))).AlwaysReturn();
+        interpreter.m_context2 = assignContextValue("value");
 
-//        interpreterMock.get().visit(&node);
+        interpreterMock.get().visit(&node);
 
-//        REQUIRE(interpreterMock.get().currentContext() == "value");
-//        VerifyNoOtherInvocations(interpreterMock);
-//    }
+        REQUIRE(getJsonValue(interpreterMock.get().m_context2) == "value");
+        VerifyNoOtherInvocations(interpreterMock);
+    }
 
-//    SECTION("evaluates current node inside subexpression")
-//    {
-//        ast::SubexpressionNode node{
-//            ast::ExpressionNode{
-//                ast::CurrentNode{}},
-//            ast::ExpressionNode{
-//                ast::IdentifierNode{"id"}}};
-//        interpreter.setContext("{\"id\": \"value\"}"_json);
-//        Json expectedResult = "value";
+    SECTION("evaluates current node inside subexpression")
+    {
+        ast::SubexpressionNode node{
+            ast::ExpressionNode{
+                ast::CurrentNode{}},
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id"}}};
+        interpreter.m_context2 = assignContextValue("{\"id\": \"value\"}"_json);
+        Json expectedResult = "value";
 
-//        interpreter.visit(&node);
+        interpreter.visit(&node);
 
-//        REQUIRE(interpreter.currentContext() == expectedResult);
-//    }
+        REQUIRE(getJsonValue(interpreter.m_context2) == expectedResult);
+    }
 
 //    SECTION("evaluates child expression of filter expression")
 //    {

@@ -74,15 +74,15 @@ inline JsonRef assignContextValue(const Json& value)
 }
 
 /**
- * @brief Extract the Json value held by the given @value.
- * @param value A ContextValue variable.
+ * @brief Extract the Json value held by the given @a value.
+ * @param contextValue A ContextValue variable.
  * @return Returns a constant reference to the Json value held by @a value.
  */
-inline const Json& getJsonValue(const ContextValue& value)
+inline const Json& getJsonValue(const ContextValue& contextValue)
 {
     return boost::apply_visitor([](const auto& value) -> const Json& {
         return value;
-    }, value);
+    }, contextValue);
 }
 
 /**
@@ -153,13 +153,19 @@ public:
      * @param node Pointer to the node.
      * @param context An const lvalue reference or an rvalue reference to the
      * evaluation context.
-     * @tparam U The type of the @a context.
+     * @tparam JsonT The type of the @a context.
      * @{
      */
     template <typename JsonT>
     void visit(const ast::IdentifierNode *node, JsonT&& context);
     template <typename JsonT>
     void visit(const ast::ArrayItemNode *node, JsonT&& context);
+    template <typename JsonT>
+    void visit(const ast::FlattenOperatorNode* node, JsonT&& context);
+    template <typename JsonT>
+    void visit(const ast::SliceExpressionNode* node, JsonT&& context);
+    template <typename JsonT>
+    void visit(const ast::HashWildcardNode* node, JsonT&& context);
     /** @}*/
 
 private:
