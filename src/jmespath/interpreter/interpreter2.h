@@ -36,6 +36,11 @@
 #include <unordered_map>
 #include <boost/variant.hpp>
 
+namespace jmespath { namespace ast {
+
+class BinaryExpressionNode;
+}} // namespace jmespath::ast
+
 namespace jmespath { namespace interpreter {
 
 template <typename NodeT, typename VisitorT>
@@ -146,10 +151,6 @@ public:
     void visit(const ast::ExpressionArgumentNode*) override;
     /**
      * @brief Visits the given @a node with the evaluation @a context.
-     *
-     * This constructor participates in overload resolution only if U is
-     * implicitly convertible to String. @a Argument should describe a
-     * valid JMESPath expression.
      * @param node Pointer to the node.
      * @param context An const lvalue reference or an rvalue reference to the
      * evaluation context.
@@ -166,6 +167,8 @@ public:
     void visit(const ast::SliceExpressionNode* node, JsonT&& context);
     template <typename JsonT>
     void visit(const ast::HashWildcardNode* node, JsonT&& context);
+    template <typename JsonT>
+    void visit(const ast::FilterExpressionNode* node, JsonT&& context);
     /** @}*/
 
 private:
@@ -233,6 +236,28 @@ private:
      * list, empty object, empty string, null), otherwise returns true.
      */
     bool toBoolean(const Json& json) const;
+    /**
+     * @brief Evaluates the projection of the given @a expression with the
+     * evaluation @a context.
+     * @param expression The expression that gets projected.
+     * @param context An const lvalue reference or an rvalue reference to the
+     * evaluation context.
+     * @tparam JsonT The type of the @a context.
+     */
+    template <typename JsonT>
+    void evaluateProjection(const ast::ExpressionNode* expression,
+                            JsonT&& context);
+    /**
+     * @brief Evaluates a binary logic operator to the result of the left
+     * side expression if it's binary value equals to @a shortCircuitValue
+     * otherwise evaluates it to the result of the result of the right side
+     * expression.
+     * @param node Pointer to the node.
+     * @param shortCircuitValue Specifies what should be the boolean value of
+     * the left side expression's result to do short circuit evaluation.
+     */
+    void evaluateLogicOperator(const ast::BinaryExpressionNode* node,
+                               bool shortCircuitValue);
     /**
      * @brief Evaluate the given function expression @a arguments.
      *
