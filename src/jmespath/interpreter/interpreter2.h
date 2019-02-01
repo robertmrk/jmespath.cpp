@@ -43,9 +43,6 @@ class BinaryExpressionNode;
 
 namespace jmespath { namespace interpreter {
 
-template <typename NodeT, typename VisitorT>
-class ContextValueVisitorAdaptor;
-
 /**
  * @brief Copyable and assignable reference to a constant Json value
  */
@@ -97,26 +94,36 @@ class Interpreter2 : public AbstractVisitor
 {
 public:
     /**
-     * @brief Constructs an Interpreter object with the given
-     * @a value as the context for the evaluation of the AST.
-     * @param value JSON document on which the AST will be evaluated
+     * @brief Constructs an Interpreter object.
      */
-    Interpreter2(const Json& value = {});
-    Interpreter2(Json&& value);
+    Interpreter2();
     /**
      * @brief Sets the context of the evaluation.
      * @param value JSON document to be used as the context.
      */
-    void setContext(const Json& value);
+    template <typename JsonT>
+    std::enable_if_t<std::is_same<std::decay_t<JsonT>, Json>::value, void>
+    setContext(JsonT&& value)
+    {
+        m_context = assignContextValue(std::forward<JsonT>(value));
+    }
     /**
      * @brief Returns the current evaluation context.
      * @return JSON document used as the context.
      */
-    Json currentContext() const;    
+    const Json &currentContext() const
+    {
+        return getJsonValue(m_context);
+    }
     /**
-     * @brief Stores the evaluation context.
+     * @brief Returns the current evaluation context which can either hold a
+     * value or a const reference.
+     * @return ContextValue used as the context.
      */
-    ContextValue m_context2;
+    ContextValue &currentContextValue()
+    {
+        return m_context;
+    }
     /**
      * @brief Evaluates the projection of the given @a expression on the current
      * context.
@@ -149,6 +156,54 @@ public:
     void visit(const ast::FilterExpressionNode* node) override;
     void visit(const ast::FunctionExpressionNode* node) override;
     void visit(const ast::ExpressionArgumentNode*) override;
+
+private:
+    /**
+     * Type of the arguments in FunctionArgumentList.
+     */
+    using FunctionArgument
+        = boost::variant<boost::blank, ContextValue, ast::ExpressionNode>;
+    /**
+     * List of FunctionArgument objects.
+     */
+    using FunctionArgumentList = std::vector<FunctionArgument>;
+    /**
+     * Function wrapper type to which JMESPath built in function implementations
+     * should conform to.
+     */
+    using Function = std::function<void(FunctionArgumentList&)>;
+    /**
+     * The type of comparator functions used for comparing JSON values.
+     */
+    using JsonComparator = std::function<bool(const Json&, const Json&)>;
+    /**
+     * Function argument arity validator predicate.
+     */
+    using ArgumentArityValidator = std::function<bool(const size_t&)>;
+    /**
+     * Describes a built in function implementation. The tuple's first item
+     * is the comparator function used for comparing the actual number
+     * of arguments with the expected argument count, the second item marks
+     * whether the funciton needs a single ContextValue or more, while the third
+     * item stores the callable functions wrapper.
+     */
+    using FunctionDescriptor = std::tuple<ArgumentArityValidator,
+                                          bool,
+                                          Function>;
+    /**
+     * List of unevaluated function arguments.
+     */
+    using FunctionExpressionArgumentList
+        = std::vector<ast::FunctionExpressionNode::ArgumentType>;    
+    /**
+     * @brief Stores the evaluation context.
+     */
+    ContextValue m_context;
+    /**
+     * @brief Maps the JMESPath built in function names to their
+     * implementations.
+     */
+    std::unordered_map<String, FunctionDescriptor> m_functionMap;
     /**
      * @brief Visits the given @a node with the evaluation @a context.
      * @param node Pointer to the node.
@@ -170,54 +225,6 @@ public:
     template <typename JsonT>
     void visit(const ast::FilterExpressionNode* node, JsonT&& context);
     /** @}*/
-
-private:
-    template <typename NodeT, typename VistorT>
-    friend class ContextValueVisitorAdaptor;
-    /**
-     * Type of the arguments in FunctionArgumentList.
-     */
-    using FunctionArgument
-        = boost::variant<boost::blank, Json, ast::ExpressionNode>;
-    /**
-     * List of FunctionArgument objects.
-     */
-    using FunctionArgumentList = std::vector<FunctionArgument>;
-    /**
-     * Function wrapper type to which JMESPath built in function implementations
-     * should conform to.
-     */
-    using Function = std::function<void(FunctionArgumentList&)>;
-    /**
-     * The type of comparator functions used for comparing JSON values.
-     */
-    using JsonComparator = std::function<bool(const Json&, const Json&)>;
-    /**
-     * Function argument arity validator predicate.
-     */
-    using ArgumentArityValidator = std::function<bool(const size_t&)>;
-    /**
-     * Describes a built in function implementation. The tuple's first item
-     * stores the number of arguments expected by the function, the second
-     * item is the comparator function used for comparing the actual number
-     * of arguments with the expected argument count, while the third item
-     * stores the callable functions wrapper.
-     */
-    using FunctionDescriptor = std::pair<ArgumentArityValidator, Function>;
-    /**
-     * List of unevaluated function arguments.
-     */
-    using FunctionExpressionArgumentList
-        = std::vector<ast::FunctionExpressionNode::ArgumentType>;
-    /**
-     * @brief Stores the evaluation context.
-     */
-    Json m_context;
-    /**
-     * @brief Maps the JMESPath built in function names to their
-     * implementations.
-     */
-    std::unordered_map<String, FunctionDescriptor> m_functionMap;    
     /**
      * @brief Adjust the value of the slice endpoint to make sure it's within
      * the array's bounds and points to the correct item.
@@ -268,7 +275,24 @@ private:
      * built in functions.
      */
     FunctionArgumentList evaluateArguments(
-            const FunctionExpressionArgumentList& arguments);
+            const FunctionExpressionArgumentList& arguments,
+            const std::shared_ptr<ContextValue> &contextValue);
+    /**
+     * @brief Converts the given function @a argument to the requsted type.
+     * @param argument A funciton argument value.
+     * @tparam T The to which the @a argument should be converted.
+     * @return The value held by the funciton @a argument.
+     * @throws InvalidFunctionArgumentType
+     */
+    template <typename T>
+    T& getArgument(FunctionArgument& argument) const;
+    /**
+     * @brief Creates a reference to the Json value held by the @a argument.
+     * @param argument A funciton argument value.
+     * @return Rreference to the Json value held by the @a argument.
+     * @throws InvalidFunctionArgumentType
+     */
+    const Json& getJsonArgument(FunctionArgument& argument) const;
     /**
      * @brief Calculates the absolute value of the first item in the given list
      * of @a arguments. The first item must be a number JSON value.
@@ -345,6 +369,16 @@ private:
      */
     void map(FunctionArgumentList& arguments);
     /**
+     * @brief Applies the expression provided in @a node to every item in the
+     * @a array.
+     * @param node Pointer to the expresson node.
+     * @param array Either an lvalue or rvalue reference to a Json array.
+     * @tparam JsonT The type of the @a array.
+     * @throws InvalidFunctionArgumentType
+     */
+    template <typename JsonT>
+    void map(const ast::ExpressionNode* node, JsonT&& array);
+    /**
      * @brief Accepts zero or more objects in the given @a arguments, and
      * returns a single object with subsequent objects merged. Each subsequent
      * object’s key/value pairs are added to the preceding object.
@@ -352,6 +386,15 @@ private:
      * @throws InvalidFunctionArgumentType
      */
     void merge(FunctionArgumentList& arguments);
+    /**
+     * @brief Merges the items of the @a sourceObject into @a object.
+     * @param object The object into which the items of the @a sourceObject
+     * should be added.
+     * @param sourceObject ither an lvalue or rvalue reference to a Json object.
+     * @tparam JsonT JsonT The type of the @a sourceObject.
+     */
+    template <typename JsonT>
+    void mergeObject(Json* object, JsonT&& sourceObject);
     /**
      * @brief Accepts one or more items in @a arguments, and will evaluate them
      * in order until a non null argument is encounted.
@@ -367,12 +410,26 @@ private:
      */
     void reverse(FunctionArgumentList& arguments);
     /**
+     * @brief Reverses the order of the @a subject. It must either be
+     * an array or a string.
+     * @param subject A JSON array or string.
+     * @throws InvalidFunctionArgumentType
+     */
+    void reverse(Json&& subject);
+    /**
      * @brief Sorts the first item in the given @a arguments, which must either
      * be an array of numbers or an array of strings.
      * @param arguments The list of the function's arguments.
      * @throws InvalidFunctionArgumentType
      */
     void sort(FunctionArgumentList& arguments);
+    /**
+     * @brief Sorts the @a array, which must either be an array of numbers or
+     * an array of strings.
+     * @param array A JSON array of number or strings.
+     * @throws InvalidFunctionArgumentType
+     */
+    void sort(Json&& array);
     /**
      * @brief Sorts the first item in the given @a arguments, which must either
      * be an array of numbers or an array of strings. It uses the expression
@@ -381,6 +438,15 @@ private:
      * @throws InvalidFunctionArgumentType
      */
     void sortBy(FunctionArgumentList& arguments);
+    /**
+     * @brief Sorts the @a array, which must either be an array of numbers or
+     * an array of strings. It uses the @a expression as the sort key.
+     * @param expression The expression which evaluates to the key that should
+     * be used for comparisons during sorting.
+     * @param array A Json array of numbers or strings.
+     * @throws InvalidFunctionArgumentType
+     */
+    void sortBy(const ast::ExpressionNode* expression, Json&& array);
     /**
      * @brief Checks wheather the string provided as the first item in @a
      * arguments starts with the string provided as the second item in @a
@@ -404,12 +470,28 @@ private:
      */
     void toArray(FunctionArgumentList& arguments);
     /**
-     * @brief Returns the JSON encoded value of the first item in the given
-     * @a arguments as a string if it's not already a string.
+     * @brief Converts the given @a value to a one element array if it's not
+     * already an array.
+     * @param value A Json value.
+     * @tparam JsonT The type of the @a value.
+     */
+    template <typename JsonT>
+    void toArray(JsonT&& value);
+    /**
+     * @brief Converts the first item of the given @a arguments to the JSON
+     * encoded value if it's not already a string.
      * @param arguments The list of the function's arguments.
      * @throws InvalidFunctionArgumentType
      */
     void toString(FunctionArgumentList& arguments);
+    /**
+     * @brief Converts the given @a value to the JSON encoded value if it's not
+     * already a string.
+     * @param value A Json value.
+     * @tparam JsonT The type of the @a value.
+     */
+    template <typename JsonT>
+    void toString(JsonT&& value);
     /**
      * @brief Converts the string provided as the first item in the given
      * @a arguments to a number. If it's already a number then the original
@@ -418,6 +500,14 @@ private:
      * @throws InvalidFunctionArgumentType
      */
     void toNumber(FunctionArgumentList& arguments);
+    /**
+     * @brief Converts the @a value to a number if it's not already a number,
+     * all other JSON types are converted to null.
+     * @param value A Json value.
+     * @tparam JsonT The type of the @a value.
+     */
+    template <typename JsonT>
+    void toNumber(JsonT&& value);
     /**
      * @brief Returns the type of the JSON value provided as the first item in
      * @a arguments.
@@ -433,6 +523,14 @@ private:
      */
     void values(FunctionArgumentList& arguments);
     /**
+     * @brief Extracts the values from the @a object.
+     * @param object A Json object.
+     * @tparam JsonT The type of @a object.
+     * @throws InvalidFunctionArgumentType
+     */
+    template <typename JsonT>
+    void values(JsonT&& object);
+    /**
      * @brief Finds the largest item in the array provided as the first item
      * in the @a arguments, it must either be an array of numbers or an array
      * of strings.
@@ -443,6 +541,18 @@ private:
      * @throws InvalidFunctionArgumentType
      */
     void max(FunctionArgumentList& arguments, const JsonComparator& comparator);
+    /**
+     * @brief Finds the largest item in the @a array, it must either be an array
+     * of numbers or an array of strings.
+     * @param comparator The comparator function used for comparing JSON values.
+     * It should return true if its first argument is less then its second
+     * argument.
+     * @param array A Json array.
+     * @tparam JsonT The type of @a array.
+     * @throws InvalidFunctionArgumentType
+     */
+    template <typename JsonT>
+    void max(const JsonComparator* comparator, JsonT&& array);
     /**
      * @brief Finds the largest item in the array provided as the first item
      * in the @a arguments, which must either be an array of numbers or an array
@@ -456,6 +566,23 @@ private:
      */
     void maxBy(FunctionArgumentList& arguments,
                const JsonComparator& comparator = std::less<Json>{});
+    /**
+     * @brief Finds the largest item in the @a array, which must either be an
+     * array of numbers or an array of strings, using the @a  expression as a
+     * key for comparison.
+     * @param expression The expression which evaluates to the key that should
+     * be used for comparisons.
+     * @param comparator The comparator function used for comparing JSON values.
+     * It should return true if its first argument is less then its second
+     * argument.
+     * @param array A Json array.
+     * @tparam JsonT The type of the @a array.
+     * @throws InvalidFunctionArgumentType
+     */
+    template <typename JsonT>
+    void maxBy(const ast::ExpressionNode* expression,
+               const JsonComparator* comparator,
+               JsonT&& array);
     /**
      * @brief Checks whether @a array is a homogeneous array which contains
      * comparable types like strings and numbers.

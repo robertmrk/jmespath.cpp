@@ -30,16 +30,12 @@
 #include "jmespath/interpreter/interpreter2.h"
 #include "jmespath/exceptions.h"
 #include "jmespath/ast/identifiernode.h"
+#include <boost/variant.hpp>
+#include <boost/hana.hpp>
 
-
-class Interpreter2Stub : public jmespath::interpreter::Interpreter2
-{
-public:
-    virtual void visit(const jmespath::ast::IdentifierNode *node,
-                       const jmespath::Json& context) {}
-    virtual void visit(const jmespath::ast::IdentifierNode *node,
-                       jmespath::Json&& context) {}
-};
+template <typename VisitorT, bool ForceMove = false>
+using AdaptorType
+    = jmespath::interpreter::ContextValueVisitorAdaptor<VisitorT, ForceMove>;
 
 TEST_CASE("ContextValueVisitorAdaptor")
 {
@@ -47,64 +43,206 @@ TEST_CASE("ContextValueVisitorAdaptor")
     using namespace jmespath::ast;
     using namespace jmespath::interpreter;
     using namespace fakeit;
-    using AdaptorType = ContextValueVisitorAdaptor<IdentifierNode,
-                                                   Interpreter2Stub>;
 
-    SECTION("can be constructed with visito and node")
+    SECTION("can be constructed with visitor")
     {
-        Interpreter2Stub visitor;
-        IdentifierNode node {"identifier"};
+        auto visitor = boost::hana::overload(
+            [](const Json&){},
+            [](Json&){}
+        );
 
-        REQUIRE_NOTHROW(AdaptorType(&visitor, &node));
+        REQUIRE_NOTHROW(AdaptorType<decltype(visitor)>(std::move(visitor)));
     }
 
-    SECTION("can't be constructed with nullptr visitor")
+    SECTION("calls visitor with rvalue ref of Json value in ContextValue")
     {
-        IdentifierNode node {"identifier"};
+        bool jsonFunctionCalled = false;
+        auto visitor = boost::hana::overload(
+            [](const Json&){},
+            [&](Json&&){
+                jsonFunctionCalled = true;
+            }
+        );
+        AdaptorType<decltype(visitor)> adaptor(std::move(visitor));
+        ContextValue contextValue {Json{}};
+        REQUIRE(contextValue.which() == 0);
 
-        REQUIRE_THROWS_AS(AdaptorType(nullptr, &node), InvalidAgrument);
+        boost::apply_visitor(adaptor, contextValue);
+
+        REQUIRE(jsonFunctionCalled);
     }
 
-    SECTION("can't be constructed with nullptr node")
+    SECTION("calls visitor with lvalue ref of Json reference in ContextValue")
     {
-        Interpreter2Stub visitor;
-
-        REQUIRE_THROWS_AS(AdaptorType(&visitor, nullptr), InvalidAgrument);
-    }
-
-    SECTION("calls visit method of visitor with node and json lvalue ref")
-    {
-        Json value{"value"};
+        bool jsonRefFunctionCalled = false;
+        auto visitor = boost::hana::overload(
+            [&](const Json&){
+                jsonRefFunctionCalled = true;
+            },
+            [](Json&&){}
+        );
+        AdaptorType<decltype(visitor)> adaptor(std::move(visitor));
+        Json value;
         ContextValue contextValue{std::cref(value)};
+        REQUIRE(contextValue.which() == 1);
+
+       boost::apply_visitor(adaptor, contextValue);
+
+       REQUIRE(jsonRefFunctionCalled);
+    }
+
+    SECTION("calls visitor with rvalue ref of the copy of value held in "
+            "ContextValue")
+    {
+        bool jsonFunctionCalled = false;
+        auto visitor = boost::hana::overload(
+            [](const Json&){},
+            [&](Json&&){
+                jsonFunctionCalled = true;
+            }
+        );
+        AdaptorType<decltype(visitor), true> adaptor(std::move(visitor));
+        Json value;
+        ContextValue contextValue{std::cref(value)};
+        REQUIRE(contextValue.which() == 1);
+
+       boost::apply_visitor(adaptor, contextValue);
+
+       REQUIRE(jsonFunctionCalled);
+    }
+}
+
+namespace {
+class VisitorStub
+{
+public:
+    virtual ~VisitorStub() {}
+    virtual void visit(const jmespath::ast::IdentifierNode *node,
+                       const jmespath::Json& context) {}
+    virtual void visit(const jmespath::ast::IdentifierNode *node,
+                       jmespath::Json&& context) {}
+};
+}
+
+TEST_CASE("makeVisitor")
+{
+    using namespace jmespath;
+    using namespace jmespath::ast;
+    using namespace jmespath::interpreter;
+    using namespace fakeit;
+
+    SECTION("creates ContextValue visitor from member functions and call "
+            "function taking lvalue ref if called with Json reference")
+    {
         IdentifierNode node{"identifier"};
-        Mock<Interpreter2Stub> visitor;
+        Mock<VisitorStub> visitor;
         When(OverloadedMethod(visitor, visit, void(const IdentifierNode*,
                                                    const Json&)))
                 .AlwaysReturn();
+        When(OverloadedMethod(visitor, visit, void(const IdentifierNode*,
+                                                   Json&&)))
+                .AlwaysReturn();
+        const IdentifierNode* nodePtr = &node;
+        Json value;
+        ContextValue contextValue{std::cref(value)};
 
-        boost::apply_visitor(AdaptorType(&visitor.get(), &node), contextValue);
+        auto adaptor = makeVisitor(&visitor.get(),
+                                   &VisitorStub::visit,
+                                   &VisitorStub::visit,
+                                   nodePtr);
+        boost::apply_visitor(adaptor, contextValue);
 
         Verify(OverloadedMethod(visitor, visit,
                                 void(const IdentifierNode*, const Json&))
-               .Using(&node, boost::get<JsonRef>(contextValue).get()))
+               .Using(&node, value))
                 .Once();
         VerifyNoOtherInvocations(visitor);
     }
 
-    SECTION("calls visit method of visitor with node and json rvalue ref")
+    SECTION("creates ContextValue visitor from member functions and call "
+            "function taking rvalue ref if called with Json value")
     {
-        ContextValue contextValue{Json{"value"}};
         IdentifierNode node{"identifier"};
-        Mock<Interpreter2Stub> visitor;
+        Mock<VisitorStub> visitor;
+        When(OverloadedMethod(visitor, visit, void(const IdentifierNode*,
+                                                   const Json&)))
+                .AlwaysReturn();
         When(OverloadedMethod(visitor, visit, void(const IdentifierNode*,
                                                    Json&&)))
                 .AlwaysReturn();
+        const IdentifierNode* nodePtr = &node;
+        Json value;
+        ContextValue contextValue{std::move(value)};
 
-        boost::apply_visitor(AdaptorType(&visitor.get(), &node), contextValue);
+        auto adaptor = makeVisitor(&visitor.get(),
+                                   &VisitorStub::visit,
+                                   &VisitorStub::visit,
+                                   nodePtr);
+        boost::apply_visitor(adaptor, contextValue);
 
         Verify(OverloadedMethod(visitor, visit,
                                 void(const IdentifierNode*, Json&&))
-               .Using(&node, std::move(boost::get<Json&>(contextValue))))
+               .Using(&node, std::move(boost::get<Json>(contextValue))))
+                .Once();
+        VerifyNoOtherInvocations(visitor);
+    }
+}
+
+TEST_CASE("makeMoveOnlyVisitor")
+{
+    using namespace jmespath;
+    using namespace jmespath::ast;
+    using namespace jmespath::interpreter;
+    using namespace fakeit;
+
+    SECTION("creates ContextValue visitor from member functions and call "
+            "function taking rvalue ref if called with Json reference")
+    {
+        IdentifierNode node{"identifier"};
+        Mock<VisitorStub> visitor;
+        When(OverloadedMethod(visitor, visit, void(const IdentifierNode*,
+                                                   const Json&)))
+                .AlwaysReturn();
+        When(OverloadedMethod(visitor, visit, void(const IdentifierNode*,
+                                                   Json&&)))
+                .AlwaysReturn();
+        const IdentifierNode* nodePtr = &node;
+        Json value;
+        ContextValue contextValue{std::cref(value)};
+
+        auto adaptor = makeMoveOnlyVisitor(&visitor.get(),
+                                           &VisitorStub::visit,
+                                           nodePtr);
+        boost::apply_visitor(adaptor, contextValue);
+
+        Verify(OverloadedMethod(visitor, visit,
+                                void(const IdentifierNode*, Json&&)))
+                .Once();
+        VerifyNoOtherInvocations(visitor);
+    }
+
+    SECTION("creates ContextValue visitor from member functions and call "
+            "function taking rvalue ref if called with Json value")
+    {
+        IdentifierNode node{"identifier"};
+        Mock<VisitorStub> visitor;
+        When(OverloadedMethod(visitor, visit, void(const IdentifierNode*,
+                                                   const Json&)))
+                .AlwaysReturn();
+        When(OverloadedMethod(visitor, visit, void(const IdentifierNode*,
+                                                   Json&&)))
+                .AlwaysReturn();
+        const IdentifierNode* nodePtr = &node;
+        Json value;
+        ContextValue contextValue{std::move(value)};
+
+        auto adaptor = makeMoveOnlyVisitor(&visitor.get(),
+                                           &VisitorStub::visit,
+                                           nodePtr);
+        boost::apply_visitor(adaptor, contextValue);
+
+        Verify(OverloadedMethod(visitor, visit,
+                                void(const IdentifierNode*, Json&&)))
                 .Once();
         VerifyNoOtherInvocations(visitor);
     }
