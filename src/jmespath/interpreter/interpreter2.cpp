@@ -1186,7 +1186,7 @@ void Interpreter2::reverse(FunctionArgumentList &arguments)
 
     // create a visitor which will reverse the argument if it's an rvalue
     // or create a copy of it's argument and reverse the copy
-    static auto visitor = makeMoveOnlyVisitor(this, &Interpreter2::reverse);
+    auto visitor = makeMoveOnlyVisitor(this, &Interpreter2::reverse);
     boost::apply_visitor(visitor, contextValue);
 }
 
@@ -1217,7 +1217,7 @@ void Interpreter2::sort(FunctionArgumentList &arguments)
 
     // create a visitor which will sort the argument if it's an rvalue
     // or create a copy of it's argument and sort the copy
-    static auto visitor = makeMoveOnlyVisitor(this, &Interpreter2::sort);
+    auto visitor = makeMoveOnlyVisitor(this, &Interpreter2::sort);
     boost::apply_visitor(visitor, contextValue);
 }
 
@@ -1365,9 +1365,9 @@ void Interpreter2::toArray(FunctionArgumentList &arguments)
 
     // evaluate the toArray function with either const lvalue ref to the
     // argument or as an rvalue ref
-    static auto visitor = makeVisitor(this,
-                                      &Interpreter2::toArray<const Json&>,
-                                      &Interpreter2::toArray<Json&&>);
+    auto visitor = makeVisitor(this,
+                               &Interpreter2::toArray<const Json&>,
+                               &Interpreter2::toArray<Json&&>);
     boost::apply_visitor(visitor, contextValue);
 }
 
@@ -1396,9 +1396,9 @@ void Interpreter2::toString(FunctionArgumentList &arguments)
 
     // evaluate the toString function with either const lvalue ref to the
     // argument or as an rvalue ref
-    static auto visitor = makeVisitor(this,
-                                      &Interpreter2::toString<const Json&>,
-                                      &Interpreter2::toString<Json&&>);
+    auto visitor = makeVisitor(this,
+                               &Interpreter2::toString<const Json&>,
+                               &Interpreter2::toString<Json&&>);
     boost::apply_visitor(visitor, contextValue);
 }
 
@@ -1424,9 +1424,9 @@ void Interpreter2::toNumber(FunctionArgumentList &arguments)
 
     // evaluate the toNumber function with either const lvalue ref to the
     // argument or as an rvalue ref
-    static auto visitor = makeVisitor(this,
-                                      &Interpreter2::toNumber<const Json&>,
-                                      &Interpreter2::toNumber<Json&&>);
+    auto visitor = makeVisitor(this,
+                               &Interpreter2::toNumber<const Json&>,
+                               &Interpreter2::toNumber<Json&&>);
     boost::apply_visitor(visitor, contextValue);
 }
 
@@ -1490,9 +1490,9 @@ void Interpreter2::values(FunctionArgumentList &arguments)
 
     // evaluate the values function with either const lvalue ref to the array
     // or as an rvalue ref
-    static auto visitor = makeVisitor(this,
-                                      &Interpreter2::values<const Json&>,
-                                      &Interpreter2::values<Json&&>);
+    auto visitor = makeVisitor(this,
+                               &Interpreter2::values<const Json&>,
+                               &Interpreter2::values<Json&&>);
     boost::apply_visitor(visitor, contextValue);
 }
 
