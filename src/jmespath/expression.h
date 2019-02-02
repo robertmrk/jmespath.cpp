@@ -44,7 +44,6 @@ class ExpressionNode;
  */
 class Expression
 {
-    friend Json search(const Expression&, const Json&);
 public:
     /**
      * @brief Constructs an empty Expression object.
@@ -132,6 +131,16 @@ public:
      * otherwise returns false.
      */
     bool isEmpty() const;
+    /**
+     * @brief Returns a pointer to the root expression in the abstract syntax
+     * tree.
+     * @return A pointer to the root expression or nullptr if the object is
+     * empty.
+     */
+    const ast::ExpressionNode* astRoot() const
+    {
+        return m_astRoot.get();
+    }
 
 private:
     /**
