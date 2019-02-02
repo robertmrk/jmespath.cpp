@@ -47,7 +47,12 @@ namespace jmespath {
  * @param document Input JSON document
  * @return Result of the evaluation of the \a expression in JSON format
  */
-Json search(const Expression& expression,
-            const Json& document);
+template <typename JsonT>
+std::enable_if_t<std::is_same<std::decay_t<JsonT>, Json>::value, Json>
+search(const Expression& expression, JsonT&& document);
+
+extern template Json search<const Json&>(const Expression&, const Json&);
+extern template Json search<Json&>(const Expression&, Json&);
+extern template Json search<Json>(const Expression&, Json&&);
 } // namespace jmespath
 #endif // JMESPATH_H

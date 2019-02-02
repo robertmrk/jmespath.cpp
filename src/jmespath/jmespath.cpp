@@ -26,13 +26,17 @@
 **
 ****************************************************************************/
 #include "jmespath/jmespath.h"
-#include "jmespath/interpreter/interpreter.h"
+#include "jmespath/interpreter/interpreter2.h"
+#include <boost/hana.hpp>
 
 namespace jmespath {
 
-Json search(const Expression &expression, const Json &document)
+template <typename JsonT>
+std::enable_if_t<std::is_same<std::decay_t<JsonT>, Json>::value, Json>
+search(const Expression &expression, JsonT&& document)
 {
-    using interpreter::Interpreter;
+    using interpreter::Interpreter2;
+    using interpreter::JsonRef;
 
     if (expression.isEmpty())
     {
@@ -40,13 +44,32 @@ Json search(const Expression &expression, const Json &document)
     }
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wexit-time-destructors"
-    static Interpreter s_interpreter;
-#pragma clang diagnostic pop
-    s_interpreter.setContext(document);
+    static Interpreter2 s_interpreter;
+    s_interpreter.setContext(std::forward<JsonT>(document));
     // evaluate the expression by calling visit with the root of the AST
-    s_interpreter.visit(expression.m_astRoot.get());
+    s_interpreter.visit(expression.astRoot());
 
-    // return the current evaluation context as the result
-    return s_interpreter.currentContext();
+    // copy the context value from the interpreter if it's a reference or move
+    // it into the local result variable if it's a value, and return the result
+    // of the function by value. this approach leaves open the possibility for
+    // the compiler to use copy elision to optimize away any further copies or
+    // moves
+    Json result;
+    static auto visitor = boost::hana::overload(
+        [&result](const JsonRef& value) mutable {
+            result = value.get();
+        },
+        [&result](Json& value) mutable {
+            result = std::move(value);
+        }
+    );
+#pragma clang diagnostic pop
+    boost::apply_visitor(visitor, s_interpreter.currentContextValue());
+    return result;
 }
+
+// explicit instantion
+template Json search<const Json&>(const Expression&, const Json&);
+template Json search<Json&>(const Expression&, Json&);
+template Json search<Json>(const Expression&, Json&&);
 } // namespace jmespath

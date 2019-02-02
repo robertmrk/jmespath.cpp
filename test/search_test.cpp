@@ -39,7 +39,7 @@ TEST_CASE("Search function")
         REQUIRE(result.is_null());
     }
 
-    SECTION("evaluates expression")
+    SECTION("evaluates expression on lvalue const ref")
     {
         String identifier{"identifier"};
         String value{"value"};
@@ -49,7 +49,37 @@ TEST_CASE("Search function")
         REQUIRE(document.is_object());
         REQUIRE(expectedResult.is_string());
 
-        auto result = search(expression, document);
+        auto result = search(expression, static_cast<const Json&>(document));
+
+        REQUIRE(result == expectedResult);
+    }
+
+    SECTION("evaluates expression on lvalue ref")
+    {
+        String identifier{"identifier"};
+        String value{"value"};
+        Json document{{identifier, value}};
+        String expression = identifier;
+        Json expectedResult = value;
+        REQUIRE(document.is_object());
+        REQUIRE(expectedResult.is_string());
+
+        auto result = search(expression, static_cast<Json&>(document));
+
+        REQUIRE(result == expectedResult);
+    }
+
+    SECTION("evaluates expression on rvalue ref")
+    {
+        String identifier{"identifier"};
+        String value{"value"};
+        Json document{{identifier, value}};
+        String expression = identifier;
+        Json expectedResult = value;
+        REQUIRE(document.is_object());
+        REQUIRE(expectedResult.is_string());
+
+        auto result = search(expression, std::move(document));
 
         REQUIRE(result == expectedResult);
     }
