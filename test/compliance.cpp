@@ -71,6 +71,18 @@ protected:
                         testError(expression, Json{document}, *errorIt);
                     }
                 }
+                auto benchIt = testCase.find("bench");
+                if (benchIt != testCase.cend())
+                {
+                    if (!passRvalue)
+                    {
+                        testBench(expression, document, *benchIt);
+                    }
+                    else
+                    {
+                        testBench(expression, Json{document}, *benchIt);
+                    }
+                }
             }
         }
     }
@@ -134,6 +146,43 @@ protected:
         {
             REQUIRE_THROWS_AS(search(expression, std::forward<JsonT>(document)),
                               UnknownFunction);
+        }
+    }
+
+    template <typename JsonT>
+    void testBench(const std::string& expression,
+                    JsonT&& document,
+                    const std::string& benchType) const
+    {
+        if (benchType == "full")
+        {
+            Json result;
+            try
+            {
+                result = search(expression, std::forward<JsonT>(document));
+                SUCCEED();
+            }
+            catch(std::exception& exc)
+            {
+                FAIL("Exception: " + String(exc.what())
+                     + "\nExpression: " + expression
+                     + "\nBenchmark type: " + benchType
+                     + "\nResult: " + result.dump());
+            }
+        }
+        else if (benchType == "parse")
+        {
+            try
+            {
+                Expression parsedExpression{expression};
+                SUCCEED();
+            }
+            catch(std::exception& exc)
+            {
+                FAIL("Exception: " + String(exc.what())
+                     + "\nExpression: " + expression
+                     + "\nBenchmark type: " + benchType);
+            }
         }
     }
 
@@ -244,6 +293,12 @@ TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Wildcard lvalue",
     executeFeatureTest("wildcard");
 }
 
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Benchmarks lvalue",
+                 "[benchmarks][lvalue]")
+{
+    executeFeatureTest("benchmarks");
+}
+
 TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Identifiers rvalue",
                  "[identifiers][rvalue]")
 {
@@ -333,4 +388,10 @@ TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Wildcard rvalue",
                  "[wildcard][rvalue]")
 {
     executeFeatureTest("wildcard", true);
+}
+
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Benchmarks rvalue",
+                 "[benchmarks][rvalue]")
+{
+    executeFeatureTest("benchmarks", true);
 }
