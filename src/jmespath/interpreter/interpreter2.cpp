@@ -536,6 +536,17 @@ void Interpreter2::visit(const ast::ComparatorExpressionNode *node)
     visit(&node->leftExpression);
     // move the left side results into a temporary variable
     ContextValue leftResultContext {std::move(m_context)};
+    // if the context of the comparator expression holds a value but the
+    // evaluation of the left side expression resulted in a const lvalue
+    // ref then make a copy of the result, to avoid referring to a value that
+    // can get potentially destroyed while evaluating the right side expression
+    auto visitor = boost::hana::overload(
+        [&leftResultContext](Json&, const JsonRef& leftResult) {
+            leftResultContext = leftResult.get();
+        },
+        [](auto, auto) {}
+    );
+    boost::apply_visitor(visitor, contextValue, leftResultContext);
     const Json& leftResult = getJsonValue(leftResultContext);
 
     // set the context for the right side expression

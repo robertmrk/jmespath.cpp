@@ -1358,6 +1358,24 @@ TEST_CASE("Interpreter2")
         REQUIRE_THROWS_AS(interpreter.visit(&node), InvalidAgrument);
     }
 
+    SECTION("evaluates comparator expression with rvalue referring to the same "
+            "value on both sides")
+    {
+        ast::ComparatorExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"key"}},
+            ast::ComparatorExpressionNode::Comparator::Equal,
+            ast::ExpressionNode{
+                ast::IdentifierNode{"key"}}};
+        auto context = "{\"key\": \"value\"}"_json;
+        interpreter.setContext(std::move(context));
+
+        interpreter.visit(&node);
+        Json result = interpreter.currentContext();
+
+        REQUIRE(result == true);
+    }
+
     SECTION("evaluates or expression")
     {
         ast::OrExpressionNode node{
