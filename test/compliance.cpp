@@ -28,6 +28,7 @@
 #define CATCH_CONFIG_MAIN
 #include "fakeit.hpp"
 #include "jmespath/jmespath.h"
+#include "jmespath/interpreter/interpreter2.h"
 #include <fstream>
 
 using namespace jmespath;
@@ -56,7 +57,7 @@ protected:
                     }
                     else
                     {
-                        testResult(expression, Json{document}, *resultIt);
+                        testResult(expression, Json(document), *resultIt);
                     }
                 }
                 auto errorIt = testCase.find("error");
@@ -68,7 +69,7 @@ protected:
                     }
                     else
                     {
-                        testError(expression, Json{document}, *errorIt);
+                        testError(expression, Json(document), *errorIt);
                     }
                 }
                 auto benchIt = testCase.find("bench");
@@ -80,7 +81,7 @@ protected:
                     }
                     else
                     {
-                        testBench(expression, Json{document}, *benchIt);
+                        testBench(expression, Json(document), *benchIt);
                     }
                 }
             }

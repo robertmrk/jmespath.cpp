@@ -118,7 +118,9 @@ TEST_CASE("assignContextValue")
     SECTION("moves Json rvalue")
     {
         Json jsonValue {{"key", "value"}};
-        Json expectedValue {jsonValue};
+        Json expectedValue(jsonValue);
+        REQUIRE(jsonValue.type() == Json::value_t::object);
+        REQUIRE(expectedValue == jsonValue);
         ContextValue contextValue;
 
         contextValue = assignContextValue(std::move(jsonValue));
@@ -192,7 +194,7 @@ TEST_CASE("Interpreter2")
     SECTION("can set context with Json rvalue")
     {
         auto context = "\"value\""_json;
-        auto expected = Json{context};
+        auto expected = Json(context);
         interpreter.setContext(std::move(context));
 
         REQUIRE(interpreter.currentContext() == expected);
@@ -531,7 +533,7 @@ TEST_CASE("Interpreter2")
     SECTION("evaluates flatten operator on lvalue ref")
     {
         Json context = "[1, 2, [3], [4, [5, 6, 7], 8], [9, 10] ]"_json;
-        Json contextCopy{context};
+        Json contextCopy(context);
         interpreter.setContext(context);
         Json expectedResult = "[1, 2, 3, 4, [5, 6, 7], 8, 9, 10]"_json;
         ast::FlattenOperatorNode flattenNode;
@@ -601,7 +603,7 @@ TEST_CASE("Interpreter2")
     SECTION("evaluates slice expression on rvalue")
     {
         Json context = "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]"_json;
-        interpreter.setContext(Json{context});
+        interpreter.setContext(std::move(context));
         ast::SliceExpressionNode sliceNode{Index{2}, Index{5}};
         Json expectedResult = "[2, 3, 4]"_json;
 
@@ -722,7 +724,7 @@ TEST_CASE("Interpreter2")
         Json context = "{\"a\": 1, \"b\":2, \"c\":3}"_json;
         Json values(Json::value_t::array);
         rng::copy(context, std::back_inserter(values));
-        interpreter.setContext(Json{context});
+        interpreter.setContext(std::move(context));
         ast::HashWildcardNode node;
 
         interpreter.visit(&node);

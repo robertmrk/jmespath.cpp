@@ -64,7 +64,7 @@ public:
     std::enable_if_t<std::is_same<T, JsonRef>::value && ForceMove, void>
     operator()(const T& value)
     {
-        m_visitor(Json{value.get()});
+        m_visitor(Json(value.get()));
     }
 
     /**
