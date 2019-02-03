@@ -55,7 +55,7 @@ search(const Expression &expression, JsonT&& document)
     // the compiler to use copy elision to optimize away any further copies or
     // moves
     Json result;
-    static auto visitor = boost::hana::overload(
+    auto visitor = boost::hana::overload(
         [&result](const JsonRef& value) mutable {
             result = value.get();
         },
