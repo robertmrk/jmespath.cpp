@@ -163,4 +163,11 @@ TEST_CASE("Expression")
 
         REQUIRE(exp.isEmpty());
     }
+
+    SECTION("return valid pointer for astRoot")
+    {
+        Expression exp;
+
+        REQUIRE_FALSE(exp.astRoot() == nullptr);
+    }
 }

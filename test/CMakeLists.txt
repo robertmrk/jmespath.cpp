@@ -14,7 +14,7 @@ add_executable(${JMESPATH_UNITTEST_TARGET_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/identifiernode_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rawstringnode_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/variantnode_test.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/interpreter_test.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/interpreter_test2.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/variantvisitoradaptor_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/subexpressionnode_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/literalnode_test.cpp
@@ -46,7 +46,8 @@ add_executable(${JMESPATH_UNITTEST_TARGET_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/leftedgeiterator_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/appendutf8action_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/appendescapesequenceaction_test.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/encodesurrogatepairaction_test.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/encodesurrogatepairaction_test.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/contextvaluevisitoradaptor_test.cpp)
 target_link_libraries(${JMESPATH_UNITTEST_TARGET_NAME}
     ${JMESPATH_TARGET_NAME} Catch2)
 target_link_libraries(${JMESPATH_UNITTEST_TARGET_NAME}

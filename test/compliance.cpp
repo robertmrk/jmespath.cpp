@@ -28,19 +28,19 @@
 #define CATCH_CONFIG_MAIN
 #include "fakeit.hpp"
 #include "jmespath/jmespath.h"
+#include "jmespath/interpreter/interpreter2.h"
 #include <fstream>
 
 using namespace jmespath;
 
 class ComplianceTestFixture
 {
-public:
-
 protected:
-    void executeFeatureTest(const std::string& featureName) const
+    void executeFeatureTest(const std::string& featureName,
+                            bool passRvalue = false) const
     {
         Json testSuites = readTestSuites(featureName + ".json");
-        for (const auto& testSuite: testSuites)
+        for (auto& testSuite: testSuites)
         {
             const Json& document = testSuite["given"];
             const Json& testCases = testSuite["cases"];
@@ -51,25 +51,52 @@ protected:
                 auto resultIt = testCase.find("result");
                 if (resultIt != testCase.cend())
                 {
-                    testResult(expression, document, *resultIt);
+                    if (!passRvalue)
+                    {
+                        testResult(expression, document, *resultIt);
+                    }
+                    else
+                    {
+                        testResult(expression, Json(document), *resultIt);
+                    }
                 }
                 auto errorIt = testCase.find("error");
                 if (errorIt != testCase.cend())
                 {
-                    testError(expression, document, *errorIt);
+                    if (!passRvalue)
+                    {
+                        testError(expression, document, *errorIt);
+                    }
+                    else
+                    {
+                        testError(expression, Json(document), *errorIt);
+                    }
+                }
+                auto benchIt = testCase.find("bench");
+                if (benchIt != testCase.cend())
+                {
+                    if (!passRvalue)
+                    {
+                        testBench(expression, document, *benchIt);
+                    }
+                    else
+                    {
+                        testBench(expression, Json(document), *benchIt);
+                    }
                 }
             }
         }
     }
 
+    template <typename JsonT>
     void testResult(const std::string& expression,
-                    const Json& document,
+                    JsonT&& document,
                     const Json& expectedResult) const
     {
         Json result;
         try
         {
-            result = search(expression, document);
+            result = search(expression, std::forward<JsonT>(document));
         }
         catch(std::exception& exc)
         {
@@ -91,34 +118,72 @@ protected:
         }
     }
 
+    template <typename JsonT>
     void testError(const std::string& expression,
-                   const Json& document,
+                   JsonT&& document,
                    const std::string& expectedError) const
     {
         if (expectedError == "syntax")
         {
-            REQUIRE_THROWS_AS(search(expression, document),
+            REQUIRE_THROWS_AS(search(expression, std::forward<JsonT>(document)),
                               SyntaxError);
         }
         else if (expectedError == "invalid-value")
         {
-            REQUIRE_THROWS_AS(search(expression, document),
+            REQUIRE_THROWS_AS(search(expression, std::forward<JsonT>(document)),
                               InvalidValue);
         }
         else if (expectedError == "invalid-type")
         {
-            REQUIRE_THROWS_AS(search(expression, document),
+            REQUIRE_THROWS_AS(search(expression, std::forward<JsonT>(document)),
                               InvalidFunctionArgumentType);
         }
         else if (expectedError == "invalid-arity")
         {
-            REQUIRE_THROWS_AS(search(expression, document),
+            REQUIRE_THROWS_AS(search(expression, std::forward<JsonT>(document)),
                               InvalidFunctionArgumentArity);
         }
         else if (expectedError == "unknown-function")
         {
-            REQUIRE_THROWS_AS(search(expression, document),
+            REQUIRE_THROWS_AS(search(expression, std::forward<JsonT>(document)),
                               UnknownFunction);
+        }
+    }
+
+    template <typename JsonT>
+    void testBench(const std::string& expression,
+                    JsonT&& document,
+                    const std::string& benchType) const
+    {
+        if (benchType == "full")
+        {
+            Json result;
+            try
+            {
+                result = search(expression, std::forward<JsonT>(document));
+                SUCCEED();
+            }
+            catch(std::exception& exc)
+            {
+                FAIL("Exception: " + String(exc.what())
+                     + "\nExpression: " + expression
+                     + "\nBenchmark type: " + benchType
+                     + "\nResult: " + result.dump());
+            }
+        }
+        else if (benchType == "parse")
+        {
+            try
+            {
+                Expression parsedExpression{expression};
+                SUCCEED();
+            }
+            catch(std::exception& exc)
+            {
+                FAIL("Exception: " + String(exc.what())
+                     + "\nExpression: " + expression
+                     + "\nBenchmark type: " + benchType);
+            }
         }
     }
 
@@ -138,83 +203,196 @@ private:
 };
 const std::string ComplianceTestFixture::s_relativePath{"compliance_tests"};
 
-TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Identifiers",
-                 "[identifiers]")
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Identifiers lvalue",
+                 "[identifiers][lvalue]")
 {
     executeFeatureTest("identifiers");
 }
 
-TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Literals", "[literals]")
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Literals lvalue",
+                 "[literals][lvalue]")
 {
     executeFeatureTest("literal");
 }
 
-TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Basic expressions",
-                 "[basic]")
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Basic expressions lvalue",
+                 "[basic][lvalue]")
 {
     executeFeatureTest("basic");
 }
 
-TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Boolean expressions",
-                 "[boolean]")
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Boolean expressions lvalue",
+                 "[boolean][lvalue]")
 {
     executeFeatureTest("boolean");
 }
 
-TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Current node", "[current]")
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Current node lvalue",
+                 "[current][lvalue]")
 {
     executeFeatureTest("current");
 }
 
-TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Escapes", "[escape]")
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Escapes lvalue",
+                 "[escape][lvalue]")
 {
     executeFeatureTest("escape");
 }
 
-TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Filters", "[filters]")
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Filters lvalue",
+                 "[filters][lvalue]")
 {
     executeFeatureTest("filters");
 }
 
-TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Functions", "[functions]")
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Functions lvalue",
+                 "[functions][lvalue]")
 {
     executeFeatureTest("functions");
 }
 
-TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Index expressions",
-                 "[indices]")
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Index expressions lvalue",
+                 "[indices][lvalue]")
 {
     executeFeatureTest("indices");
 }
 
-TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Multiselect expressions",
-                 "[multiselect]")
+TEST_CASE_METHOD(ComplianceTestFixture,
+                 "Compliance/Multiselect expressions lvalue",
+                 "[multiselect][lvalue]")
 {
     executeFeatureTest("multiselect");
 }
 
-TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Pipe expressions", "[pipe]")
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Pipe expressions lvalue",
+                 "[pipe][lvalue]")
 {
     executeFeatureTest("pipe");
 }
 
-TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Slice expressions",
-                 "[slice]")
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Slice expressions lvalue",
+                 "[slice][lvalue]")
 {
     executeFeatureTest("slice");
 }
 
-TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Syntax", "[syntax]")
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Syntax lvalue",
+                 "[syntax][lvalue]")
 {
     executeFeatureTest("syntax");
 }
 
-TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Unicode", "[unicode]")
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Unicode lvalue",
+                 "[unicode][lvalue]")
 {
     executeFeatureTest("unicode");
 }
 
-TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Wildcard", "[wildcard]")
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Wildcard lvalue",
+                 "[wildcard][lvalue]")
 {
     executeFeatureTest("wildcard");
+}
+
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Benchmarks lvalue",
+                 "[benchmarks][lvalue]")
+{
+    executeFeatureTest("benchmarks");
+}
+
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Identifiers rvalue",
+                 "[identifiers][rvalue]")
+{
+    executeFeatureTest("identifiers", true);
+}
+
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Literals rvalue",
+                 "[literals][rvalue]")
+{
+    executeFeatureTest("literal", true);
+}
+
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Basic expressions rvalue",
+                 "[basic][rvalue]")
+{
+    executeFeatureTest("basic", true);
+}
+
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Boolean expressions rvalue",
+                 "[boolean][rvalue]")
+{
+    executeFeatureTest("boolean", true);
+}
+
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Current node rvalue",
+                 "[current][rvalue]")
+{
+    executeFeatureTest("current", true);
+}
+
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Escapes rvalue",
+                 "[escape][rvalue]")
+{
+    executeFeatureTest("escape", true);
+}
+
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Filters rvalue",
+                 "[filters][rvalue]")
+{
+    executeFeatureTest("filters", true);
+}
+
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Functions rvalue",
+                 "[functions][rvalue]")
+{
+    executeFeatureTest("functions", true);
+}
+
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Index expressions rvalue",
+                 "[indices][rvalue]")
+{
+    executeFeatureTest("indices", true);
+}
+
+TEST_CASE_METHOD(ComplianceTestFixture,
+                 "Compliance/Multiselect expressions rvalue",
+                 "[multiselect][rvalue]")
+{
+    executeFeatureTest("multiselect", true);
+}
+
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Pipe expressions rvalue",
+                 "[pipe][rvalue]")
+{
+    executeFeatureTest("pipe", true);
+}
+
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Slice expressions rvalue",
+                 "[slice][rvalue]")
+{
+    executeFeatureTest("slice", true);
+}
+
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Syntax rvalue",
+                 "[syntax][rvalue]")
+{
+    executeFeatureTest("syntax", true);
+}
+
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Unicode rvalue",
+                 "[unicode][rvalue]")
+{
+    executeFeatureTest("unicode", true);
+}
+
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Wildcard rvalue",
+                 "[wildcard][rvalue]")
+{
+    executeFeatureTest("wildcard", true);
+}
+
+TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Benchmarks rvalue",
+                 "[benchmarks][rvalue]")
+{
+    executeFeatureTest("benchmarks", true);
 }
