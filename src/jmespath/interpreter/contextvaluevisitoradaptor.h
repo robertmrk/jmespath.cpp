@@ -97,37 +97,20 @@ private:
 
 /**
  * @brief Create visitor object which accepts ast::interpreter::ContextValue
- * objects, and calls @a lvalueRefPtr member function with a const lvalue ref
- * of the Json reference held by the ContextValue or calls the @a rvalueRefPtr
- * member function with an rvalue ref of the Json object held by ContextValue.
- * @param instance A pointer to an object on which the given @a lvalueRefPtr and
- * @a rvalueRefPtr functions should be called.
- * @param lvalueRefPtr A member function pointer taking a const lvalue reference
- * to Json and an arbitary number and type of additional parameters which
- * precede it.
- * @param rvalueRefPtr A member function pointer taking an rvalue reference
- * to Json and an arbitary number and type of additional parameters which
- * precede it.
- * @param args Additional paramters for the @a lvalueRefPtr and @a rvalueRefPtr
- * funcitons which precede the Json reference parameter which should be the last
- * one in the list of parameters.
- * @tparam ClassT The type of object to which the member function pointers
- * belong.
- * @tparam Args The type of the additional member function arguments.
+ * objects, and calls @a lvalueFunc callable with a const lvalue ref of the Json
+ * reference held by the ContextValue or calls the @a rvalueFunc callable with
+ * an rvalue ref of the Json object held by ContextValue.
+ * @param lvalueFunc A callable taking a const lvalue reference to Json.
+ * @param rvalueFunc A callable taking an rvalue reference to Json.
  * @return A visitor object which accepts ast::interpreter::ContextValue objects
  */
-template <typename ClassT, typename... Args>
 inline decltype(auto) makeVisitor(
-    ClassT* instance,
-    void (ClassT::*lvalueRefPtr)(Args..., const Json&),
-    void (ClassT::*rvalueRefPtr)(Args..., Json&&),
-    Args... args)
+    std::function<void(const Json&)> &&lvalueFunc,
+    std::function<void(Json&&)> &&rvalueFunc)
 {
-    using std::placeholders::_1;
-
     auto functions = boost::hana::overload_linearly(
-        std::bind(rvalueRefPtr, instance, args..., _1),
-        std::bind(lvalueRefPtr, instance, args..., _1)
+        std::move(rvalueFunc),
+        std::move(lvalueFunc)
     );
     return ContextValueVisitorAdaptor<decltype(functions)>{
         std::move(functions)
@@ -136,35 +119,19 @@ inline decltype(auto) makeVisitor(
 
 /**
  * @brief Create visitor object which accepts ast::interpreter::ContextValue
- * objects, and calls the @a rvalueRefPtr member function with an rvalue ref
- * of the Json object held by ContextValue or calls it with the rvalue ref of
- * the copy of the object to which the Json reference points in the ContextValue
- * object.
- * @param instance A pointer to an object on which the given @a rvalueRefPtr
- * function should be called.
- * @param rvalueRefPtr A member function pointer taking an rvalue reference
- * to Json and an arbitary number and type of additional parameters which
- * precede it.
- * @param args Additional paramters for the @a rvalueRefPtr funciton which
- * precede the Json reference parameter which should be the last one in the list
- * of parameters.
- * @tparam ClassT The type of object to which the member function pointer
- * belongs.
- * @tparam Args The type of the additional member function arguments.
+ * objects, and calls the @a rvalueFunc callable with an rvalue ref of the Json
+ * object held by the ContextValue or calls it with the rvalue ref of the copy
+ * of the object to which the Json reference points in the ContextValue object.
+ * @param rvalueFunc A callable taking an rvalue reference to Json.
  * @return A visitor object which accepts ast::interpreter::ContextValue objects
  */
-template <typename ClassT, typename... Args>
 inline decltype(auto) makeMoveOnlyVisitor(
-    ClassT* instance,
-    void (ClassT::*rvalueRefPtr)(Args..., Json&&),
-    Args... args)
+        std::function<void(Json&&)> rvalueFunc)
 {
-    using std::placeholders::_1;
-
-    auto function = std::bind(rvalueRefPtr, instance, args..., _1);
-    return ContextValueVisitorAdaptor<decltype(function), true>{
-        std::move(function)
+    auto result = ContextValueVisitorAdaptor<decltype(rvalueFunc), true>{
+        std::move(rvalueFunc)
     };
+    return result;
 }
 }} // namespace jmespath::interpreter
 #endif // CONTEXTVALUEVISITORADAPTOR_H

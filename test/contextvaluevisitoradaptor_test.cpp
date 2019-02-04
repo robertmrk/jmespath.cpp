@@ -32,6 +32,7 @@
 #include "jmespath/ast/identifiernode.h"
 #include <boost/variant.hpp>
 #include <boost/hana.hpp>
+#include <functional>
 
 template <typename VisitorT, bool ForceMove = false>
 using AdaptorType
@@ -134,6 +135,10 @@ TEST_CASE("makeVisitor")
     SECTION("creates ContextValue visitor from member functions and call "
             "function taking lvalue ref if called with Json reference")
     {
+        using std::placeholders::_1;
+        using LvalueType = void(VisitorStub::*)(const IdentifierNode*,
+                                                const Json&);
+        using RvalueType = void(VisitorStub::*)(const IdentifierNode*, Json&&);
         IdentifierNode node{"identifier"};
         Mock<VisitorStub> visitor;
         When(OverloadedMethod(visitor, visit, void(const IdentifierNode*,
@@ -146,10 +151,12 @@ TEST_CASE("makeVisitor")
         Json value;
         ContextValue contextValue{std::cref(value)};
 
-        auto adaptor = makeVisitor(&visitor.get(),
-                                   &VisitorStub::visit,
-                                   &VisitorStub::visit,
-                                   nodePtr);
+        auto adaptor = makeVisitor(
+            std::bind(static_cast<LvalueType>(&VisitorStub::visit),
+                      &visitor.get(), nodePtr, _1),
+            std::bind(static_cast<RvalueType>(&VisitorStub::visit),
+                      &visitor.get(), nodePtr, _1)
+        );
         boost::apply_visitor(adaptor, contextValue);
 
         Verify(OverloadedMethod(visitor, visit,
@@ -162,6 +169,10 @@ TEST_CASE("makeVisitor")
     SECTION("creates ContextValue visitor from member functions and call "
             "function taking rvalue ref if called with Json value")
     {
+        using std::placeholders::_1;
+        using LvalueType = void(VisitorStub::*)(const IdentifierNode*,
+                                                const Json&);
+        using RvalueType = void(VisitorStub::*)(const IdentifierNode*, Json&&);
         IdentifierNode node{"identifier"};
         Mock<VisitorStub> visitor;
         When(OverloadedMethod(visitor, visit, void(const IdentifierNode*,
@@ -174,10 +185,12 @@ TEST_CASE("makeVisitor")
         Json value;
         ContextValue contextValue{std::move(value)};
 
-        auto adaptor = makeVisitor(&visitor.get(),
-                                   &VisitorStub::visit,
-                                   &VisitorStub::visit,
-                                   nodePtr);
+        auto adaptor = makeVisitor(
+            std::bind(static_cast<LvalueType>(&VisitorStub::visit),
+                      &visitor.get(), nodePtr, _1),
+            std::bind(static_cast<RvalueType>(&VisitorStub::visit),
+                      &visitor.get(), nodePtr, _1)
+        );
         boost::apply_visitor(adaptor, contextValue);
 
         Verify(OverloadedMethod(visitor, visit,
@@ -198,6 +211,8 @@ TEST_CASE("makeMoveOnlyVisitor")
     SECTION("creates ContextValue visitor from member functions and call "
             "function taking rvalue ref if called with Json reference")
     {
+        using std::placeholders::_1;
+        using RvalueType = void(VisitorStub::*)(const IdentifierNode*, Json&&);
         IdentifierNode node{"identifier"};
         Mock<VisitorStub> visitor;
         When(OverloadedMethod(visitor, visit, void(const IdentifierNode*,
@@ -207,12 +222,13 @@ TEST_CASE("makeMoveOnlyVisitor")
                                                    Json&&)))
                 .AlwaysReturn();
         const IdentifierNode* nodePtr = &node;
-        Json value;
+        Json value{15};
         ContextValue contextValue{std::cref(value)};
 
-        auto adaptor = makeMoveOnlyVisitor(&visitor.get(),
-                                           &VisitorStub::visit,
-                                           nodePtr);
+        auto adaptor = makeMoveOnlyVisitor(
+            std::bind(static_cast<RvalueType>(&VisitorStub::visit),
+                      &visitor.get(), nodePtr, _1)
+        );
         boost::apply_visitor(adaptor, contextValue);
 
         Verify(OverloadedMethod(visitor, visit,
@@ -224,6 +240,8 @@ TEST_CASE("makeMoveOnlyVisitor")
     SECTION("creates ContextValue visitor from member functions and call "
             "function taking rvalue ref if called with Json value")
     {
+        using std::placeholders::_1;
+        using RvalueType = void(VisitorStub::*)(const IdentifierNode*, Json&&);
         IdentifierNode node{"identifier"};
         Mock<VisitorStub> visitor;
         When(OverloadedMethod(visitor, visit, void(const IdentifierNode*,
@@ -236,9 +254,10 @@ TEST_CASE("makeMoveOnlyVisitor")
         Json value;
         ContextValue contextValue{std::move(value)};
 
-        auto adaptor = makeMoveOnlyVisitor(&visitor.get(),
-                                           &VisitorStub::visit,
-                                           nodePtr);
+        auto adaptor = makeMoveOnlyVisitor(
+            std::bind(static_cast<RvalueType>(&VisitorStub::visit),
+                      &visitor.get(), nodePtr, _1)
+        );
         boost::apply_visitor(adaptor, contextValue);
 
         Verify(OverloadedMethod(visitor, visit,
