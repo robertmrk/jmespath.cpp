@@ -840,8 +840,7 @@ Interpreter2::evaluateArguments(
         // evaluate the current function argument
         auto visitor = boost::hana::overload(
             // evaluate expressions and return their results
-            [&, this](const ast::ExpressionNode& node)
-                    -> FunctionArgument {
+            [&, this](const ast::ExpressionNode& node) -> FunctionArgument {
                 if (contextValue)
                 {
                     const Json& context = getJsonValue(*contextValue);
@@ -849,7 +848,7 @@ Interpreter2::evaluateArguments(
                     m_context = assignContextValue(context);
                 }
                 // evaluate the expression
-                visit(&node);
+                this->visit(&node);
                 // move the result
                 FunctionArgument result{std::move(m_context)};
                 return result;
