@@ -203,9 +203,18 @@ matrix:
       compiler: clang
       addons:
       homebrew:
-        taps: ['nlohmann/json']
-        packages: ['cmake', 'boost', 'nlohmann_json']
+        packages: ['cmake', 'boost']
         update: true
+      before_install:
+        - cd ..
+        - wget https://github.com/nlohmann/json/archive/v3.4.0.tar.gz
+        - tar -xf v3.4.0.tar.gz
+        - cd json-3.4.0
+        - mkdir build
+        - cd build
+        - cmake .. -DJSON_BuildTests=OFF
+        - sudo make install
+        - cd ../../jmespath.cpp
       env: COMPILER=clang++
       env: CMAKE_CXX=clang++
       env: CMAKE_CC=clang
@@ -214,9 +223,18 @@ matrix:
       compiler: clang
       addons:
       homebrew:
-        taps: ['nlohmann/json']
-        packages: ['cmake', 'boost', 'nlohmann_json']
+        packages: ['cmake', 'boost']
         update: true
+      before_install:
+        - cd ..
+        - wget https://github.com/nlohmann/json/archive/v3.4.0.tar.gz
+        - tar -xf v3.4.0.tar.gz
+        - cd json-3.4.0
+        - mkdir build
+        - cd build
+        - cmake .. -DJSON_BuildTests=OFF
+        - sudo make install
+        - cd ../../jmespath.cpp
       env: COMPILER=clang++
       env: CMAKE_CXX=clang++
       env: CMAKE_CC=clang
@@ -225,9 +243,18 @@ matrix:
       compiler: clang
       addons:
       homebrew:
-        taps: ['nlohmann/json']
-        packages: ['cmake', 'boost', 'nlohmann_json']
+        packages: ['cmake', 'boost']
         update: true
+      before_install:
+        - cd ..
+        - wget https://github.com/nlohmann/json/archive/v3.4.0.tar.gz
+        - tar -xf v3.4.0.tar.gz
+        - cd json-3.4.0
+        - mkdir build
+        - cd build
+        - cmake .. -DJSON_BuildTests=OFF
+        - sudo make install
+        - cd ../../jmespath.cpp
       env: COMPILER=clang++
       env: CMAKE_CXX=clang++
       env: CMAKE_CC=clang
