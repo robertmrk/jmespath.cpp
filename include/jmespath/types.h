@@ -31,7 +31,7 @@
 #include <limits>
 #include <boost/regex/pending/unicode_iterator.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
-#include "jmespath/third_party/json/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace jmespath {
 /**
