@@ -36,7 +36,21 @@ add_subdirectory(src)
 add_subdirectory(test)
 add_subdirectory(third_party)
 
-add_library(${JMESPATH_TARGET_NAME} ${JMESPATH_SOURCE_FILES})
+set(JMESPATH_PUBLIC_HEADER_FILES
+    "include/jmespath/jmespath.h"
+    "include/jmespath/expression.h"
+    "include/jmespath/types.h"
+    "include/jmespath/exceptions.h"
+)
+
+list(APPEND JMESPATH_INCLUDE_DIRECTORIES
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>)
+
+add_library(${JMESPATH_TARGET_NAME} ${JMESPATH_PUBLIC_HEADER_FILES}
+    ${JMESPATH_SOURCE_FILES})
+add_library(robertmrk::${JMESPATH_TARGET_NAME} ALIAS ${JMESPATH_TARGET_NAME})
 
 add_dependencies(${JMESPATH_TARGET_NAME}
     ${JMESPATH_SYMLINK_THIRD_PARTY_TARGET_NAME})
@@ -47,6 +61,7 @@ target_include_directories(${JMESPATH_TARGET_NAME} SYSTEM
 set_target_properties(${JMESPATH_TARGET_NAME} PROPERTIES
     CXX_STANDARD 14
     CXX_STANDARD_REQUIRED ON
+    PUBLIC_HEADER "${JMESPATH_PUBLIC_HEADER_FILES}"
     COMPILE_FLAGS ${JMESPATH_COMPILE_FLAGS}
     DEBUG_POSTFIX "d"
     INTERFACE_SYSTEM_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})

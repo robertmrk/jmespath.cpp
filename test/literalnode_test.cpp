@@ -26,8 +26,8 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/ast/literalnode.h"
-#include "jmespath/interpreter/abstractvisitor.h"
+#include "src/ast/literalnode.h"
+#include "src/interpreter/abstractvisitor.h"
 
 TEST_CASE("LiteralNode")
 {

@@ -26,8 +26,8 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/parser/noderank.h"
-#include "jmespath/ast/allnodes.h"
+#include "src/parser/noderank.h"
+#include "src/ast/allnodes.h"
 
 TEST_CASE("nodeRank")
 {

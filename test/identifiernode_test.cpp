@@ -26,8 +26,8 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/ast/identifiernode.h"
-#include "jmespath/interpreter/abstractvisitor.h"
+#include "src/ast/identifiernode.h"
+#include "src/interpreter/abstractvisitor.h"
 
 TEST_CASE("IdentifierNode")
 {

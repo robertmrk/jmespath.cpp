@@ -26,7 +26,7 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/parser/appendutf8action.h"
+#include "src/parser/appendutf8action.h"
 
 TEST_CASE("AppendUtf8Action")
 {

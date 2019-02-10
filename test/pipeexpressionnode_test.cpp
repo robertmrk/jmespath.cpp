@@ -26,8 +26,8 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/ast/allnodes.h"
-#include "jmespath/interpreter/abstractvisitor.h"
+#include "src/ast/allnodes.h"
+#include "src/interpreter/abstractvisitor.h"
 
 TEST_CASE("PipeExpressionNode")
 {

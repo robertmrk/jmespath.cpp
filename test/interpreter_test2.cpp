@@ -26,9 +26,9 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/interpreter/interpreter.h"
-#include "jmespath/interpreter/interpreter2.h"
-#include "jmespath/ast/allnodes.h"
+#include "src/interpreter/interpreter.h"
+#include "src/interpreter/interpreter2.h"
+#include "src/ast/allnodes.h"
 #include "jmespath/exceptions.h"
 #include <fstream>
 #include <chrono>

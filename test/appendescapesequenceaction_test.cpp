@@ -26,7 +26,7 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/parser/appendescapesequenceaction.h"
+#include "src/parser/appendescapesequenceaction.h"
 
 TEST_CASE("AppendEscapeSequenceAction")
 {

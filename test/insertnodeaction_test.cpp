@@ -26,8 +26,8 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/parser/insertnodeaction.h"
-#include "jmespath/ast/allnodes.h"
+#include "src/parser/insertnodeaction.h"
+#include "src/ast/allnodes.h"
 
 
 using ParameterPair = std::pair<jmespath::ast::ExpressionNode,

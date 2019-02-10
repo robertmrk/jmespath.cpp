@@ -26,8 +26,8 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/ast/rawstringnode.h"
-#include "jmespath/interpreter/abstractvisitor.h"
+#include "src/ast/rawstringnode.h"
+#include "src/interpreter/abstractvisitor.h"
 
 TEST_CASE("RawStringNode")
 {

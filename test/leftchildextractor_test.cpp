@@ -27,8 +27,8 @@
 ****************************************************************************/
 #include "fakeit.hpp"
 #include "jmespath/types.h"
-#include "jmespath/parser/leftchildextractor.h"
-#include "jmespath/ast/allnodes.h"
+#include "src/parser/leftchildextractor.h"
+#include "src/ast/allnodes.h"
 
 TEST_CASE("LeftChildExtractor")
 {

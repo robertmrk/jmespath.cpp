@@ -28,7 +28,7 @@
 #define CATCH_CONFIG_MAIN
 #include "fakeit.hpp"
 #include "jmespath/jmespath.h"
-#include "jmespath/interpreter/interpreter2.h"
+#include "src/interpreter/interpreter2.h"
 #include <fstream>
 
 using namespace jmespath;

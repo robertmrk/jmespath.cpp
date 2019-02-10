@@ -26,8 +26,8 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/interpreter/interpreter.h"
-#include "jmespath/ast/allnodes.h"
+#include "src/interpreter/interpreter.h"
+#include "src/ast/allnodes.h"
 #include "jmespath/exceptions.h"
 #include <boost/range/algorithm.hpp>
 
