@@ -26,10 +26,10 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/interpreter/contextvaluevisitoradaptor.h"
-#include "jmespath/interpreter/interpreter2.h"
+#include "src/interpreter/contextvaluevisitoradaptor.h"
+#include "src/interpreter/interpreter2.h"
 #include "jmespath/exceptions.h"
-#include "jmespath/ast/identifiernode.h"
+#include "src/ast/identifiernode.h"
 #include <boost/variant.hpp>
 #include <boost/hana.hpp>
 #include <functional>

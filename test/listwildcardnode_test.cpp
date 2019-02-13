@@ -26,8 +26,8 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/ast/listwildcardnode.h"
-#include "jmespath/interpreter/abstractvisitor.h"
+#include "src/ast/listwildcardnode.h"
+#include "src/interpreter/abstractvisitor.h"
 
 TEST_CASE("ListWildcardNode")
 {

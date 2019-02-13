@@ -26,8 +26,8 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/ast/variantnode.h"
-#include "jmespath/ast/identifiernode.h"
+#include "src/ast/variantnode.h"
+#include "src/ast/identifiernode.h"
 
 TEST_CASE("VariantNode")
 {

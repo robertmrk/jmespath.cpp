@@ -26,7 +26,7 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/ast/allnodes.h"
+#include "src/ast/allnodes.h"
 
 TEST_CASE("FilterExpressionNode")
 {

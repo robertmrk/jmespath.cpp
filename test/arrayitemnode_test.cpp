@@ -26,8 +26,8 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/ast/arrayitemnode.h"
-#include "jmespath/interpreter/abstractvisitor.h"
+#include "src/ast/arrayitemnode.h"
+#include "src/interpreter/abstractvisitor.h"
 
 TEST_CASE("ArrayItemNode")
 {

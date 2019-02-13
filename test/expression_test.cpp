@@ -27,7 +27,7 @@
 ****************************************************************************/
 #include "fakeit.hpp"
 #include "jmespath/expression.h"
-#include "jmespath/ast/allnodes.h"
+#include "src/ast/allnodes.h"
 
 TEST_CASE("Expression")
 {

@@ -26,8 +26,8 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/ast/currentnode.h"
-#include "jmespath/interpreter/abstractvisitor.h"
+#include "src/ast/currentnode.h"
+#include "src/interpreter/abstractvisitor.h"
 
 TEST_CASE("CurrentNode")
 {

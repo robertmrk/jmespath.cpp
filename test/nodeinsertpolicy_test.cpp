@@ -26,8 +26,8 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/parser/nodeinsertpolicy.h"
-#include "jmespath/ast/allnodes.h"
+#include "src/parser/nodeinsertpolicy.h"
+#include "src/ast/allnodes.h"
 
 TEST_CASE("NodeInsertPolicy")
 {

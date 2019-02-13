@@ -26,7 +26,7 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/parser/encodesurrogatepairaction.h"
+#include "src/parser/encodesurrogatepairaction.h"
 
 TEST_CASE("EncodeSurrogatePairAction")
 {

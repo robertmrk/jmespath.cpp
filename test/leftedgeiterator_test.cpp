@@ -26,8 +26,8 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/parser/leftedgeiterator.h"
-#include "jmespath/ast/allnodes.h"
+#include "src/parser/leftedgeiterator.h"
+#include "src/ast/allnodes.h"
 
 TEST_CASE("LeftEdgeIterator")
 {

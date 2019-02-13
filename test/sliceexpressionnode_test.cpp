@@ -26,7 +26,7 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/ast/sliceexpressionnode.h"
+#include "src/ast/sliceexpressionnode.h"
 #include <boost/optional/optional_io.hpp>
 
 TEST_CASE("SliceExpressionNode")

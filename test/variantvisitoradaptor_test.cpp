@@ -26,9 +26,9 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/ast/variantvisitoradaptor.h"
+#include "src/ast/variantvisitoradaptor.h"
 #include "jmespath/exceptions.h"
-#include "jmespath/ast/identifiernode.h"
+#include "src/ast/identifiernode.h"
 
 TEST_CASE("VariantVisitorAdaptor")
 {

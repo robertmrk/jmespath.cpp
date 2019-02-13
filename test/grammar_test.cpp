@@ -26,7 +26,7 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/parser/grammar.h"
+#include "src/parser/grammar.h"
 #include "jmespath/types.h"
 #include <limits>
 #include <boost/spirit/include/qi.hpp>

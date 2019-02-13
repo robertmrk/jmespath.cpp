@@ -28,7 +28,7 @@
 #include "fakeit.hpp"
 #include <boost/spirit/include/qi.hpp>
 #include <boost/phoenix.hpp>
-#include "jmespath/parser/parser.h"
+#include "src/parser/parser.h"
 
 namespace qi = boost::spirit::qi;
 namespace encoding = qi::ascii;

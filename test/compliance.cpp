@@ -28,7 +28,7 @@
 #define CATCH_CONFIG_MAIN
 #include "fakeit.hpp"
 #include "jmespath/jmespath.h"
-#include "jmespath/interpreter/interpreter2.h"
+#include "src/interpreter/interpreter2.h"
 #include <fstream>
 
 using namespace jmespath;
@@ -188,12 +188,12 @@ protected:
     }
 
 private:
-    static const std::string s_relativePath;
+    static const std::string s_absoluteDirPath;
 
     Json readTestSuites(const std::string& fileName) const
     {
         std::ifstream jsonFile;
-        jsonFile.open(s_relativePath + "/" + fileName);
+        jsonFile.open(s_absoluteDirPath + "/" + fileName);
         REQUIRE(jsonFile.is_open());
         Json featureTest;
         jsonFile >> featureTest;
@@ -201,7 +201,9 @@ private:
         return featureTest;
     }
 };
-const std::string ComplianceTestFixture::s_relativePath{"compliance_tests"};
+const std::string ComplianceTestFixture::s_absoluteDirPath{
+    JMESPATH_COMPLIANCETEST_DATA_PATH
+};
 
 TEST_CASE_METHOD(ComplianceTestFixture, "Compliance/Identifiers lvalue",
                  "[identifiers][lvalue]")

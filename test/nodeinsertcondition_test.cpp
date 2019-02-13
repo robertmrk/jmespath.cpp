@@ -26,7 +26,7 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/parser/nodeinsertcondition.h"
+#include "src/parser/nodeinsertcondition.h"
 
 TEST_CASE("NodeInsertCondition")
 {

@@ -7,6 +7,23 @@ install:
     git submodule update
 
     set "BOOST_ROOT=C:\Libraries\boost_1_65_1"
+
+    appveyor DownloadFile https://github.com/nlohmann/json/archive/v3.4.0.zip
+
+    7z x v3.4.0.zip
+
+    cd json-3.4.0
+
+    mkdir build
+
+    cd build
+
+    cmake .. -DJSON_BuildTests=OFF -G"Visual Studio 15 2017"
+
+    cmake --build . --target install
+
+    cd ../..
+
 build_script:
 - cmd: >-
     mkdir build
@@ -16,6 +33,9 @@ build_script:
     cmake -Wno-dev -G"Visual Studio 15 2017" ..
 
     cmake --build . --config Release
+
+    cmake --build . --target install --config Release
+
 test_script:
 - cmd: >-
     cd test

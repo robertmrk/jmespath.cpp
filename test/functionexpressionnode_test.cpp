@@ -26,9 +26,9 @@
 **
 ****************************************************************************/
 #include "fakeit.hpp"
-#include "jmespath/ast/functionexpressionnode.h"
-#include "jmespath/ast/allnodes.h"
-#include "jmespath/interpreter/abstractvisitor.h"
+#include "src/ast/functionexpressionnode.h"
+#include "src/ast/allnodes.h"
+#include "src/interpreter/abstractvisitor.h"
 
 namespace jmespath { namespace ast {
 

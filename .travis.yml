@@ -15,6 +15,14 @@ matrix:
         - wget http://sourceforge.net/projects/boost/files/boost/1.65.1/boost_1_65_1.tar.bz2/download -O boost.tar.bz2
         - tar -xjf boost.tar.bz2
         - export BOOST_ROOT=$PWD/boost_1_65_1
+        - wget https://github.com/nlohmann/json/archive/v3.4.0.tar.gz
+        - tar -xf v3.4.0.tar.gz
+        - cd json-3.4.0
+        - mkdir build
+        - cd build
+        - cmake .. -DJSON_BuildTests=OFF
+        - sudo make install
+        - cd ../..
         - export CMAKE_CXX=g++-5
         - export CMAKE_CC=gcc-5
         - cd jmespath.cpp
@@ -30,6 +38,14 @@ matrix:
         - wget http://sourceforge.net/projects/boost/files/boost/1.65.1/boost_1_65_1.tar.bz2/download -O boost.tar.bz2
         - tar -xjf boost.tar.bz2
         - export BOOST_ROOT=$PWD/boost_1_65_1
+        - wget https://github.com/nlohmann/json/archive/v3.4.0.tar.gz
+        - tar -xf v3.4.0.tar.gz
+        - cd json-3.4.0
+        - mkdir build
+        - cd build
+        - cmake .. -DJSON_BuildTests=OFF
+        - sudo make install
+        - cd ../..
         - export CMAKE_CXX=g++-6
         - export CMAKE_CC=gcc-6
         - cd jmespath.cpp
@@ -45,6 +61,14 @@ matrix:
         - wget http://sourceforge.net/projects/boost/files/boost/1.65.1/boost_1_65_1.tar.bz2/download -O boost.tar.bz2
         - tar -xjf boost.tar.bz2
         - export BOOST_ROOT=$PWD/boost_1_65_1
+        - wget https://github.com/nlohmann/json/archive/v3.4.0.tar.gz
+        - tar -xf v3.4.0.tar.gz
+        - cd json-3.4.0
+        - mkdir build
+        - cd build
+        - cmake .. -DJSON_BuildTests=OFF
+        - sudo make install
+        - cd ../..
         - export CMAKE_CXX=g++-7
         - export CMAKE_CC=gcc-7
         - cd jmespath.cpp
@@ -70,6 +94,14 @@ matrix:
         - wget http://sourceforge.net/projects/boost/files/boost/1.65.1/boost_1_65_1.tar.bz2/download -O boost.tar.bz2
         - tar -xjf boost.tar.bz2
         - export BOOST_ROOT=$PWD/boost_1_65_1
+        - wget https://github.com/nlohmann/json/archive/v3.4.0.tar.gz
+        - tar -xf v3.4.0.tar.gz
+        - cd json-3.4.0
+        - mkdir build
+        - cd build
+        - cmake .. -DJSON_BuildTests=OFF
+        - sudo make install
+        - cd ../..
         - export CMAKE_CXX=g++-8
         - export CMAKE_CC=gcc-8
         - cd jmespath.cpp
@@ -85,6 +117,14 @@ matrix:
         - wget http://sourceforge.net/projects/boost/files/boost/1.65.1/boost_1_65_1.tar.bz2/download -O boost.tar.bz2
         - tar -xjf boost.tar.bz2
         - export BOOST_ROOT=$PWD/boost_1_65_1
+        - wget https://github.com/nlohmann/json/archive/v3.4.0.tar.gz
+        - tar -xf v3.4.0.tar.gz
+        - cd json-3.4.0
+        - mkdir build
+        - cd build
+        - cmake .. -DJSON_BuildTests=OFF
+        - sudo make install
+        - cd ../..
         - export CMAKE_CXX=clang++-4.0
         - export CMAKE_CC=clang-4.0
         - cd jmespath.cpp
@@ -100,6 +140,14 @@ matrix:
         - wget http://sourceforge.net/projects/boost/files/boost/1.65.1/boost_1_65_1.tar.bz2/download -O boost.tar.bz2
         - tar -xjf boost.tar.bz2
         - export BOOST_ROOT=$PWD/boost_1_65_1
+        - wget https://github.com/nlohmann/json/archive/v3.4.0.tar.gz
+        - tar -xf v3.4.0.tar.gz
+        - cd json-3.4.0
+        - mkdir build
+        - cd build
+        - cmake .. -DJSON_BuildTests=OFF
+        - sudo make install
+        - cd ../..
         - export CMAKE_CXX=clang++-5.0
         - export CMAKE_CC=clang-5.0
         - cd jmespath.cpp
@@ -115,6 +163,14 @@ matrix:
         - wget http://sourceforge.net/projects/boost/files/boost/1.65.1/boost_1_65_1.tar.bz2/download -O boost.tar.bz2
         - tar -xjf boost.tar.bz2
         - export BOOST_ROOT=$PWD/boost_1_65_1
+        - wget https://github.com/nlohmann/json/archive/v3.4.0.tar.gz
+        - tar -xf v3.4.0.tar.gz
+        - cd json-3.4.0
+        - mkdir build
+        - cd build
+        - cmake .. -DJSON_BuildTests=OFF
+        - sudo make install
+        - cd ../..
         - export CMAKE_CXX=clang++-6.0
         - export CMAKE_CC=clang-6.0
         - cd jmespath.cpp
@@ -130,6 +186,14 @@ matrix:
         - wget http://sourceforge.net/projects/boost/files/boost/1.65.1/boost_1_65_1.tar.bz2/download -O boost.tar.bz2
         - tar -xjf boost.tar.bz2
         - export BOOST_ROOT=$PWD/boost_1_65_1
+        - wget https://github.com/nlohmann/json/archive/v3.4.0.tar.gz
+        - tar -xf v3.4.0.tar.gz
+        - cd json-3.4.0
+        - mkdir build
+        - cd build
+        - cmake .. -DJSON_BuildTests=OFF
+        - sudo make install
+        - cd ../..
         - export CMAKE_CXX=clang++-7
         - export CMAKE_CC=clang-7
         - cd jmespath.cpp
@@ -141,6 +205,16 @@ matrix:
       homebrew:
         packages: ['cmake', 'boost']
         update: true
+      before_install:
+        - cd ..
+        - wget https://github.com/nlohmann/json/archive/v3.4.0.tar.gz
+        - tar -xf v3.4.0.tar.gz
+        - cd json-3.4.0
+        - mkdir build
+        - cd build
+        - cmake .. -DJSON_BuildTests=OFF
+        - sudo make install
+        - cd ../../jmespath.cpp
       env: COMPILER=clang++
       env: CMAKE_CXX=clang++
       env: CMAKE_CC=clang
@@ -151,6 +225,16 @@ matrix:
       homebrew:
         packages: ['cmake', 'boost']
         update: true
+      before_install:
+        - cd ..
+        - wget https://github.com/nlohmann/json/archive/v3.4.0.tar.gz
+        - tar -xf v3.4.0.tar.gz
+        - cd json-3.4.0
+        - mkdir build
+        - cd build
+        - cmake .. -DJSON_BuildTests=OFF
+        - sudo make install
+        - cd ../../jmespath.cpp
       env: COMPILER=clang++
       env: CMAKE_CXX=clang++
       env: CMAKE_CC=clang
@@ -161,6 +245,16 @@ matrix:
       homebrew:
         packages: ['cmake', 'boost']
         update: true
+      before_install:
+        - cd ..
+        - wget https://github.com/nlohmann/json/archive/v3.4.0.tar.gz
+        - tar -xf v3.4.0.tar.gz
+        - cd json-3.4.0
+        - mkdir build
+        - cd build
+        - cmake .. -DJSON_BuildTests=OFF
+        - sudo make install
+        - cd ../../jmespath.cpp
       env: COMPILER=clang++
       env: CMAKE_CXX=clang++
       env: CMAKE_CC=clang
@@ -176,6 +270,7 @@ script:
   - ./unit
   - ./compliance
   - cd ..
+  - sudo make install
   - cd ../example
   - mkdir build;cd build
   - cmake -DCMAKE_C_COMPILER=$CMAKE_CC -DCMAKE_CXX_COMPILER=$CMAKE_CXX ..
