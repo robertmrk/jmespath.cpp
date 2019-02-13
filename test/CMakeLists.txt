@@ -1,9 +1,22 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.8)
 
+##
+## CONFIGURATION
+##
+# Unit and compliance test confgiuration
 set(JMESPATH_UNITTEST_TARGET_NAME unit)
 set(JMESPATH_COMPLIANCETEST_TARGET_NAME compliance)
 set(JMESPATH_COPY_COMPLIANCETEST_FILES_TARGET_NAME copy_tests)
+set(JMESPATH_COMPLIANCETEST_DATA_PATH
+    "${CMAKE_CURRENT_SOURCE_DIR}/jmespath.test/tests")
+#set(JMESPATH_COMPLIANCETEST_DATA_DIRNAME compliance_tests)
+#set(JMESPATH_COMPLIANCETEST_DATA_PATH
+#    "${CMAKE_CURRENT_BINARY_DIR}/${JMESPATH_COMPLIANCETEST_DATA_DIRNAME}")
 
+##
+## UNIT TEST TARGET
+##
+# create the unit test target
 add_executable(${JMESPATH_UNITTEST_TARGET_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/unit.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/expression_test.cpp
@@ -48,39 +61,33 @@ add_executable(${JMESPATH_UNITTEST_TARGET_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/appendescapesequenceaction_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/encodesurrogatepairaction_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/contextvaluevisitoradaptor_test.cpp)
+# configure the linked libraries
 target_link_libraries(${JMESPATH_UNITTEST_TARGET_NAME}
-    ${JMESPATH_TARGET_NAME} Catch2)
-target_link_libraries(${JMESPATH_UNITTEST_TARGET_NAME}
-    ${JMESPATH_TARGET_NAME} FakeIt)
-target_compile_features(${JMESPATH_UNITTEST_TARGET_NAME} PUBLIC cxx_std_14)
+    ${JMESPATH_TARGET_NAME} Catch2 FakeIt)
+# add the necessary compile and link flags for generating test coverage if
+# the coverage info is enabled
 if (${JMESPATH_COVERAGE_INFO})
     set_target_properties(${JMESPATH_UNITTEST_TARGET_NAME} PROPERTIES
         COMPILE_FLAGS "-fprofile-arcs  -ftest-coverage"
         LINK_FLAGS "-fprofile-arcs  -ftest-coverage -lgcov")
 endif ()
+# create a ctest test for executing the unit test target
 add_test(NAME ${JMESPATH_UNITTEST_TARGET_NAME}
     COMMAND ${JMESPATH_UNITTEST_TARGET_NAME})
 
+##
+## COMPLIANCE TEST TARGET
+##
+# create the unit test target
 add_executable(${JMESPATH_COMPLIANCETEST_TARGET_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/compliance.cpp)
-target_compile_features(${JMESPATH_COMPLIANCETEST_TARGET_NAME} PUBLIC cxx_std_14)
+# set the definition which specifies the location of the test data
+target_compile_definitions(${JMESPATH_COMPLIANCETEST_TARGET_NAME} PRIVATE
+    "JMESPATH_COMPLIANCETEST_DATA_PATH=\"${JMESPATH_COMPLIANCETEST_DATA_PATH}\"")
+# configure the linked libraries
 target_link_libraries(${JMESPATH_COMPLIANCETEST_TARGET_NAME}
-    ${JMESPATH_TARGET_NAME} Catch2)
-target_link_libraries(${JMESPATH_COMPLIANCETEST_TARGET_NAME}
-    ${JMESPATH_TARGET_NAME} FakeIt)
+    ${JMESPATH_TARGET_NAME} Catch2 FakeIt)
+# create a ctest test for executing the unit test target
 add_test(NAME ${JMESPATH_COMPLIANCETEST_TARGET_NAME}
     COMMAND ${JMESPATH_COMPLIANCETEST_TARGET_NAME}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-
-if (UNIX)
-    set(JMESPATH_COPY_COMPLIANCETEST_FILES_OPERATION "create_symlink")
-elseif (WIN32)
-    set(JMESPATH_COPY_COMPLIANCETEST_FILES_OPERATION "copy_directory")
-endif ()
-
-add_custom_target(${JMESPATH_COPY_COMPLIANCETEST_FILES_TARGET_NAME}
-    ${CMAKE_COMMAND} -E ${JMESPATH_COPY_COMPLIANCETEST_FILES_OPERATION}
-    ${CMAKE_CURRENT_SOURCE_DIR}/jmespath.test/tests
-    ${CMAKE_CURRENT_BINARY_DIR}/compliance_tests)
-add_dependencies(${JMESPATH_COMPLIANCETEST_TARGET_NAME}
-    ${JMESPATH_COPY_COMPLIANCETEST_FILES_TARGET_NAME})

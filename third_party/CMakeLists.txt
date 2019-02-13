@@ -1,10 +1,16 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.8)
 
+##
+## FAKEIT IMPORTED LIBRARY TARGET
+##
 add_library(FakeIt INTERFACE IMPORTED GLOBAL)
 set(FAKEIT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/FakeIt)
 set_target_properties(FakeIt PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
     "${FAKEIT_DIR}/include;${FAKEIT_DIR}/config/catch")
 
+##
+## CATCH2 IMPORTED LIBRARY TARGET
+##
 add_library(Catch2 INTERFACE IMPORTED GLOBAL)
 set(CATCH2_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Catch2)
 set_target_properties(Catch2 PROPERTIES INTERFACE_INCLUDE_DIRECTORIES

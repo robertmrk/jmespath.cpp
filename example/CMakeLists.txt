@@ -4,7 +4,5 @@ project(example)
 find_package(jmespath 0.1.0 CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME} main.cpp)
-target_link_libraries(${PROJECT_NAME} robertmrk::jmespath)
-set_target_properties(${PROJECT_NAME} PROPERTIES
-    CXX_STANDARD 14
-    CXX_STANDARD_REQUIRED ON)
+target_link_libraries(${PROJECT_NAME} jmespath::jmespath)
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_14)

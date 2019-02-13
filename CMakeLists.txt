@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.0)
-project(jmespath.cpp VERSION 0.1.0)
+cmake_minimum_required(VERSION 3.8)
+project(jmespath.cpp VERSION 0.1.0 LANGUAGES CXX)
 
 set(JMESPATH_CONAN_BUILD_INFO "${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
 if (EXISTS ${JMESPATH_CONAN_BUILD_INFO})
@@ -7,14 +7,16 @@ if (EXISTS ${JMESPATH_CONAN_BUILD_INFO})
     conan_basic_setup()
 endif()
 
-set(JMESPATH_COVERAGE_INFO OFF CACHE BOOL "Generate code coverage information")
+##
+## CONFIGURATION
+##
+option(JMESPATH_COVERAGE_INFO "Generate code coverage information" OFF)
 set(JMESPATH_PROJECT_NAME ${PROJECT_NAME})
 set(JMESPATH_TARGET_NAME "jmespath")
-set(JMESPATH_INCLUDE_DIR "include")
-set(JMESPATH_LIB_DIR "lib")
-set(JMESPATH_INCLUDE_PREFIX_DIR "${JMESPATH_INCLUDE_DIR}/jmespath")
+SET(JMESPATH_TARGET_NAMESPACE_NAME "${JMESPATH_TARGET_NAME}::")
 set(JMESPATH_REQUIRED_BOOST_VERSION 1.65)
 set(JMESPATH_REQUIRED_JSON_VERSION 3.4.0)
+# set compiler specific flags
 if (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang"))
     set(JMESPATH_COMPILE_FLAGS "-Weverything -Wno-padded \
@@ -29,13 +31,16 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 endif()
 enable_testing()
 
+# find dependencies
 find_package(Boost ${JMESPATH_REQUIRED_BOOST_VERSION} REQUIRED)
 find_package(nlohmann_json ${JMESPATH_REQUIRED_JSON_VERSION} REQUIRED)
 
+# add targets and variables in subdirectories
 add_subdirectory(src)
 add_subdirectory(test)
 add_subdirectory(third_party)
 
+# create the list of public header files
 set(JMESPATH_PUBLIC_HEADER_FILES
     "include/jmespath/jmespath.h"
     "include/jmespath/expression.h"
@@ -43,15 +48,19 @@ set(JMESPATH_PUBLIC_HEADER_FILES
     "include/jmespath/exceptions.h"
 )
 
+# set the include directories
 list(APPEND JMESPATH_INCLUDE_DIRECTORIES
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
 
+##
+## JMESPATH LIBRARY TARGET
+##
 add_library(${JMESPATH_TARGET_NAME} ${JMESPATH_PUBLIC_HEADER_FILES}
     ${JMESPATH_SOURCE_FILES})
-add_library(robertmrk::${JMESPATH_TARGET_NAME} ALIAS ${JMESPATH_TARGET_NAME})
-
+add_library("${JMESPATH_TARGET_NAMESPACE_NAME}${JMESPATH_TARGET_NAME}" ALIAS
+    ${JMESPATH_TARGET_NAME})
 target_include_directories(${JMESPATH_TARGET_NAME}
     PUBLIC ${JMESPATH_INCLUDE_DIRECTORIES})
 set_target_properties(${JMESPATH_TARGET_NAME} PROPERTIES
@@ -69,7 +78,12 @@ if (${JMESPATH_COVERAGE_INFO})
         LINK_FLAGS "-fprofile-arcs  -ftest-coverage -lgcov")
 endif ()
 
+##
+## INSTALL TARGET
+##
 include(CMakePackageConfigHelpers)
+include(GNUInstallDirs)
+# install target configuration
 SET(JMESPATH_PACKAGE_NAME ${JMESPATH_TARGET_NAME})
 SET(JMESPATH_CONFIG_INSTALL_DIR
     "lib/cmake/${JMESPATH_PACKAGE_NAME}")
@@ -79,30 +93,32 @@ SET(JMESPATH_CONFIGVERSION_FILE_NAME
     "${JMESPATH_PACKAGE_NAME}ConfigVersion.cmake")
 SET(JMESPATH_TARGETS_FILE_NAME "${JMESPATH_PACKAGE_NAME}Targets.cmake")
 
-include(GNUInstallDirs)
+# install the jmespath library target
 install(TARGETS ${JMESPATH_TARGET_NAME} EXPORT ${JMESPATH_PACKAGE_NAME}
   LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}/${JMESPATH_PACKAGE_NAME}"
   ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}/${JMESPATH_PACKAGE_NAME}"
   RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}/${JMESPATH_PACKAGE_NAME}"
   INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${JMESPATH_PACKAGE_NAME}"
-  PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${JMESPATH_PACKAGE_NAME}"
+  PUBLIC_HEADER DESTINATION
+  "${CMAKE_INSTALL_INCLUDEDIR}/${JMESPATH_PACKAGE_NAME}"
 )
-
-include(CMakePackageConfigHelpers)
+# generage package version file
 write_basic_package_version_file(
   "${CMAKE_CURRENT_BINARY_DIR}/${JMESPATH_CONFIGVERSION_FILE_NAME}"
   COMPATIBILITY SameMajorVersion
 )
+# generate packe config file
 configure_file("cmake/config.cmake.in"
   "${CMAKE_BINARY_DIR}/${JMESPATH_CONFIG_FILE_NAME}"
   @ONLY
 )
-
+# generate and install package targets file
 install(EXPORT ${JMESPATH_PACKAGE_NAME}
   FILE ${JMESPATH_TARGETS_FILE_NAME}
-  NAMESPACE robertmrk::
+  NAMESPACE ${JMESPATH_TARGET_NAMESPACE_NAME}
   DESTINATION ${JMESPATH_CONFIG_INSTALL_DIR}
 )
+# install package config and version files
 install(FILES
     "${CMAKE_BINARY_DIR}/${JMESPATH_CONFIG_FILE_NAME}"
     "${CMAKE_BINARY_DIR}/${JMESPATH_CONFIGVERSION_FILE_NAME}"
