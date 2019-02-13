@@ -50,4 +50,8 @@ bool BracketSpecifierNode::stopsProjection() const
 {
     return (value.type() == typeid(FlattenOperatorNode));
 }
+
+void BracketSpecifierNode::anchor()
+{
+}
 }} // namespace jmespath::ast

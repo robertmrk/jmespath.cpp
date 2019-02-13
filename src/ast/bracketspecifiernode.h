@@ -72,6 +72,12 @@ public:
      * otherwise returns false.
      */
     bool stopsProjection() const;
+
+private:
+    /**
+     * @brief A virtual function used to pin vtable to a transaltion unit
+     */
+    virtual void anchor();
 };
 }} // namespace jmespath::ast
 

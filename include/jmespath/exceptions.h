@@ -52,36 +52,85 @@ using InfoFunctionName
  * @brief The Exception struct is the common base class for
  * for all the exceptions thrown by the library
  */
-struct Exception : virtual boost::exception, virtual std::exception {};
+struct Exception : virtual boost::exception, virtual std::exception
+{
+private:
+    /**
+     * @brief A virtual function used to pin vtable to a transaltion unit
+     */
+    virtual void anchor();
+};
 /**
  * @brief The SyntaxError struct represents a syntax error in
  * the evaluated expression
  */
-struct SyntaxError : virtual Exception {};
+struct SyntaxError : virtual Exception
+{
+private:
+    /**
+     * @brief A virtual function used to pin vtable to a transaltion unit
+     */
+    virtual void anchor();
+};
 /**
  * @brief The InvalidAgrument struct signals a function call with illegal
  * arguments
  */
-struct InvalidAgrument : virtual Exception {};
+struct InvalidAgrument : virtual Exception
+{
+private:
+    /**
+     * @brief A virtual function used to pin vtable to a transaltion unit
+     */
+    virtual void anchor();
+};
 /**
  * @brief The InvalidValue struct represents an invalid value in the JMESPath
  * expression.
  */
-struct InvalidValue : virtual Exception {};
+struct InvalidValue : virtual Exception
+{
+private:
+    /**
+     * @brief A virtual function used to pin vtable to a transaltion unit
+     */
+    virtual void anchor();
+};
 /**
  * @brief The UnknownFunction struct represents a call to a JMESPath built in
  * function which doesn't exists.
  */
-struct UnknownFunction : virtual Exception {};
+struct UnknownFunction : virtual Exception
+{
+private:
+    /**
+     * @brief A virtual function used to pin vtable to a transaltion unit
+     */
+    virtual void anchor();
+};
 /**
  * @brief The InvalidFunctionArgumentArity struct signals the a JMESPath built
  * in function was called with an unexpected number of arguments.
  */
-struct InvalidFunctionArgumentArity : virtual Exception {};
+struct InvalidFunctionArgumentArity : virtual Exception
+{
+private:
+    /**
+     * @brief A virtual function used to pin vtable to a transaltion unit
+     */
+    virtual void anchor();
+};
 /**
  * @brief The InvalidFunctionArgumentType struct represents a call to a JMESPath
  * built in function with an unexpected type of argument.
  */
-struct InvalidFunctionArgumentType : virtual Exception {};
+struct InvalidFunctionArgumentType : virtual Exception
+{
+private:
+    /**
+     * @brief A virtual function used to pin vtable to a transaltion unit
+     */
+    virtual void anchor();
+};
 } // namespace jmespath
 #endif // EXCEPTIONS_H

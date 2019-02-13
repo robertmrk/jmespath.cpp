@@ -14,6 +14,7 @@ set(JMESPATH_INTERPRETER_SOURCE_DIR ${JMESPATH_SOURCE_DIR}/interpreter)
 list(APPEND JMESPATH_SOURCE_FILES
     ${JMESPATH_SOURCE_DIR}/jmespath.cpp
     ${JMESPATH_SOURCE_DIR}/expression.cpp
+    ${JMESPATH_SOURCE_DIR}/exceptions.cpp
     ${JMESPATH_PARSER_SOURCE_DIR}/grammar.h
     ${JMESPATH_PARSER_SOURCE_DIR}/parser.h
     ${JMESPATH_PARSER_SOURCE_DIR}/noderank.h
@@ -27,6 +28,7 @@ list(APPEND JMESPATH_SOURCE_FILES
     ${JMESPATH_PARSER_SOURCE_DIR}/leftedgeiterator.h
     ${JMESPATH_AST_SOURCE_DIR}/allnodes.h
     ${JMESPATH_AST_SOURCE_DIR}/abstractnode.h
+    ${JMESPATH_AST_SOURCE_DIR}/abstractnode.cpp
     ${JMESPATH_AST_SOURCE_DIR}/binaryexpressionnode.h
     ${JMESPATH_AST_SOURCE_DIR}/binaryexpressionnode.cpp
     ${JMESPATH_AST_SOURCE_DIR}/variantnode.h
@@ -81,6 +83,7 @@ list(APPEND JMESPATH_SOURCE_FILES
     ${JMESPATH_AST_SOURCE_DIR}/expressionargumentnode.h
     ${JMESPATH_AST_SOURCE_DIR}/expressionargumentnode.cpp
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/abstractvisitor.h
+    ${JMESPATH_INTERPRETER_SOURCE_DIR}/abstractvisitor.cpp
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/interpreter2.h
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/interpreter2.cpp
     ${JMESPATH_INTERPRETER_SOURCE_DIR}/contextvaluevisitoradaptor.h)

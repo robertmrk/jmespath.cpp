@@ -56,7 +56,7 @@ public:
     /**
      * @brief Destroys the AbstractNode object.
      */
-    virtual ~AbstractNode() = default;
+    virtual ~AbstractNode();
     /**
      * @brief Copy-assigns the other object to this object.
      * @return Returns a reference to this object.

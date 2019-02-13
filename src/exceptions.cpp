@@ -25,36 +25,35 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "src/ast/allnodes.h"
+#include <jmespath/exceptions.h>
 
-namespace jmespath { namespace ast {
+namespace jmespath {
 
-ExpressionNode::ExpressionNode()
-    : VariantNode()
+void Exception::anchor()
 {
 }
 
-ExpressionNode::~ExpressionNode()
+void SyntaxError::anchor()
 {
 }
 
-ExpressionNode::ExpressionNode(const ValueType &expression)
-    : VariantNode(expression)
+void InvalidAgrument::anchor()
 {
 }
 
-ExpressionNode &ExpressionNode::operator=(const ExpressionNode &other)
+void InvalidValue::anchor()
 {
-    if (this != &other)
-    {
-        value = other.value;
-    }
-    return *this;
 }
 
-ExpressionNode &ExpressionNode::operator=(const ValueType &expression)
+void UnknownFunction::anchor()
 {
-    value = expression;
-    return *this;
 }
-}} // namespace jmespath::ast
+
+void InvalidFunctionArgumentArity::anchor()
+{
+}
+
+void InvalidFunctionArgumentType::anchor()
+{
+}
+} // namespace jmespath

@@ -81,6 +81,10 @@ public:
      */
     ExpressionNode(const ExpressionNode&) = default;
     /**
+     * @brief Destroys the ExpressionNode object.
+     */
+    virtual ~ExpressionNode();
+    /**
      * @brief Constructs an ExpressionNode object with its child expression
      * initialized to \a expression
      * @param expression The node's child expression

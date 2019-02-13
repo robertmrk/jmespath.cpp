@@ -74,7 +74,7 @@ public:
     /**
      * @brief Destroys the AbstractVisitor object.
      */
-    virtual ~AbstractVisitor() = default;
+    virtual ~AbstractVisitor();
     /**
      * @brief Visits the given @a node.
      * @param node Pointer to the node
