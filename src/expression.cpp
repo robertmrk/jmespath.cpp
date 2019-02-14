@@ -51,6 +51,7 @@ Expression& Expression::operator=(const Expression &other)
 {
     if (this != &other)
     {
+        std::lock_guard<std::recursive_mutex> lock(m_mutex);
         m_expressionString = other.m_expressionString;
         *m_astRoot = *other.m_astRoot;
     }
@@ -61,6 +62,7 @@ Expression& Expression::operator=(Expression &&other)
 {
     if (this != &other)
     {
+        std::lock_guard<std::recursive_mutex> lock(m_mutex);
         m_expressionString = std::move(other.m_expressionString);
         m_astRoot = std::move(other.m_astRoot);
     }
@@ -69,30 +71,39 @@ Expression& Expression::operator=(Expression &&other)
 
 String Expression::toString() const
 {
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
     return m_expressionString;
 }
 
 bool Expression::isEmpty() const
 {
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
     return (!m_astRoot || m_astRoot->isNull());
+}
+
+const ast::ExpressionNode *Expression::astRoot() const
+{
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    return m_astRoot.get();
 }
 
 void Expression::parseExpression(const String& expressionString)
 {
-    using ParserType = parser::Parser<parser::Grammar>;
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
     if (!m_astRoot)
     {
         m_astRoot.reset(new ast::ExpressionNode);
     }
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wexit-time-destructors"
-    static ParserType s_parser;
-    *m_astRoot = s_parser.parse(expressionString);
+     thread_local parser::Parser<parser::Grammar> s_parser;
 #pragma clang diagnostic pop
+    *m_astRoot = s_parser.parse(expressionString);
 }
 
 Expression& Expression::operator=(const String& expressionString)
 {
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
     parseExpression(expressionString);
     m_expressionString = expressionString;
     return *this;
@@ -100,6 +111,7 @@ Expression& Expression::operator=(const String& expressionString)
 
 Expression& Expression::operator=(String &&expressionString)
 {
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
     parseExpression(expressionString);
     m_expressionString = std::move(expressionString);
     return *this;
@@ -109,6 +121,7 @@ bool Expression::operator==(const Expression &other) const
 {
     if (this != &other)
     {
+        std::lock_guard<std::recursive_mutex> lock(m_mutex);
         return (m_expressionString == other.m_expressionString)
                 && (*m_astRoot == *other.m_astRoot);
     }

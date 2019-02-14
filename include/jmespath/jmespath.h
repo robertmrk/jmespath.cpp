@@ -46,6 +46,9 @@ namespace jmespath {
  * @param expression JMESPath expression.
  * @param document Input JSON document
  * @return Result of the evaluation of the @a expression in @ref Json format
+ * @note This function is reentrant. Since it takes the @a expression by
+ * reference the value of the @a expression should be protected from changes
+ * until the function returns.
  */
 template <typename JsonT>
 std::enable_if_t<std::is_same<std::decay_t<JsonT>, Json>::value, Json>

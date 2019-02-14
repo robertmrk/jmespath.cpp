@@ -44,7 +44,8 @@ search(const Expression &expression, JsonT&& document)
     }
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wexit-time-destructors"
-    static Interpreter2 s_interpreter;
+    thread_local Interpreter2 s_interpreter;
+#pragma clang diagnostic pop
     s_interpreter.setContext(std::forward<JsonT>(document));
     // evaluate the expression by calling visit with the root of the AST
     s_interpreter.visit(expression.astRoot());
@@ -63,7 +64,6 @@ search(const Expression &expression, JsonT&& document)
             result = std::move(value);
         }
     );
-#pragma clang diagnostic pop
     boost::apply_visitor(visitor, s_interpreter.currentContextValue());
     return result;
 }
