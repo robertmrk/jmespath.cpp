@@ -42,15 +42,15 @@ class VariantVisitorAdaptor : public boost::static_visitor<>
 public:
     /**
      * @brief Constructs a VariantVisitorAdaptor object with the given
-     * \a visitor
-     * @param visitor The visitor object to which the visit calls will be
+     * @a visitor
+     * @param[in] visitor The visitor object to which the visit calls will be
      * forwarded.
      */
     VariantVisitorAdaptor(interpreter::AbstractVisitor* visitor);
     /**
      * @brief Calls the appropriate visit method of the visitor object with the
-     * address of the \a variant object.
-     * @param variant The object that the visitor should visit.
+     * address of the @a variant object.
+     * @param[in] variant The object that the visitor should visit.
      */
     template <typename T>
     void operator() (const T& variant) const

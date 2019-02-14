@@ -86,19 +86,19 @@ public:
     virtual ~ExpressionNode();
     /**
      * @brief Constructs an ExpressionNode object with its child expression
-     * initialized to \a expression
-     * @param expression The node's child expression
+     * initialized to @a expression
+     * @param[in] expression The node's child expression
      */
     ExpressionNode(const ValueType& expression);
     /**
      * @brief Assigns the @a other object to this object.
-     * @param other An ExpressionNode object.
+     * @param[in] other An ExpressionNode object.
      * @return Returns a reference to this object.
      */
     ExpressionNode& operator=(const ExpressionNode& other);
     /**
      * @brief Assigns the @a other Expression to this object's expression.
-     * @param expression An Expression object.
+     * @param[in] expression An Expression object.
      * @return Returns a reference to this object.
      */
     ExpressionNode& operator=(const ValueType& expression);

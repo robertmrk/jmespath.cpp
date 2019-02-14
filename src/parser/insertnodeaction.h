@@ -48,11 +48,11 @@ namespace jmespath { namespace parser {
  * @tparam NodeInserterT Policy type for inserting the a node at the position
  * of the target node into the AST. The functor should have an overloaded
  * function call operator with a signature of
- * void(ast::ExpressionNode* targetNode, T* node) const.
+ * `void(ast::ExpressionNode* targetNode, T* node)` const.
  * @tparam NodeInsertConditionT Policy type for checking whether the passed node
  * can be inserted at the position of the target node. The functor should have
  * an overloaded function call operator with a signature of
- * bool(ast::ExpressionNode* targetNode, T* node) const.
+ * `bool(ast::ExpressionNode* targetNode, T* node)` const.
  */
 template <typename NodeInserterT,
           typename NodeInsertConditionT>
@@ -60,24 +60,23 @@ class InsertNodeAction
 {
 public:
     /**
-     * The action's result type
+     * @brief The action's result type
      */
     using result_type = void;
     /**
      * @brief Inserts the given @a node into the AST whose root node is
      * specified with @a targetNode.
-     * @param targetNode The root node of the AST.
-     * @param node The node which should be inserted.
+     * @param[in] targetNode The root node of the AST.
+     * @param[in] node The node which should be inserted.
      */
     template <typename T>
     void operator()(ast::ExpressionNode& targetNode, T& node) const
     {
+        using std::placeholders::_1;
         LeftEdgeIterator begin(targetNode);
         LeftEdgeIterator end;
-        auto it = std::find_if(begin, end, [&](ast::ExpressionNode& currentNode)
-        {
-            return m_insertCondition(currentNode, node);
-        });
+        auto predicate = std::bind(m_insertCondition, _1, std::ref(node));
+        auto it = std::find_if(begin, end, predicate);
         if (it != end)
         {
             m_nodeInserter(*it, node);
@@ -85,7 +84,15 @@ public:
     }
 
 private:
+    /**
+     * @brief Functor for inserting the a node at the position of the target
+     * node into the AST
+     */
     NodeInserterT m_nodeInserter;
+    /**
+     * @brief Functor for checking whether the passed node can be inserted at
+     * the position of the target node
+     */
     NodeInsertConditionT m_insertCondition;
 };
 }} // namespace jmespath::parser

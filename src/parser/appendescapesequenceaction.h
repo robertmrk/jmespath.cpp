@@ -40,21 +40,21 @@ class AppendEscapeSequenceAction
 {
 public:
     /**
-     * The action's result type
+     * @brief The action's result type
      */
     using result_type = void;
     /**
-     * The type of the escape sequence
+     * @brief The type of the escape sequence
      */
     using escape_type = std::pair<UnicodeChar, UnicodeChar>;
     /**
-    * @brief Append the characters of the \a escapeSequence to the
-    * \a utf8String encoded in UTF-8.
+    * @brief Append the characters of the @a escapeSequence to the
+    * @a utf8String encoded in UTF-8.
     * @details Treat everything as regular characters if the escaped character
     * is not a single quote.
-    * @param utf8String The string where the encoded value of the \a utf32Char
-    * will be appended.
-    * @param escapeSequence The character of the escape sequence encoded
+    * @param[out] utf8String The string where the encoded value of the
+    * @a utf32Char will be appended.
+    * @param[in] escapeSequence The character of the escape sequence encoded
     * in UTF-32
     */
     result_type operator()(String& utf8String,

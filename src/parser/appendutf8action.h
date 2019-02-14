@@ -39,15 +39,15 @@ class AppendUtf8Action
 {
 public:
     /**
-     * The action's result type
+     * @brief The action's result type
      */
     using result_type = void;
     /**
-    * @brief Appends the \a utf32Char character to the \a utf8String encoded in
+    * @brief Appends the @a utf32Char character to the @a utf8String encoded in
     * UTF-8.
-    * @param utf8String The string where the encoded value of the \a utf32Char
-    * will be appended.
-    * @param utf32Char The input character encoded in UTF-32
+    * @param[out] utf8String The string where the encoded value of the
+    * @a utf32Char will be appended.
+    * @param[in] utf32Char The input character encoded in UTF-32
     */
     result_type operator()(String& utf8String,
                            UnicodeChar utf32Char) const

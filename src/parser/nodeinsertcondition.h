@@ -42,16 +42,16 @@ class NodeInsertCondition
 {
 public:
     /**
-     * The result type of the functor.
+     * @brief The result type of the functor.
      */
     using result_type = bool;
 
     /**
      * @brief Returns true or false based on whether the given @a node should be
      * inserted at the location of the @a targetNode.
-     * @param targetNode The node located where the given @a node might be
+     * @param[in] targetNode The node located where the given @a node might be
      * insertable.
-     * @param node The node to test for insertability.
+     * @param[in] node The node to test for insertability.
      * @{
      */
     template <typename T, typename

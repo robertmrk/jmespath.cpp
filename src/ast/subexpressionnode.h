@@ -44,8 +44,8 @@ public:
     /**
      * @brief Constructs an SubexpressionNode object with the given left hand
      * side @a expression and a right hand side @a subexpression.
-     * @param expression The node's left hand side child expression
-     * @param subexpression The node's right hand side child expression
+     * @param[in] expression The node's left hand side child expression
+     * @param[in] subexpression The node's right hand side child expression
      */
     SubexpressionNode(const ExpressionNode& expression,
                       const ExpressionNode& subexpression = {});

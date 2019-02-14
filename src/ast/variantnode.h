@@ -43,8 +43,8 @@ class VariantNode : public AbstractNode
 {
 public:
     /**
-     * The internal variant type which stores the nodes defined in VariantT or
-     * boost::blank if it's empty.
+     * @brief The internal variant type which stores the nodes defined in
+     * VariantT or boost::blank if it's empty.
      */
     using ValueType = boost::variant<boost::blank, VariantT...>;
     /**
@@ -61,7 +61,7 @@ public:
     /**
      * @brief Copy constructs a VariantNode object if T is VariantNode or
      * constructs a VariantNode object with T as the represented node type with
-     * the value given in \a other.
+     * the value given in @a other.
      */
     template <typename T>
     VariantNode(const T& other)
@@ -70,8 +70,8 @@ public:
         *this = other;
     }
     /**
-     * @brief Assigns the \a other object's value to this object
-     * @param other The object whos value should be assigned to this object.
+     * @brief Assigns the @a other object's value to this object
+     * @param[in] other The object whos value should be assigned to this object.
      * @return Returns a reference to this object.
      */
     VariantNode<VariantT...>& operator=(const VariantNode& other)
@@ -83,7 +83,7 @@ public:
         return *this;
     }
     /**
-     * @brief Assigns the value of the \a other object to this object's internal
+     * @brief Assigns the value of the @a other object to this object's internal
      * variant making it the node that this object represents.
      */
     template <typename T>
@@ -93,9 +93,9 @@ public:
         return *this;
     }
     /**
-     * @brief Equality compares this node to the \a other
-     * @param other The node that should be compared.
-     * @return Returns true if this object is equal to the \a other, otherwise
+     * @brief Equality compares this node to the @a other
+     * @param[in] other The node that should be compared.
+     * @return Returns true if this object is equal to the @a other, otherwise
      * false
      */
     bool operator==(const VariantNode& other) const

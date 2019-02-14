@@ -44,7 +44,7 @@ public:
     /**
      * @brief Returns a pointer to the child expression node of the given
      * @a node or nullptr if the @a node doesn't has a suitable child node.
-     * @param node The node whose child node should be extracted.
+     * @param[in] node The node whose child node should be extracted.
      * @{
      */
     ast::ExpressionNode* operator()(ast::ExpressionNode* node) const

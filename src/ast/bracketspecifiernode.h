@@ -56,7 +56,7 @@ public:
     /**
      * @brief Constructs a BracketSpecifierNode object with the given
      * @a expression as its value.
-     * @param expression The node's child expression.
+     * @param[in] expression The node's child expression.
      */
     BracketSpecifierNode(const ValueType& expression);
     /**

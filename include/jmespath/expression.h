@@ -51,13 +51,13 @@ public:
     Expression();
     /**
      * @brief Constructs a copy of @a other.
-     * @param other The object that should be copied.
+     * @param[in] other The object that should be copied.
      */
     Expression(const Expression& other);
     /**
      * @brief Move-constructs an Expression by moving the value of @a other to
      * this object.
-     * @param other The object whose value should be mvoed.
+     * @param[in] other The object whose value should be mvoed.
      */
     Expression(Expression&& other);
     /**
@@ -66,7 +66,7 @@ public:
      * This constructor participates in overload resolution only if U is
      * implicitly convertible to String. @a Argument should describe a
      * valid JMESPath expression.
-     * @param argument The value that should be forwarded.
+     * @param[in] argument The value that should be forwarded.
      * @tparam U The type of @a argument.
      */
     template <typename U, typename
@@ -80,14 +80,14 @@ public:
     /**
      * @brief Assigns @a other to this expression and returns a reference to
      * this expression.
-     * @param other The expression that should be assigned.
+     * @param[in] other The expression that should be assigned.
      * @return Reference to this expression.
      */
     Expression& operator= (const Expression& other);
     /**
      * @brief Move-assigns @a other to this expression and returns a reference
      * to this expression.
-     * @param other The expression that should be moved.
+     * @param[in] other The expression that should be moved.
      * @return Reference to this expression.
      */
     Expression& operator= (Expression&& other);
@@ -96,7 +96,7 @@ public:
      * reference to this expression.
      *
      * @a ExpressionString should describe a valid JMESPath expression.
-     * @param expressionString The string representation of a JMESPath
+     * @param[in] expressionString The string representation of a JMESPath
      * expression.
      * @return Reference to this expression.
      */
@@ -106,22 +106,22 @@ public:
      * reference to this expression.
      *
      * @a ExpressionString should describe a valid JMESPath expression.
-     * @param expressionString The string representation of a JMESPath
+     * @param[in] expressionString The string representation of a JMESPath
      * expression.
      * @return Reference to this expression.
      */
     Expression& operator= (String&& expressionString);
     /**
-     * @brief Equality compares this expression to the \a other.
-     * @param other The expression that should be compared.
-     * @return Returns true if this object is equal to the \a other, otherwise
+     * @brief Equality compares this expression to the @a other.
+     * @param[in] other The expression that should be compared.
+     * @return Returns true if this object is equal to the @a other, otherwise
      * false
      */
     bool operator== (const Expression& other) const;
     /**
      * @brief Converts the expression to the string representation of the
      * JMESPath expression.
-     * @return String representation of the JMESPath expression.
+     * @return[in] String representation of the JMESPath expression.
      */
     String toString() const;
     /**
@@ -134,7 +134,7 @@ public:
     /**
      * @brief Returns a pointer to the root expression in the abstract syntax
      * tree.
-     * @return A pointer to the root expression or nullptr if the object is
+     * @return A pointer to the root expression or `nullptr` if the object is
      * empty.
      */
     const ast::ExpressionNode* astRoot() const
@@ -148,7 +148,7 @@ private:
      * for deleting ast::ExpressionNode objects.
      *
      * Unlike std::default_deleter it can be used to delete forward declared
-     * ast::ExpressionNode.
+     * @ref ast::ExpressionNode.
      */
     struct ExpressionDeleter
     {
@@ -168,7 +168,7 @@ private:
     std::unique_ptr<ast::ExpressionNode, ExpressionDeleter> m_astRoot;
     /**
      * @brief Parses the @a expressionString and updates the AST.
-     * @param expressionString The string representation of the JMESPath
+     * @param[in] expressionString The string representation of the JMESPath
      * expression.
      */
     void parseExpression(const String &expressionString);
@@ -179,7 +179,7 @@ private:
  *
  * This operator implements a user defined string literal for JMESPath
  * expressions. It can be used by appending `"_jmespath"` to a string literal.
- * @param expression The string representation of a JMESPath expression.
+ * @param[in] expression The string representation of a JMESPath expression.
  * @return An Expression object.
  */
 inline Expression operator""_jmespath(const char* expression, std::size_t)

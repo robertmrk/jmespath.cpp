@@ -39,15 +39,15 @@ class NodeInsertPolicy
 {
 public:
     /**
-     * The result type of the functor.
+     * @brief The result type of the functor.
      */
     using result_type = void;
 
     /**
      * @brief Inserts the given @a node into the AST at the location of the
      * @a targetNode.
-     * @param targetNode The node located where @a node should be inserted.
-     * @param node The node that will be inserted.
+     * @param[in] targetNode The node located where @a node should be inserted.
+     * @param[in] node The node that will be inserted.
      * @{
      */
     template <typename T, typename

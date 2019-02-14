@@ -31,6 +31,10 @@
 
 namespace jmespath { namespace ast {
 
+/**
+ * @brief The HashWildcardNode class represents a JMESPath hash wildcard
+ * expression.
+ */
 class HashWildcardNode : public BinaryExpressionNode
 {
 public:
@@ -41,8 +45,8 @@ public:
     /**
      * @brief Constructs a HashWildcardNode object with the given
      * @a leftExpression and @a rightExpression as its children.
-     * @param leftExpression Left hand expression of the node.
-     * @param rightExpression Right hand expression of the node.
+     * @param[in] leftExpression Left hand expression of the node.
+     * @param[in] rightExpression Right hand expression of the node.
      */
     HashWildcardNode(const ExpressionNode& leftExpression,
                      const ExpressionNode& rightExpression);
@@ -60,9 +64,9 @@ public:
      */
     bool stopsProjection() const override;
     /**
-     * @brief Calls the visit method of the given \a visitor with the
+     * @brief Calls the visit method of the given @a visitor with the
      * dynamic type of the node.
-     * @param visitor A visitor implementation
+     * @param[in] visitor A visitor implementation
      */
     void accept(interpreter::AbstractVisitor* visitor) const override;
 };

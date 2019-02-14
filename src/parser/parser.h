@@ -58,8 +58,8 @@ public:
     using ResultType    = typename GrammarType::start_type::attr_type;
 
     /**
-     * @brief Parses the given \a expression
-     * @param expression JMESPath search expression encoded in UTF-8
+     * @brief Parses the given @a expression
+     * @param[in] expression JMESPath search expression encoded in UTF-8
      * @return The result of parsing the expression. The result's type is the
      * same as the attribute type of the start rule in the specified grammar.
      * @throws SyntaxError
@@ -99,6 +99,9 @@ public:
     }
 
 private:
+    /**
+     * @brief Grammar object used for parsing
+     */
     GrammarType m_grammar;
 };
 }} // namespace jmespath::parser

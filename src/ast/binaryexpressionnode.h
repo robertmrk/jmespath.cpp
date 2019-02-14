@@ -46,22 +46,22 @@ public:
     /**
      * @brief Constructs a BinaryExpressionNode object with the given @a leftExpressin
      * and @a rightExpression as its children.
-     * @param left Left hand expression of the node.
-     * @param right hand expression of the node.
+     * @param[in] left Left hand expression of the node.
+     * @param[in] right hand expression of the node.
      */
     BinaryExpressionNode(const ExpressionNode& left,
                          const ExpressionNode& right);
     /**
-     * @brief Equality compares this node to the \a other
-     * @param other The node that should be compared.
-     * @return Returns true if this object is equal to the \a other, otherwise
+     * @brief Equality compares this node to the @a other
+     * @param[in] other The node that should be compared.
+     * @return Returns true if this object is equal to the @a other, otherwise
      * false
      */
     bool operator==(const BinaryExpressionNode& other) const;
     /**
      * @brief Calls the accept method with the given @a visitor as the parameter
      * on the node's child expressions.
-     * @param visitor A visitor implementation.
+     * @param[in] visitor A visitor implementation.
      */
     void accept(interpreter::AbstractVisitor *visitor) const override;
     /**

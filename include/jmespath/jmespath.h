@@ -39,20 +39,26 @@
 namespace jmespath {
 
 /**
- * @brief Finds or creates the results for the \a expression evaluated on the
- * given \a document.
+ * @brief Finds or creates the results for the @a expression evaluated on the
+ * given @a document.
  *
- * The \a searchExpression string should be encoded in UTF-8.
+ * The @a expression string should be encoded in UTF-8.
  * @param expression JMESPath expression.
  * @param document Input JSON document
- * @return Result of the evaluation of the \a expression in JSON format
+ * @return Result of the evaluation of the @a expression in @ref Json format
  */
 template <typename JsonT>
 std::enable_if_t<std::is_same<std::decay_t<JsonT>, Json>::value, Json>
 search(const Expression& expression, JsonT&& document);
 
+/**
+ * @brief Explicit instantiation declaration for @ref search to prevent
+ * implicit instantiation in client code.
+* @{
+*/
 extern template Json search<const Json&>(const Expression&, const Json&);
 extern template Json search<Json&>(const Expression&, Json&);
 extern template Json search<Json>(const Expression&, Json&&);
+/** @}*/
 } // namespace jmespath
 #endif // JMESPATH_H

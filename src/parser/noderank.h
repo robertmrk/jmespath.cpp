@@ -31,50 +31,38 @@
 
 namespace jmespath { namespace parser {
 
-namespace {
-
 /**
  * @brief Returns the rank of the given @a node object's type.
  * @tparam T The type of the @a node object.
  * @return Returns the rank of the node as an integer.
  */
 template <typename T>
-int nodeRank(const T&)
+inline int nodeRank(const T&)
 {
     return 0;
 }
-/**
- * @brief The NodeRankVisitor struct is a functor which returns the rank of a
- * node in a variant
- */
-struct NodeRankVisitor : public boost::static_visitor<>
-{
-    /**
-     * The type of the result.
-     */
-    using result_type = int;
-    /**
-     * Calls the nodeRank function on the given @a node.
-     * @param node The node object that should be ranked.
-     * @tparam T The type of the @a node object.
-     */
-    template <typename T>
-    int operator()(const T& node) const
-    {
-        return nodeRank(node);
-    }
-};
 
+/**
+ * @brief Returns the rank of the node object's type contained in @a variant.
+ * @param[in] variant A variant object containing a @ref ast::AbstractNode
+ * @return Returns the rank of the node as an integer.
+ */
 template <typename... Args>
-int nodeRank(const boost::variant<Args...>& variant)
+inline int nodeRank(const boost::variant<Args...>& variant)
 {
-    return boost::apply_visitor(NodeRankVisitor{}, variant);
+    return boost::apply_visitor([](const auto& node){
+        return nodeRank(node);
+    }, variant);
 }
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunneeded-internal-declaration"
+/**
+ * @brief Returns the rank of the given @a node object's type.
+ * @param[in] node A node object
+ * @return Returns the rank of the node as an integer.
+ * @{
+ */
 template <>
-int nodeRank(const ast::ExpressionNode& node)
+inline int nodeRank(const ast::ExpressionNode& node)
 {
     if(node.isNull())
     {
@@ -85,91 +73,90 @@ int nodeRank(const ast::ExpressionNode& node)
         return nodeRank(node.value);
     }
 }
-#pragma clang diagnostic pop
 
 template <>
-int nodeRank(const ast::SubexpressionNode&)
+inline int nodeRank(const ast::SubexpressionNode&)
 {
     return 1;
 }
 
 template <>
-int nodeRank(const ast::BracketSpecifierNode& node)
+inline int nodeRank(const ast::BracketSpecifierNode& node)
 {
     return nodeRank(node.value);
 }
 
 template <>
-int nodeRank(const ast::IndexExpressionNode& node)
+inline int nodeRank(const ast::IndexExpressionNode& node)
 {
     return nodeRank(node.bracketSpecifier);
 }
 
 template <>
-int nodeRank(const ast::ArrayItemNode&)
+inline int nodeRank(const ast::ArrayItemNode&)
 {
     return 1;
 }
 
 template <>
-int nodeRank(const ast::FlattenOperatorNode&)
+inline int nodeRank(const ast::FlattenOperatorNode&)
 {
     return 2;
 }
 
 template <>
-int nodeRank(const ast::SliceExpressionNode&)
+inline int nodeRank(const ast::SliceExpressionNode&)
 {
     return 2;
 }
 
 template <>
-int nodeRank(const ast::ListWildcardNode&)
+inline int nodeRank(const ast::ListWildcardNode&)
 {
     return 2;
 }
 
 template <>
-int nodeRank(const ast::HashWildcardNode&)
+inline int nodeRank(const ast::HashWildcardNode&)
 {
     return 2;
 }
 
 template <>
-int nodeRank(const ast::FilterExpressionNode&)
+inline int nodeRank(const ast::FilterExpressionNode&)
 {
     return 2;
 }
 
 template <>
-int nodeRank(const ast::NotExpressionNode&)
+inline int nodeRank(const ast::NotExpressionNode&)
 {
     return 3;
 }
 
 template <>
-int nodeRank(const ast::ComparatorExpressionNode&)
+inline int nodeRank(const ast::ComparatorExpressionNode&)
 {
     return 4;
 }
 
 template <>
-int nodeRank(const ast::AndExpressionNode&)
+inline int nodeRank(const ast::AndExpressionNode&)
 {
     return 5;
 }
 
 template <>
-int nodeRank(const ast::OrExpressionNode&)
+inline int nodeRank(const ast::OrExpressionNode&)
 {
     return 6;
 }
 
 template <>
-int nodeRank(const ast::PipeExpressionNode&)
+inline int nodeRank(const ast::PipeExpressionNode&)
 {
     return 7;
 }
-} // anonymous namespace
+/** @} */
 }} // namespace jmespath::parser
 #endif // NODERANK_H

@@ -46,24 +46,24 @@ public:
     /**
      * @brief Constructs an IndexExpressionNode object with the given
      * @a bracketSpecifier and empty left and right expressions.
-     * @param bracketNode The bracket specifier node.
+     * @param[in] bracketNode The bracket specifier node.
      */
     IndexExpressionNode(const BracketSpecifierNode& bracketNode);
     /**
      * @brief Constructs an IndexExpressionNode with given @a expression as its
      * left hand expression, @a subexpression as its right hand expression and
      * with the given @a bracketSpecifier.
-     * @param left The left hand expression of the node.
-     * @param bracketNode The index expression's bracket specifier.
-     * @param right The right hand expression of the node.
+     * @param[in] left The left hand expression of the node.
+     * @param[in] bracketNode The index expression's bracket specifier.
+     * @param[in] right The right hand expression of the node.
      */
     IndexExpressionNode(const ExpressionNode& left,
                         const BracketSpecifierNode& bracketNode,
                         const ExpressionNode& right = {});
     /**
-     * @brief Equality compares this node to the \a other
-     * @param other The node that should be compared.
-     * @return Returns true if this object is equal to the \a other, otherwise
+     * @brief Equality compares this node to the @a other
+     * @param[in] other The node that should be compared.
+     * @return Returns true if this object is equal to the @a other, otherwise
      * false
      */
     bool operator ==(const IndexExpressionNode& other) const;
@@ -81,9 +81,9 @@ public:
      */
     bool stopsProjection() const override;
     /**
-     * @brief Calls the visit method of the given \a visitor with the
+     * @brief Calls the visit method of the given @a visitor with the
      * dynamic type of the node.
-     * @param visitor A visitor implementation
+     * @param[in] visitor A visitor implementation
      */
     void accept(interpreter::AbstractVisitor* visitor) const override;
     /**

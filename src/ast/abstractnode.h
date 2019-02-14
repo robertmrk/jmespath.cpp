@@ -63,12 +63,13 @@ public:
      */
     AbstractNode& operator=(const AbstractNode&) = default;
     /**
-     * @brief Accepts the given \a visitor object.
+     * @brief Accepts the given @a visitor object.
      *
      * Subclasses should implement this function by calling the visit
-     * method of the \a visitor with a pointer to the node object itself
-     * and the accept method of the node's member nodes with the \a visitor as
+     * method of the @a visitor with a pointer to the node object itself
+     * and the accept method of the node's member nodes with the @a visitor as
      * the parameter.
+     * @param[in] visitor An @ref interpreter::AbstractVisitor object
      */
     virtual void accept(interpreter::AbstractVisitor* visitor) const = 0;
 };

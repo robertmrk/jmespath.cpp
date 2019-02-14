@@ -39,13 +39,13 @@ class EncodeSurrogatePairAction
 {
 public:
     /**
-     * The action's result type
+     * @brief The action's result type
      */
     using result_type =  UnicodeChar;
     /**
      * @brief Encodes a surrogate pair character
-     * @param highSurrogate High surrogate
-     * @param lowSurrogate Low surrogate
+     * @param[in] highSurrogate High surrogate
+     * @param[in] lowSurrogate Low surrogate
      * @return The result of @a highSurrogate and @a lowSurrogate combined
      * into a single codepoint
      */

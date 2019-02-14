@@ -36,8 +36,8 @@ namespace jmespath{ namespace interpreter {
 
 /**
  * @brief The ContextValueVisitorAdaptor class adapts a visitor object,
- * which is callable with const lvalue reference of Json and with rvalue
- * reference of Json objects, to ast::interpreter::ContextValue objects.
+ * which is callable with const lvalue reference of @ref Json and with rvalue
+ * reference of @ref Json objects, to @ref ContextValue objects.
  */
 template <typename VisitorT, bool ForceMove = false>
 class ContextValueVisitorAdaptor : public boost::static_visitor<>
@@ -45,9 +45,9 @@ class ContextValueVisitorAdaptor : public boost::static_visitor<>
 public:
     /**
      * @brief Constructs a ContextValueVisitorAdaptor object, adapting the
-     * \a visitor object to be able to consume ContextValue objects.
-     * @param visitor A visitor which is callable with const lvalue reference
-     * of Json and with rvalue reference of Json objects.
+     * @a visitor object to be able to consume @ref ContextValue objects.
+     * @param[in] visitor A visitor which is callable with const lvalue
+     * reference of @ref Json and with rvalue reference of @ref Json objects.
      */
     ContextValueVisitorAdaptor(VisitorT&& visitor)
         : boost::static_visitor<>{},
@@ -57,8 +57,8 @@ public:
 
     /**
      * @brief Calls the visitor object with the rvalue reference of the copy
-     * of the object to which \a value refers to.
-     * @param value A JsonRef value.
+     * of the object to which @a value refers to.
+     * @param[in] value A @ref JsonRef value.
      */
     template <typename T>
     std::enable_if_t<std::is_same<T, JsonRef>::value && ForceMove, void>
@@ -68,9 +68,9 @@ public:
     }
 
     /**
-     * @brief Calls the visitor object with the lvalue reference of the Json
-     * value to which \a value refers to.
-     * @param value A JsonRef value.
+     * @brief Calls the visitor object with the lvalue reference of the
+     * @ref Json value to which @a value refers to.
+     * @param[in] value A @ref JsonRef value.
      */
     template <typename T>
     std::enable_if_t<std::is_same<T, JsonRef>::value && !ForceMove, void>
@@ -80,8 +80,8 @@ public:
     }
 
     /**
-     * @brief Calls the visitor object with the rvalue reference of \a value.
-     * @param value A Json value.
+     * @brief Calls the visitor object with the rvalue reference of @a value.
+     * @param[in] value A @ref Json value.
      */
     void operator()(Json& value)
     {
@@ -96,13 +96,14 @@ private:
 };
 
 /**
- * @brief Create visitor object which accepts ast::interpreter::ContextValue
- * objects, and calls @a lvalueFunc callable with a const lvalue ref of the Json
- * reference held by the ContextValue or calls the @a rvalueFunc callable with
- * an rvalue ref of the Json object held by ContextValue.
- * @param lvalueFunc A callable taking a const lvalue reference to Json.
- * @param rvalueFunc A callable taking an rvalue reference to Json.
- * @return A visitor object which accepts ast::interpreter::ContextValue objects
+ * @brief Create visitor object which accepts @ref ContextValue
+ * objects, and calls @a lvalueFunc callable with a const lvalue ref of the
+ * @ref Json reference held by the @ref ContextValue or calls the @a rvalueFunc
+ * callable with an rvalue ref of the @ref Json object held by
+ * @ref ContextValue.
+ * @param[in] lvalueFunc A callable taking a const lvalue reference to Json.
+ * @param[in] rvalueFunc A callable taking an rvalue reference to Json.
+ * @return A visitor object which accepts @ref ContextValue objects
  */
 inline decltype(auto) makeVisitor(
     std::function<void(const Json&)> &&lvalueFunc,
@@ -118,12 +119,13 @@ inline decltype(auto) makeVisitor(
 }
 
 /**
- * @brief Create visitor object which accepts ast::interpreter::ContextValue
- * objects, and calls the @a rvalueFunc callable with an rvalue ref of the Json
- * object held by the ContextValue or calls it with the rvalue ref of the copy
- * of the object to which the Json reference points in the ContextValue object.
- * @param rvalueFunc A callable taking an rvalue reference to Json.
- * @return A visitor object which accepts ast::interpreter::ContextValue objects
+ * @brief Create visitor object which accepts @ref ContextValue
+ * objects, and calls the @a rvalueFunc callable with an rvalue ref of the
+ * @ref Json object held by the @ref ContextValue or calls it with the rvalue
+ * ref of the copy of the object to which the @ref Json reference points in the
+ * @ref ContextValue object.
+ * @param[in] rvalueFunc A callable taking an rvalue reference to @ref Json.
+ * @return A visitor object which accepts @ref ContextValue objects
  */
 inline decltype(auto) makeMoveOnlyVisitor(
         std::function<void(Json&&)> rvalueFunc)

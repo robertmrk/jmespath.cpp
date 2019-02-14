@@ -55,21 +55,21 @@ public:
     /**
      * @brief Constructs a FunctionExpressionNode object with the given
      * @a function name and list of @a arguments as its arguments
-     * @param name The function's identifier
-     * @param argumentList The function's arguments
+     * @param[in] name The function's identifier
+     * @param[in] argumentList The function's arguments
      */
     FunctionExpressionNode(const String& name,
         const std::initializer_list<ArgumentType>& argumentList = {});
     /**
-     * @brief Calls the visit method of the given \a visitor with the
+     * @brief Calls the visit method of the given @a visitor with the
      * dynamic type of the node.
-     * @param visitor A visitor implementation
+     * @param[in] visitor A visitor implementation
      */
     void accept(interpreter::AbstractVisitor* visitor) const override;
     /**
-     * @brief Equality compares this node to the \a other
-     * @param other The node that should be compared.
-     * @return Returns true if this object is equal to the \a other, otherwise
+     * @brief Equality compares this node to the @a other
+     * @param[in] other The node that should be compared.
+     * @return Returns true if this object is equal to the @a other, otherwise
      * false
      */
     bool operator==(const FunctionExpressionNode& other) const;

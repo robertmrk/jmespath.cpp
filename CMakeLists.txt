@@ -20,7 +20,8 @@ set(JMESPATH_REQUIRED_JSON_VERSION 3.4.0)
 if (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang"))
     set(JMESPATH_COMPILE_FLAGS "-Weverything -Wno-padded \
-        -Wno-c++98-compat-pedantic -Wno-disabled-macro-expansion")
+        -Wno-c++98-compat-pedantic -Wno-disabled-macro-expansion \
+        -Wno-documentation")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     #wd4348 - ingore warning C4348 (A template parameter was redefined.)
     #wd4068 - ingore warning C4068 (The compiler ignored an unrecognized pragma)

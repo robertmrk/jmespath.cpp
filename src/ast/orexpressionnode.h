@@ -45,8 +45,8 @@ public:
     /**
      * @brief Constructs a OrExpressionNode object with the given @a
      * leftExpression and @a rightExpression.
-     * @param leftExpression The node's left hand child expression.
-     * @param rightExpression The node's right hand child expression.
+     * @param[in] leftExpression The node's left hand child expression.
+     * @param[in] rightExpression The node's right hand child expression.
      */
     OrExpressionNode(const ExpressionNode& leftExpression,
                      const ExpressionNode& rightExpression);
@@ -64,9 +64,9 @@ public:
      */
     bool stopsProjection() const override;
     /**
-     * @brief Calls the visit method of the given \a visitor with the
+     * @brief Calls the visit method of the given @a visitor with the
      * dynamic type of the node.
-     * @param visitor A visitor implementation
+     * @param[in] visitor A visitor implementation
      */
     void accept(interpreter::AbstractVisitor* visitor) const override;
 };

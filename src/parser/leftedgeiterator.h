@@ -51,7 +51,7 @@ public:
     }
     /**
      * @brief Constructs a LeftEdgeIterator which points to the given @a node.
-     * @param node The node object where the iterator should point.
+     * @param[in] node The node object where the iterator should point.
      */
     LeftEdgeIterator(ast::ExpressionNode& node)
         : m_node(&node)
@@ -75,7 +75,7 @@ public:
     }
     /**
      * @brief Checks whether this iterator doesn't equals to the @a other.
-     * @param other An iterator object.
+     * @param[in] other An iterator object.
      * @return Returns true if other points to a different node than this
      * iterator, otherwise returns false.
      */

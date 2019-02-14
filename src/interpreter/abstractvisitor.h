@@ -77,7 +77,7 @@ public:
     virtual ~AbstractVisitor();
     /**
      * @brief Visits the given @a node.
-     * @param node Pointer to the node
+     * @param[in] node Pointer to the node
      * @{
      */
     virtual void visit(const ast::AbstractNode* node) = 0;
