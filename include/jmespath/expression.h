@@ -173,5 +173,18 @@ private:
      */
     void parseExpression(const String &expressionString);
 };
+
+/**
+ * @brief User defined string literal for JMESPath expressions
+ *
+ * This operator implements a user defined string literal for JMESPath
+ * expressions. It can be used by appending `"_jmespath"` to a string literal.
+ * @param expression The string representation of a JMESPath expression.
+ * @return An Expression object.
+ */
+inline Expression operator""_jmespath(const char* expression, std::size_t)
+{
+    return {expression};
+}
 } // namespace jmespath
 #endif // EXPRESSION_H

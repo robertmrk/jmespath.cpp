@@ -61,6 +61,13 @@ TEST_CASE("Expression")
         {
             REQUIRE_NOTHROW(Expression{"\"id[5]\""});
         }
+
+        SECTION("with literal")
+        {
+            Expression expr = "id"_jmespath;
+
+            REQUIRE(expr.toString() == "id");
+        }
     }
 
     SECTION("can be copy assigned")
