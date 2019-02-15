@@ -1,12 +1,6 @@
 cmake_minimum_required(VERSION 3.8)
 project(jmespath.cpp VERSION 0.1.0 LANGUAGES CXX)
 
-set(JMESPATH_CONAN_BUILD_INFO "${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
-if (EXISTS ${JMESPATH_CONAN_BUILD_INFO})
-    include(${JMESPATH_CONAN_BUILD_INFO})
-    conan_basic_setup()
-endif()
-
 ##
 ## CONFIGURATION
 ##
