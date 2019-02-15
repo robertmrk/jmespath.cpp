@@ -4,6 +4,7 @@ project(jmespath.cpp VERSION 0.1.0 LANGUAGES CXX)
 ##
 ## CONFIGURATION
 ##
+option(JMESPATH_BUILD_TESTS "Create targets for unit and compliance tests" ON)
 option(JMESPATH_COVERAGE_INFO "Generate code coverage information" OFF)
 set(JMESPATH_PROJECT_NAME ${PROJECT_NAME})
 set(JMESPATH_TARGET_NAME "jmespath")
