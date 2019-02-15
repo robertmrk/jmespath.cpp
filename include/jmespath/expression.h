@@ -28,7 +28,6 @@
 #ifndef EXPRESSION_H
 #define EXPRESSION_H
 #include <memory>
-#include <mutex>
 #include <jmespath/types.h>
 #include <jmespath/exceptions.h>
 
@@ -42,7 +41,7 @@ class ExpressionNode;
  *
  * The Expression class can be used to store a parsed JMESPath expression and
  * reuse it for multiple searches.
- * @note This class is thread safe.
+ * @note This class is reentrant.
  */
 class Expression
 {
@@ -171,10 +170,6 @@ private:
      * expression.
      */
     void parseExpression(const String &expressionString);
-    /**
-     * @brief Mutex to protect member variables from concurrent access
-     */
-    mutable std::recursive_mutex m_mutex;
 };
 
 /**
