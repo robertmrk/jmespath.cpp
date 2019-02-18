@@ -64,6 +64,8 @@ TEST_CASE("Expression")
 
         SECTION("with literal")
         {
+            using namespace jmespath::literals;
+
             Expression expr = "id"_jmespath;
 
             REQUIRE(expr.toString() == "id");

@@ -173,6 +173,11 @@ private:
 };
 
 /**
+ * @brief User defined literals
+ */
+namespace literals {
+
+/**
  * @brief User defined string literal for JMESPath expressions
  *
  * This operator implements a user defined string literal for JMESPath
@@ -184,5 +189,6 @@ inline Expression operator""_jmespath(const char* expression, std::size_t)
 {
     return {expression};
 }
+} // namespace jmespath::literals
 } // namespace jmespath
 #endif // EXPRESSION_H
