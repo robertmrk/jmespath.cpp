@@ -49,6 +49,16 @@ namespace jmespath {
  * @note This function is reentrant. Since it takes the @a expression by
  * reference the value of the @a expression should be protected from changes
  * until the function returns.
+ * @throws InvalidAgrument If a precondition fails. Usually signals an internal
+ * error.
+ * @throws InvalidValue When an invalid value is specified for an *expression*.
+ * For example a `0` step value for a slice expression.
+ * @throws UnknownFunction When an unknown JMESPath function is called in the
+ * *expression*.
+ * @throws InvalidFunctionArgumentArity When a JMESPath function is called with
+ * an unexpected number of arguments in the *expression*.
+ * @throws InvalidFunctionArgumentType When an invalid type of argument was
+ * specified for a JMESPath function call in the *expression*.
  */
 template <typename JsonT>
 std::enable_if_t<std::is_same<std::decay_t<JsonT>, Json>::value, Json>

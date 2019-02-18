@@ -69,12 +69,14 @@ public:
      * valid JMESPath expression.
      * @param[in] argument The value that should be forwarded.
      * @tparam U The type of @a argument.
+     * @throws SyntaxError When the syntax of the specified *expression* is
+     * invalid.
      */
     template <typename U, typename
         std::enable_if<
             std::is_convertible<U, String>::value>::type* = nullptr>
-    Expression(U&& argument)
-        : m_expressionString(std::forward<U>(argument))
+    Expression(U&& expression)
+        : m_expressionString(std::forward<U>(expression))
     {
         parseExpression(m_expressionString);
     }
@@ -100,6 +102,8 @@ public:
      * @param[in] expressionString The string representation of a JMESPath
      * expression.
      * @return Reference to this expression.
+     * @throws SyntaxError When the syntax of the specified
+     * *expressionString* is invalid.
      */
     Expression& operator= (const String& expressionString);
     /**
@@ -110,6 +114,8 @@ public:
      * @param[in] expressionString The string representation of a JMESPath
      * expression.
      * @return Reference to this expression.
+     * @throws SyntaxError When the syntax of the specified
+     * *expressionString* is invalid.
      */
     Expression& operator= (String&& expressionString);
     /**
@@ -168,6 +174,8 @@ private:
      * @brief Parses the @a expressionString and updates the AST.
      * @param[in] expressionString The string representation of the JMESPath
      * expression.
+     * @throws SyntaxError When the syntax of the specified
+     * *expressionString* is invalid.
      */
     void parseExpression(const String &expressionString);
 };
@@ -184,6 +192,7 @@ namespace literals {
  * expressions. It can be used by appending `"_jmespath"` to a string literal.
  * @param[in] expression The string representation of a JMESPath expression.
  * @return An Expression object.
+ * @throws SyntaxError When the syntax of the specified *expression* is invalid.
  */
 inline Expression operator""_jmespath(const char* expression, std::size_t)
 {
