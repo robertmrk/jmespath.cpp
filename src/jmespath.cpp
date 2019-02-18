@@ -26,7 +26,7 @@
 **
 ****************************************************************************/
 #include "jmespath/jmespath.h"
-#include "src/interpreter/interpreter2.h"
+#include "src/interpreter/interpreter.h"
 #include <boost/hana.hpp>
 
 namespace jmespath {
@@ -35,7 +35,7 @@ template <typename JsonT>
 std::enable_if_t<std::is_same<std::decay_t<JsonT>, Json>::value, Json>
 search(const Expression &expression, JsonT&& document)
 {
-    using interpreter::Interpreter2;
+    using interpreter::Interpreter;
     using interpreter::JsonRef;
 
     if (expression.isEmpty())
@@ -44,7 +44,7 @@ search(const Expression &expression, JsonT&& document)
     }
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wexit-time-destructors"
-    thread_local Interpreter2 s_interpreter;
+    thread_local Interpreter s_interpreter;
 #pragma clang diagnostic pop
     s_interpreter.setContext(std::forward<JsonT>(document));
     // evaluate the expression by calling visit with the root of the AST

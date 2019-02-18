@@ -27,7 +27,7 @@
 ****************************************************************************/
 #include "fakeit.hpp"
 #include "src/interpreter/contextvaluevisitoradaptor.h"
-#include "src/interpreter/interpreter2.h"
+#include "src/interpreter/interpreter.h"
 #include "jmespath/exceptions.h"
 #include "src/ast/identifiernode.h"
 #include <boost/variant.hpp>

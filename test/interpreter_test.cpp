@@ -29,33 +29,175 @@
 #include "src/interpreter/interpreter.h"
 #include "src/ast/allnodes.h"
 #include "jmespath/exceptions.h"
+#include <fstream>
+#include <chrono>
 #include <boost/range/algorithm.hpp>
 
-namespace jmespath { namespace ast {
+//namespace jmespath { namespace ast {
 
-std::ostream& operator<< (std::ostream& stream, ExpressionNode const&)
+//std::ostream& operator<< (std::ostream& stream, ExpressionNode const&)
+//{
+//    return stream;
+//}
+//}} // namespace jmespath::ast
+
+TEST_CASE("ContextValue")
 {
-    return stream;
+    using namespace jmespath;
+    using jmespath::interpreter::JsonRef;
+    using jmespath::interpreter::ContextValue;
+
+    SECTION("can be constructed with Json lvalue")
+    {
+        Json jsonValue {{"key", "value"}};
+
+        ContextValue value {jsonValue};
+
+        REQUIRE(value.which() == 0);
+        REQUIRE(boost::get<const Json&>(value) == jsonValue);
+    }
+
+    SECTION("can be constructed with Json rvalue")
+    {
+        ContextValue value {Json{{"key", "value"}}};
+
+        REQUIRE(value.which() == 0);
+        REQUIRE(boost::get<const Json&>(value) == Json{{"key", "value"}});
+    }
+
+    SECTION("can be constructed with Json reference wrapper")
+    {
+        Json jsonValue {{"key", "value"}};
+
+        ContextValue value {std::cref(jsonValue)};
+
+        REQUIRE(value.which() == 1);
+        REQUIRE(boost::get<const JsonRef&>(value) == jsonValue);
+    }
+
+    SECTION("can assing Json lvalue")
+    {
+        Json jsonValue {{"key", "value"}};
+        ContextValue value;
+
+        value = jsonValue;
+
+        REQUIRE(value.which() == 0);
+        REQUIRE(boost::get<const Json&>(value) == jsonValue);
+    }
+
+
+    SECTION("can assing Json rvalue")
+    {
+        ContextValue value {Json{{"key", "value"}}};
+
+        REQUIRE(value.which() == 0);
+        REQUIRE(boost::get<const Json&>(value) == Json{{"key", "value"}});
+    }
+
+    SECTION("can asign Json reference wrapper")
+    {
+        Json jsonValue {{"key", "value"}};
+        ContextValue value;
+
+        value = std::cref(jsonValue);
+
+        REQUIRE(value.which() == 1);
+        REQUIRE(boost::get<const JsonRef&>(value) == jsonValue);
+    }
 }
-}} // namespace jmespath::ast
+
+TEST_CASE("assignContextValue")
+{
+    using namespace jmespath;
+    using jmespath::interpreter::JsonRef;
+    using jmespath::interpreter::ContextValue;
+    using jmespath::interpreter::assignContextValue;
+
+    SECTION("moves Json rvalue")
+    {
+        Json jsonValue {{"key", "value"}};
+        Json expectedValue(jsonValue);
+        REQUIRE(jsonValue.type() == Json::value_t::object);
+        REQUIRE(expectedValue == jsonValue);
+        ContextValue contextValue;
+
+        contextValue = assignContextValue(std::move(jsonValue));
+
+        REQUIRE(contextValue.which() == 0);
+        REQUIRE(boost::get<const Json&>(contextValue) == expectedValue);
+        REQUIRE(jsonValue == Json{});
+    }
+
+    SECTION("returns reference_wrapper for Json lvalue ref")
+    {
+        Json jsonValue {{"key", "value"}};
+        ContextValue contextValue;
+
+        contextValue = assignContextValue(jsonValue);
+
+        REQUIRE(contextValue.which() == 1);
+        REQUIRE(boost::get<const JsonRef&>(contextValue) == jsonValue);
+        REQUIRE_FALSE(jsonValue == Json{});
+    }
+}
+
+TEST_CASE("getJsonValue")
+{
+    using namespace jmespath;
+    using jmespath::interpreter::JsonRef;
+    using jmespath::interpreter::ContextValue;
+    using jmespath::interpreter::getJsonValue;
+    Json jsonValue {{"key", "value"}};
+
+    SECTION("returns const ref for Json value context")
+    {
+        ContextValue context {jsonValue};
+
+        const Json& result = getJsonValue(context);
+
+        REQUIRE(result == jsonValue);
+    }
+
+    SECTION("returns const ref for Json reference_wrapper context")
+    {
+        ContextValue context {std::cref(jsonValue)};
+
+        const Json& result = getJsonValue(context);
+
+        REQUIRE(result == jsonValue);
+    }
+}
 
 TEST_CASE("Interpreter")
-{    
+{
     using namespace jmespath;
-    using jmespath::interpreter::Interpreter;    
+    using jmespath::interpreter::Interpreter;
+    using jmespath::interpreter::assignContextValue;
+    using jmespath::interpreter::getJsonValue;
     namespace ast = jmespath::ast;
     namespace rng = boost::range;
     using namespace fakeit;
 
     Interpreter interpreter;
 
-    SECTION("can be constructed with context value")
+    SECTION("can set context with Json lvalue ref")
     {
-        Json context{"ident", "value"};
+        auto context = "\"value\""_json;
+        interpreter.setContext(context);
 
-        Interpreter ev{context};
+        REQUIRE(interpreter.currentContext() == context);
+        REQUIRE(interpreter.currentContextValue().which() == 1);
+    }
 
-        REQUIRE(ev.currentContext() == context);
+    SECTION("can set context with Json rvalue")
+    {
+        auto context = "\"value\""_json;
+        auto expected = Json(context);
+        interpreter.setContext(std::move(context));
+
+        REQUIRE(interpreter.currentContext() == expected);
+        REQUIRE(interpreter.currentContextValue().which() == 0);
     }
 
     SECTION("accepts abstract node")
@@ -78,16 +220,32 @@ TEST_CASE("Interpreter")
         Verify(Method(node, accept)).Once();
     }
 
-    SECTION("evaluates identifier node")
+    SECTION("evaluates identifier node with lvalue ref")
     {
         ast::IdentifierNode node{"identifier"};
         int value = 15;
         Json expectedValue = value;
         REQUIRE(expectedValue.is_number());
-        interpreter.setContext({{"identifier", value}});
+        Json jsonValue{{"identifier", value}};
+        interpreter.setContext(jsonValue);
 
         interpreter.visit(&node);
 
+        REQUIRE(interpreter.currentContextValue().which() == 1);
+        REQUIRE(interpreter.currentContext() == expectedValue);
+    }
+
+    SECTION("evaluates identifier node with rvalue")
+    {
+        ast::IdentifierNode node{"identifier"};
+        int value = 15;
+        Json expectedValue = value;
+        REQUIRE(expectedValue.is_number());
+        interpreter.setContext(Json{{"identifier", value}});
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContextValue().which() == 0);
         REQUIRE(interpreter.currentContext() == expectedValue);
     }
 
@@ -100,10 +258,34 @@ TEST_CASE("Interpreter")
         REQUIRE(interpreter.currentContext() == Json{});
     }
 
+    SECTION("evaluates non existing identifier in an lvalue ref object to null")
+    {
+        Json jsonValue{{"identifier", "value"}};
+        interpreter.setContext(jsonValue);
+        ast::IdentifierNode node{"non-existing"};
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContextValue().which() == 0);
+        REQUIRE(interpreter.currentContext() == Json{});
+    }
+
+    SECTION("evaluates non existing identifier in an rvalue ref object to null")
+    {
+        Json jsonValue{{"identifier", "value"}};
+        interpreter.setContext(Json{{"identifier", "value"}});
+        ast::IdentifierNode node{"non-existing"};
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContextValue().which() == 0);
+        REQUIRE(interpreter.currentContext() == Json{});
+    }
+
     SECTION("evaluates identifier on non object to null")
     {
         ast::IdentifierNode node{"identifier"};
-        interpreter.setContext(15);
+        interpreter.setContext(Json{15});
 
         interpreter.visit(&node);
 
@@ -119,7 +301,7 @@ TEST_CASE("Interpreter")
 
         interpreter.visit(&node);
 
-        REQUIRE(interpreter.currentContext() == expectedValue);
+        REQUIRE(interpreter.currentContext()  == expectedValue);
     }
 
     SECTION("evaluates literal")
@@ -149,7 +331,7 @@ TEST_CASE("Interpreter")
         interpreter.visit(&node.get());
 
         Verify(Method(node, accept).Using(&interpreter)).Once();
-    }    
+    }
 
     SECTION("evaluates bracket specifier")
     {
@@ -190,7 +372,7 @@ TEST_CASE("Interpreter")
     {
         ast::IndexExpressionNode node;
         Mock<Interpreter> interpreterMock(interpreter);
-        interpreterMock.get().setContext("string value");
+        interpreterMock.get().setContext("\"string value\""_json);
         When(OverloadedMethod(interpreterMock, visit,
                               void(const ast::ExpressionNode*)))
                 .AlwaysReturn();
@@ -219,7 +401,8 @@ TEST_CASE("Interpreter")
         When(OverloadedMethod(interpreterMock, visit,
                               void(const ast::BracketSpecifierNode*)))
                 .AlwaysReturn();
-        When(Method(interpreterMock, evaluateProjection))
+        When(OverloadedMethod(interpreterMock, evaluateProjection,
+                              void(const ast::ExpressionNode*)))
                 .AlwaysReturn();
 
         interpreterMock.get().visit(&node);
@@ -230,36 +413,63 @@ TEST_CASE("Interpreter")
                + OverloadedMethod(interpreterMock, visit,
                                   void(const ast::BracketSpecifierNode*))
                     .Using(&node.bracketSpecifier)
-               + Method(interpreterMock, evaluateProjection)
+               + OverloadedMethod(interpreterMock, evaluateProjection,
+                                  void(const ast::ExpressionNode*))
                     .Using(&node.rightExpression))
                 .Once();
         VerifyNoOtherInvocations(interpreterMock);
     }
 
-    SECTION("evaluates array item expression")
+    SECTION("evaluates array item expression with lvalue ref")
     {
         ast::ArrayItemNode node{2};
-        interpreter.setContext({"zero", "one", "two", "three", "four"});
+        Json value {"zero", "one", "two", "three", "four"};
+        interpreter.setContext(value);
 
         interpreter.visit(&node);
 
+        REQUIRE(interpreter.currentContextValue().which() == 1);
         REQUIRE(interpreter.currentContext() == "two");
+    }
+
+    SECTION("evaluates array item expression with rvalue")
+    {
+        ast::ArrayItemNode node{2};
+        interpreter.setContext(Json{"zero", "one", "two", "three", "four"});
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContextValue().which() == 0);
+        REQUIRE(interpreter.currentContext() == "two");
+    }
+
+    SECTION("evaluates array item expression with negative index lvalue ref")
+    {
+        ast::ArrayItemNode node{-4};
+        Json value {"zero", "one", "two", "three", "four"};
+        interpreter.setContext(value);
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContextValue().which() == 1);
+        REQUIRE(interpreter.currentContext() == "one");
     }
 
     SECTION("evaluates array item expression with negative index")
     {
         ast::ArrayItemNode node{-4};
-        interpreter.setContext({"zero", "one", "two", "three", "four"});
+        interpreter.setContext(Json{"zero", "one", "two", "three", "four"});
 
         interpreter.visit(&node);
 
+        REQUIRE(interpreter.currentContextValue().which() == 0);
         REQUIRE(interpreter.currentContext() == "one");
     }
 
     SECTION("evaluates array item expression on non arrays to null")
     {
         ast::ArrayItemNode node{2};
-        interpreter.setContext(3);
+        interpreter.setContext(Json{3});
 
         interpreter.visit(&node);
 
@@ -269,21 +479,35 @@ TEST_CASE("Interpreter")
     SECTION("evaluates array item expression with out of bounds index to null")
     {
         ast::ArrayItemNode node{15};
-        interpreter.setContext({"zero", "one", "two", "three", "four"});
+        interpreter.setContext(Json{"zero", "one", "two", "three", "four"});
 
         interpreter.visit(&node);
 
         REQUIRE(interpreter.currentContext() == Json{});
     }
 
-    SECTION("evaluates projection")
+    SECTION("evaluates projection on lvalue ref")
     {
         Json context = {{{"id", 1}}, {{"id", 2}}, {{"id2", 3}}, {{"id", 4}}};
         REQUIRE(context.is_array());
-        interpreter.setContext(context);
         ast::ExpressionNode expression{
             ast::IdentifierNode{"id"}};
         interpreter.setContext(context);
+        Json expectedResult = {1, 2, 4};
+        REQUIRE(expectedResult.is_array());
+
+        interpreter.evaluateProjection(&expression);
+
+        REQUIRE(interpreter.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates projection on rvalue")
+    {
+        Json context = {{{"id", 1}}, {{"id", 2}}, {{"id2", 3}}, {{"id", 4}}};
+        REQUIRE(context.is_array());
+        ast::ExpressionNode expression{
+            ast::IdentifierNode{"id"}};
+        interpreter.setContext(std::move(context));
         Json expectedResult = {1, 2, 4};
         REQUIRE(expectedResult.is_array());
 
@@ -305,10 +529,25 @@ TEST_CASE("Interpreter")
         REQUIRE(interpreter.currentContext() == Json{});
     }
 
-    SECTION("evaluates flatten operator")
+    SECTION("evaluates flatten operator on lvalue ref")
     {
         Json context = "[1, 2, [3], [4, [5, 6, 7], 8], [9, 10] ]"_json;
+        Json contextCopy(context);
         interpreter.setContext(context);
+        Json expectedResult = "[1, 2, 3, 4, [5, 6, 7], 8, 9, 10]"_json;
+        ast::FlattenOperatorNode flattenNode;
+
+        interpreter.visit(&flattenNode);
+
+        REQUIRE(interpreter.currentContext() == expectedResult);
+        REQUIRE(context == contextCopy);
+    }
+
+    SECTION("evaluates flatten operator on rvalue")
+    {
+        Json context = "[1, 2, [3], [4, [5, 6, 7], 8], [9, 10] ]"_json;
+        Json contextCopy{context};
+        interpreter.setContext(std::move(context));
         Json expectedResult = "[1, 2, 3, 4, [5, 6, 7], 8, 9, 10]"_json;
         ast::FlattenOperatorNode flattenNode;
 
@@ -348,10 +587,22 @@ TEST_CASE("Interpreter")
         REQUIRE_THROWS_AS(interpreter.visit(&sliceNode), InvalidValue);
     }
 
-    SECTION("evaluates slice expression")
+    SECTION("evaluates slice expression on lvalue ref")
     {
         Json context = "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]"_json;
         interpreter.setContext(context);
+        ast::SliceExpressionNode sliceNode{Index{2}, Index{5}};
+        Json expectedResult = "[2, 3, 4]"_json;
+
+        interpreter.visit(&sliceNode);
+
+        REQUIRE(interpreter.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates slice expression on rvalue")
+    {
+        Json context = "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]"_json;
+        interpreter.setContext(std::move(context));
         ast::SliceExpressionNode sliceNode{Index{2}, Index{5}};
         Json expectedResult = "[2, 3, 4]"_json;
 
@@ -452,12 +703,27 @@ TEST_CASE("Interpreter")
         REQUIRE(interpreter.currentContext() == Json{});
     }
 
-    SECTION("evaluates hash wildcard expression on objects to array of values")
+    SECTION("evaluates hash wildcard expression on objects to array of values "
+            "from lvalue ref")
     {
         Json context = "{\"a\": 1, \"b\":2, \"c\":3}"_json;
         Json values(Json::value_t::array);
         rng::copy(context, std::back_inserter(values));
         interpreter.setContext(context);
+        ast::HashWildcardNode node;
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContext() == values);
+    }
+
+    SECTION("evaluates hash wildcard expression on objects to array of values "
+            "from rvalue")
+    {
+        Json context = "{\"a\": 1, \"b\":2, \"c\":3}"_json;
+        Json values(Json::value_t::array);
+        rng::copy(context, std::back_inserter(values));
+        interpreter.setContext(std::move(context));
         ast::HashWildcardNode node;
 
         interpreter.visit(&node);
@@ -473,7 +739,8 @@ TEST_CASE("Interpreter")
         When(OverloadedMethod(interpreterMock, visit,
                               void(const ast::ExpressionNode*)))
                 .AlwaysReturn();
-        When(Method(interpreterMock, evaluateProjection))
+        When(OverloadedMethod(interpreterMock, evaluateProjection,
+                              void(const ast::ExpressionNode*)))
                 .AlwaysReturn();
 
         interpreterMock.get().visit(&node);
@@ -481,7 +748,8 @@ TEST_CASE("Interpreter")
         Verify(OverloadedMethod(interpreterMock, visit,
                                 void(const ast::ExpressionNode*))
                     .Using(&node.leftExpression)
-               + Method(interpreterMock, evaluateProjection)
+               + OverloadedMethod(interpreterMock, evaluateProjection,
+                                  void(const ast::ExpressionNode*))
                     .Using(&node.rightExpression))
                 .Once();
         VerifyNoOtherInvocations(interpreterMock);
@@ -501,7 +769,7 @@ TEST_CASE("Interpreter")
         When(OverloadedMethod(interpreterMock, visit,
                               void(const ast::ExpressionNode*)))
                 .AlwaysReturn();
-        interpreterMock.get().setContext("value");
+        interpreterMock.get().setContext("\"value\""_json);
 
         interpreterMock.get().visit(&node);
 
@@ -567,7 +835,7 @@ TEST_CASE("Interpreter")
         Mock<Interpreter> interpreterMock(interpreter);
         When(OverloadedMethod(interpreterMock, visit,
                               void(const ast::ExpressionNode*))).AlwaysReturn();
-        interpreterMock.get().setContext("value");
+        interpreterMock.get().setContext("\"value\""_json);
 
         interpreterMock.get().visit(&node);
 
@@ -592,7 +860,6 @@ TEST_CASE("Interpreter")
         Mock<Interpreter> interpreterMock(interpreter);
         When(OverloadedMethod(interpreterMock, visit,
                               void(const ast::ExpressionNode*))).AlwaysReturn();
-        interpreterMock.get().setContext({});
 
         interpreterMock.get().visit(&node);
 
@@ -613,8 +880,8 @@ TEST_CASE("Interpreter")
 
         interpreter.visit(&node);
 
-        REQUIRE(interpreter.currentContext() == "{\"id1\":\"value2\","
-                                              "\"id3\":\"value4\"}"_json);
+        REQUIRE(interpreter.currentContext()
+                == "{\"id1\":\"value2\",\"id3\":\"value4\"}"_json);
     }
 
     SECTION("evaluates child expression of not expression")
@@ -1092,6 +1359,24 @@ TEST_CASE("Interpreter")
         REQUIRE_THROWS_AS(interpreter.visit(&node), InvalidAgrument);
     }
 
+    SECTION("evaluates comparator expression with rvalue referring to the same "
+            "value on both sides")
+    {
+        ast::ComparatorExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"key"}},
+            ast::ComparatorExpressionNode::Comparator::Equal,
+            ast::ExpressionNode{
+                ast::IdentifierNode{"key"}}};
+        auto context = "{\"key\": \"value\"}"_json;
+        interpreter.setContext(std::move(context));
+
+        interpreter.visit(&node);
+        Json result = interpreter.currentContext();
+
+        REQUIRE(result == true);
+    }
+
     SECTION("evaluates or expression")
     {
         ast::OrExpressionNode node{
@@ -1112,23 +1397,62 @@ TEST_CASE("Interpreter")
         VerifyNoOtherInvocations(interpreterMock);
     }
 
-    SECTION("evaluates or expression to left expression's result if it's true")
+    SECTION("evaluates or expression to left expression's result if it's true "
+            "with lvalue ref")
     {
         ast::OrExpressionNode node{
             ast::ExpressionNode{
                 ast::IdentifierNode{"id1"}},
             ast::ExpressionNode{
                 ast::IdentifierNode{"id2"}}};
-        interpreter.setContext("{\"id1\": \"value1\", \"id2\": \"value2\"}"_json);
+        auto context = "{\"id1\": \"value1\", \"id2\": \"value2\"}"_json;
+        interpreter.setContext(context);
         Json expectedResult = "value1";
 
         interpreter.visit(&node);
 
+        REQUIRE(interpreter.currentContextValue().which() == 1);
+        REQUIRE(interpreter.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates or expression to left expression's result if it's true "
+            "with rvalue")
+    {
+        ast::OrExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id1"}},
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id2"}}};
+        interpreter.setContext(
+                    "{\"id1\": \"value1\", \"id2\": \"value2\"}"_json);
+        Json expectedResult = "value1";
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContextValue().which() == 0);
         REQUIRE(interpreter.currentContext() == expectedResult);
     }
 
     SECTION("evaluates or expression to right expression's result if left "
-            "expression's result is false")
+            "expression's result is false with lvalue ref")
+    {
+        ast::OrExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id1"}},
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id2"}}};
+        auto context = "{\"id1\": \"\", \"id2\": \"value2\"}"_json;
+        interpreter.setContext(context);
+        Json expectedResult = "value2";
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContextValue().which() == 1);
+        REQUIRE(interpreter.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates or expression to right expression's result if left "
+            "expression's result is false with rvalue")
     {
         ast::OrExpressionNode node{
             ast::ExpressionNode{
@@ -1140,6 +1464,7 @@ TEST_CASE("Interpreter")
 
         interpreter.visit(&node);
 
+        REQUIRE(interpreter.currentContextValue().which() == 0);
         REQUIRE(interpreter.currentContext() == expectedResult);
     }
 
@@ -1165,23 +1490,61 @@ TEST_CASE("Interpreter")
     }
 
     SECTION("evaluates and expression to right expression's result if left "
-            "expression's result is true")
+            "expression's result is true with lvalue ref")
     {
         ast::AndExpressionNode node{
             ast::ExpressionNode{
                 ast::IdentifierNode{"id1"}},
             ast::ExpressionNode{
                 ast::IdentifierNode{"id2"}}};
-        interpreter.setContext("{\"id1\": \"value1\", \"id2\": \"value2\"}"_json);
+        auto context = "{\"id1\": \"value1\", \"id2\": \"value2\"}"_json;
+        interpreter.setContext(context);
         Json expectedResult = "value2";
 
         interpreter.visit(&node);
 
+        REQUIRE(interpreter.currentContextValue().which() == 1);
+        REQUIRE(interpreter.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates and expression to right expression's result if left "
+            "expression's result is true with rvalue")
+    {
+        ast::AndExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id1"}},
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id2"}}};
+        interpreter.setContext(
+                    "{\"id1\": \"value1\", \"id2\": \"value2\"}"_json);
+        Json expectedResult = "value2";
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContextValue().which() == 0);
         REQUIRE(interpreter.currentContext() == expectedResult);
     }
 
     SECTION("evaluates and expression to left expression's result if left "
-            "expression's result is false")
+            "expression's result is false with lvalue ref")
+    {
+        ast::AndExpressionNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id1"}},
+            ast::ExpressionNode{
+                ast::IdentifierNode{"id2"}}};
+        auto context = "{\"id1\": [], \"id2\": \"value2\"}"_json;
+        interpreter.setContext(context);
+        Json expectedResult = "[]"_json;
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContextValue().which() == 1);
+        REQUIRE(interpreter.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates and expression to left expression's result if left "
+            "expression's result is false with rvalue")
     {
         ast::AndExpressionNode node{
             ast::ExpressionNode{
@@ -1193,6 +1556,7 @@ TEST_CASE("Interpreter")
 
         interpreter.visit(&node);
 
+        REQUIRE(interpreter.currentContextValue().which() == 0);
         REQUIRE(interpreter.currentContext() == expectedResult);
     }
 
@@ -1251,7 +1615,7 @@ TEST_CASE("Interpreter")
         Mock<Interpreter> interpreterMock(interpreter);
         When(OverloadedMethod(interpreterMock, visit,
                               void(const ast::ExpressionNode*))).AlwaysReturn();
-        interpreterMock.get().setContext("value");
+        interpreter.setContext("\"value\""_json);
 
         interpreterMock.get().visit(&node);
 
@@ -1274,7 +1638,25 @@ TEST_CASE("Interpreter")
         REQUIRE(interpreter.currentContext() == expectedResult);
     }
 
-    SECTION("evaluates child expression of filter expression")
+    SECTION("evaluates child expression of filter expression with lvalue ref")
+    {
+        ast::FilterExpressionNode node;
+        Mock<Interpreter> interpreterMock(interpreter);
+        auto context = "[1, 2, 3]"_json;
+        interpreterMock.get().setContext(context);
+        When(OverloadedMethod(interpreterMock, visit,
+                              void(const ast::ExpressionNode*)))
+                .AlwaysReturn();
+
+        interpreterMock.get().visit(&node);
+
+        Verify(OverloadedMethod(interpreterMock, visit,
+                                void(const ast::ExpressionNode*))
+                    .Using(&node.expression)).Exactly(3);
+        VerifyNoOtherInvocations(interpreterMock);
+    }
+
+    SECTION("evaluates child expression of filter expression with rvalue")
     {
         ast::FilterExpressionNode node;
         Mock<Interpreter> interpreterMock(interpreter);
@@ -1303,10 +1685,29 @@ TEST_CASE("Interpreter")
     }
 
     SECTION("evaluates filter expression on arrays to an array filtered with "
-            "the filter's subexpression")
+            "the filter's subexpression with lvalue ref")
     {
         Json context = "[{\"id\": 1}, {\"id\": 2}, {\"id\": 3}]"_json;
         interpreter.setContext(context);
+        ast::FilterExpressionNode node{
+            ast::ExpressionNode{
+                ast::ComparatorExpressionNode{
+                    ast::ExpressionNode{
+                        ast::IdentifierNode{"id"}},
+                    ast::ComparatorExpressionNode::Comparator::GreaterOrEqual,
+                    ast::ExpressionNode{
+                        ast::LiteralNode{"2"}}}}};
+        Json expectedResult = "[{\"id\": 2}, {\"id\": 3}]"_json;
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContext() == expectedResult);
+    }
+
+    SECTION("evaluates filter expression on arrays to an array filtered with "
+            "the filter's subexpression with rvalue")
+    {
+        interpreter.setContext("[{\"id\": 1}, {\"id\": 2}, {\"id\": 3}]"_json);
         ast::FilterExpressionNode node{
             ast::ExpressionNode{
                 ast::ComparatorExpressionNode{
@@ -1324,10 +1725,29 @@ TEST_CASE("Interpreter")
     }
 
     SECTION("evaluates filter expression on arrays to an array filtered with "
-            "the filter's subexpression 2")
+            "the filter's subexpression 2 with lvalue ref")
     {
         Json context2 = "[{\"name\": \"a\"}, {\"name\": \"b\"}]"_json;
         interpreter.setContext(context2);
+        ast::FilterExpressionNode node2{
+            ast::ExpressionNode{
+                ast::ComparatorExpressionNode{
+                    ast::ExpressionNode{
+                        ast::IdentifierNode{"name"}},
+                    ast::ComparatorExpressionNode::Comparator::Equal,
+                    ast::ExpressionNode{
+                        ast::RawStringNode{"a"}}}}};
+        Json expectedResult2 = "[{\"name\": \"a\"}]"_json;
+
+        interpreter.visit(&node2);
+
+        REQUIRE(interpreter.currentContext() == expectedResult2);
+    }
+
+    SECTION("evaluates filter expression on arrays to an array filtered with "
+            "the filter's subexpression 2 with rvalue")
+    {
+        interpreter.setContext("[{\"name\": \"a\"}, {\"name\": \"b\"}]"_json);
         ast::FilterExpressionNode node2{
             ast::ExpressionNode{
                 ast::ComparatorExpressionNode{
@@ -1368,6 +1788,18 @@ TEST_CASE("Interpreter")
     }
 
     SECTION("abs function throws on inavlid argument type")
+    {
+        ast::FunctionExpressionNode node{
+            "abs",
+            {ast::ExpressionArgumentNode{
+                ast::ExpressionNode{
+                    ast::LiteralNode{"true"}}}}};
+
+        REQUIRE_THROWS_AS(interpreter.visit(&node),
+                          InvalidFunctionArgumentType);
+    }
+
+    SECTION("abs function throws on inavlid json argument type")
     {
         ast::FunctionExpressionNode node{
             "abs",
@@ -1860,7 +2292,8 @@ TEST_CASE("Interpreter")
 
         interpreter.visit(&node);
 
-        REQUIRE(interpreter.currentContext() == "[\"id1\", \"id2\"]"_json);
+        REQUIRE(interpreter.currentContext()
+                == "[\"id1\", \"id2\"]"_json);
     }
 
     SECTION("length function throws on invalid number of arguments")
@@ -1962,7 +2395,25 @@ TEST_CASE("Interpreter")
                           InvalidFunctionArgumentType);
     }
 
-    SECTION("evaluates map function")
+    SECTION("evaluates map function with lvalue ref")
+    {
+        ast::FunctionExpressionNode node{
+            "map",
+            {ast::ExpressionArgumentNode{
+                ast::ExpressionNode{
+                    ast::IdentifierNode{"id"}}},
+            ast::ExpressionNode{
+                ast::IdentifierNode{"foo"}}}};
+        auto context
+                = "{\"foo\": [{\"id\": 1}, {\"id\": 2}, {\"id2\": 3}]}"_json;
+        interpreter.setContext(context);
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContext() == "[1, 2, null]"_json);
+    }
+
+    SECTION("evaluates map function with rvalue")
     {
         ast::FunctionExpressionNode node{
             "map",
@@ -2024,7 +2475,7 @@ TEST_CASE("Interpreter")
                           InvalidFunctionArgumentType);
     }
 
-    SECTION("evaluates max function on number array")
+    SECTION("evaluates max function on number array with rvalue")
     {
         ast::FunctionExpressionNode node{
             "max",
@@ -2036,7 +2487,21 @@ TEST_CASE("Interpreter")
         REQUIRE(interpreter.currentContext() == "3"_json);
     }
 
-    SECTION("evaluates max function on string array")
+    SECTION("evaluates max function on number array with lvalue ref")
+    {
+        ast::FunctionExpressionNode node{
+            "max",
+            {ast::ExpressionNode{
+                ast::IdentifierNode{"foo"}}}};
+        auto context = "{\"foo\": [2, 3, 1]}"_json;
+        interpreter.setContext(context);
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContext() == "3"_json);
+    }
+
+    SECTION("evaluates max function on string array with rvalue")
     {
         ast::FunctionExpressionNode node{
             "max",
@@ -2046,6 +2511,32 @@ TEST_CASE("Interpreter")
         interpreter.visit(&node);
 
         REQUIRE(interpreter.currentContext() == "\"foo\""_json);
+    }
+
+    SECTION("evaluates max function on string array with lvalue ref")
+    {
+        ast::FunctionExpressionNode node{
+            "max",
+            {ast::ExpressionNode{
+                ast::IdentifierNode{"foo"}}}};
+        auto context = "{\"foo\": [\"bar\", \"foo\", \"baz\"]}"_json;
+        interpreter.setContext(context);
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContext() == "\"foo\""_json);
+    }
+
+    SECTION("max function returns null on empty array")
+    {
+        ast::FunctionExpressionNode node{
+            "max",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[]"}}}};
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContext() == "null"_json);
     }
 
     SECTION("max_by function throws on invalid number of arguments")
@@ -2109,7 +2600,22 @@ TEST_CASE("Interpreter")
                           InvalidFunctionArgumentType);
     }
 
-    SECTION("evaluates max_by function")
+    SECTION("evaluates max_by function on empty array to null")
+    {
+        ast::FunctionExpressionNode node{
+            "max_by",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[]"}},
+            ast::ExpressionArgumentNode{
+                ast::ExpressionNode{
+                    ast::IdentifierNode{"id"}}}}};
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContext() == "null"_json);
+    }
+
+    SECTION("evaluates max_by function with rvalue")
     {
         ast::FunctionExpressionNode node{
             "max_by",
@@ -2118,6 +2624,24 @@ TEST_CASE("Interpreter")
             ast::ExpressionArgumentNode{
                 ast::ExpressionNode{
                     ast::IdentifierNode{"id"}}}}};
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContext() == "{\"id\": 5}"_json);
+    }
+
+    SECTION("evaluates max_by function with lvalue ref")
+    {
+        ast::FunctionExpressionNode node{
+            "max_by",
+            {ast::ExpressionNode{
+                ast::IdentifierNode{"foo"}},
+            ast::ExpressionArgumentNode{
+                ast::ExpressionNode{
+                    ast::IdentifierNode{"id"}}}}};
+        auto context = "{\"foo\": [{\"id\": 3}, {\"id\": 5}, "
+                       "{\"id\": 1}]}"_json;
+        interpreter.setContext(context);
 
         interpreter.visit(&node);
 
@@ -2137,7 +2661,7 @@ TEST_CASE("Interpreter")
                           InvalidFunctionArgumentType);
     }
 
-    SECTION("evaluates merge function on objects")
+    SECTION("evaluates merge function on objects with rvalue")
     {
         ast::FunctionExpressionNode node{
             "merge",
@@ -2145,6 +2669,24 @@ TEST_CASE("Interpreter")
                 ast::LiteralNode{"{\"id1\": 0, \"id2\": 2}"}},
             ast::ExpressionNode{
                 ast::LiteralNode{"{\"id1\": 1, \"id3\": 3}"}}}};
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContext()
+                == "{\"id1\": 1, \"id2\":2, \"id3\": 3}"_json);
+    }
+
+    SECTION("evaluates merge function on objects with lvalue ref")
+    {
+        ast::FunctionExpressionNode node{
+            "merge",
+            {ast::ExpressionNode{
+                ast::IdentifierNode{"foo"}},
+            ast::ExpressionNode{
+                ast::IdentifierNode{"bar"}}}};
+        auto context = "{\"foo\": {\"id1\": 0, \"id2\": 2},"
+                       "\"bar\": {\"id1\": 1, \"id3\": 3}}"_json;
+        interpreter.setContext(context);
 
         interpreter.visit(&node);
 
@@ -2199,7 +2741,7 @@ TEST_CASE("Interpreter")
                           InvalidFunctionArgumentType);
     }
 
-    SECTION("evaluates min function on number array")
+    SECTION("evaluates min function on number array with rvalue")
     {
         ast::FunctionExpressionNode node{
             "min",
@@ -2211,12 +2753,40 @@ TEST_CASE("Interpreter")
         REQUIRE(interpreter.currentContext() == "1"_json);
     }
 
-    SECTION("evaluates min function on string array")
+    SECTION("evaluates min function on number array with lvalue ref")
+    {
+        ast::FunctionExpressionNode node{
+            "min",
+            {ast::ExpressionNode{
+                ast::IdentifierNode{"foo"}}}};
+        auto context = "{\"foo\": [2, 3, 1]}"_json;
+        interpreter.setContext(context);
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContext() == "1"_json);
+    }
+
+    SECTION("evaluates min function on string array with rvalue")
     {
         ast::FunctionExpressionNode node{
             "min",
             {ast::ExpressionNode{
                 ast::LiteralNode{"[\"bar\", \"foo\", \"baz\"]"}}}};
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContext() == "\"bar\""_json);
+    }
+
+    SECTION("evaluates min function on string array with lvalue ref")
+    {
+        ast::FunctionExpressionNode node{
+            "min",
+            {ast::ExpressionNode{
+                ast::IdentifierNode{"foo"}}}};
+        auto context = "{\"foo\": [\"bar\", \"foo\", \"baz\"]}"_json;
+        interpreter.setContext(context);
 
         interpreter.visit(&node);
 
@@ -2284,7 +2854,22 @@ TEST_CASE("Interpreter")
                           InvalidFunctionArgumentType);
     }
 
-    SECTION("evaluates min_by function")
+    SECTION("evaluates min_by function on empty array to null")
+    {
+        ast::FunctionExpressionNode node{
+            "min_by",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[]"}},
+            ast::ExpressionArgumentNode{
+                ast::ExpressionNode{
+                    ast::IdentifierNode{"id"}}}}};
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContext() == "null"_json);
+    }
+
+    SECTION("evaluates min_by function with rvalue")
     {
         ast::FunctionExpressionNode node{
             "min_by",
@@ -2293,6 +2878,24 @@ TEST_CASE("Interpreter")
             ast::ExpressionArgumentNode{
                 ast::ExpressionNode{
                     ast::IdentifierNode{"id"}}}}};
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContext() == "{\"id\": 1}"_json);
+    }
+
+    SECTION("evaluates min_by function with lvalue ref")
+    {
+        ast::FunctionExpressionNode node{
+            "min_by",
+            {ast::ExpressionNode{
+                ast::IdentifierNode{"foo"}},
+            ast::ExpressionArgumentNode{
+                ast::ExpressionNode{
+                    ast::IdentifierNode{"id"}}}}};
+        auto context = "{\"foo\": [{\"id\": 3}, {\"id\": 5}, "
+                       "{\"id\": 1}]}"_json;
+        interpreter.setContext(context);
 
         interpreter.visit(&node);
 
@@ -2318,7 +2921,7 @@ TEST_CASE("Interpreter")
                           InvalidFunctionArgumentType);
     }
 
-    SECTION("evaluates not_null function")
+    SECTION("evaluates not_null function with rvalue")
     {
         ast::FunctionExpressionNode node{
             "not_null",
@@ -2332,6 +2935,40 @@ TEST_CASE("Interpreter")
         interpreter.visit(&node);
 
         REQUIRE(interpreter.currentContext() == "[]"_json);
+    }
+
+    SECTION("evaluates not_null function with lvalue ref")
+    {
+        ast::FunctionExpressionNode node{
+            "not_null",
+            {ast::ExpressionNode{
+                ast::IdentifierNode{"a"}},
+            ast::ExpressionNode{
+                ast::IdentifierNode{"b"}},
+            ast::ExpressionNode{
+                ast::IdentifierNode{"c"}}}};
+        auto context = "{\"a\": null, \"b\": [], \"c\": null}"_json;
+        interpreter.setContext(context);
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContext() == "[]"_json);
+    }
+
+    SECTION("not_null returns null if no not null values are found")
+    {
+        ast::FunctionExpressionNode node{
+            "not_null",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"null"}},
+            ast::ExpressionNode{
+                ast::LiteralNode{"null"}},
+            ast::ExpressionNode{
+                ast::LiteralNode{"null"}}}};
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContext() == "null"_json);
     }
 
     SECTION("reverse function throws on invalid number of arguments")
@@ -2359,7 +2996,7 @@ TEST_CASE("Interpreter")
                           InvalidFunctionArgumentType);
     }
 
-    SECTION("evaluates reverse function on array")
+    SECTION("evaluates reverse function on array with rvalue")
     {
         ast::FunctionExpressionNode node{
             "reverse",
@@ -2371,12 +3008,40 @@ TEST_CASE("Interpreter")
         REQUIRE(interpreter.currentContext() == "[3, 2, 1]"_json);
     }
 
-    SECTION("evaluates reverse function on strings")
+    SECTION("evaluates reverse function on array with lvalue ref")
+    {
+        ast::FunctionExpressionNode node{
+            "reverse",
+            {ast::ExpressionNode{
+                ast::IdentifierNode{"foo"}}}};
+        auto context = "{\"foo\": [1, 2, 3]}"_json;
+        interpreter.setContext(context);
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContext() == "[3, 2, 1]"_json);
+    }
+
+    SECTION("evaluates reverse function on strings with rvalue")
     {
         ast::FunctionExpressionNode node{
             "reverse",
             {ast::ExpressionNode{
                 ast::LiteralNode{"\"abc\""}}}};
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContext() == "\"cba\""_json);
+    }
+
+    SECTION("evaluates reverse function on strings with lvalue ref")
+    {
+        ast::FunctionExpressionNode node{
+            "reverse",
+            {ast::ExpressionNode{
+                ast::IdentifierNode{"foo"}}}};
+        auto context = "{\"foo\":\"abc\"}"_json;
+        interpreter.setContext(context);
 
         interpreter.visit(&node);
 
@@ -2430,7 +3095,7 @@ TEST_CASE("Interpreter")
                           InvalidFunctionArgumentType);
     }
 
-    SECTION("evaluates sort function on array of numbers")
+    SECTION("evaluates sort function on array of numbers with rvalue")
     {
         ast::FunctionExpressionNode node{
             "sort",
@@ -2442,12 +3107,40 @@ TEST_CASE("Interpreter")
         REQUIRE(interpreter.currentContext() == "[1, 2, 3]"_json);
     }
 
-    SECTION("evaluates sort function on array of strings")
+    SECTION("evaluates sort function on array of numbers with lvalue ref")
+    {
+        ast::FunctionExpressionNode node{
+            "sort",
+            {ast::ExpressionNode{
+                ast::IdentifierNode{"foo"}}}};
+        auto context = "{\"foo\": [3, 1, 2]}"_json;
+        interpreter.setContext(context);
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContext() == "[1, 2, 3]"_json);
+    }
+
+    SECTION("evaluates sort function on array of strings with rvalue")
     {
         ast::FunctionExpressionNode node{
             "sort",
             {ast::ExpressionNode{
                 ast::LiteralNode{"[\"b\", \"c\", \"a\"]"}}}};
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContext() == "[\"a\", \"b\", \"c\"]"_json);
+    }
+
+    SECTION("evaluates sort function on array of strings with lvalue ref")
+    {
+        ast::FunctionExpressionNode node{
+            "sort",
+            {ast::ExpressionNode{
+                ast::IdentifierNode{"foo"}}}};
+        auto context = "{\"foo\": [\"b\", \"c\", \"a\"]}"_json;
+        interpreter.setContext(context);
 
         interpreter.visit(&node);
 
@@ -2529,12 +3222,33 @@ TEST_CASE("Interpreter")
                           InvalidFunctionArgumentType);
     }
 
-    SECTION("evaluates sort_by function")
+    SECTION("evaluates sort_by function with lvalue ref")
     {
         ast::FunctionExpressionNode node{
             "sort_by",
             {ast::ExpressionNode{
-                ast::LiteralNode{"[{\"id\": 3}, {\"id\": 5}, {\"id\": 1}]"}},
+                ast::IdentifierNode{"foo"}},
+            ast::ExpressionArgumentNode{
+                ast::ExpressionNode{
+                    ast::IdentifierNode{"id"}}}}};
+        auto context = "{\"foo\": [{\"id\": 3}, {\"id\": 5}, {\"id\": 1},"
+                       "{\"id\": 4}, {\"id\": 2}]}"_json;
+        interpreter.setContext(context);
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContext()
+                == "[{\"id\": 1}, {\"id\": 2}, {\"id\": 3}, {\"id\": 4}, "
+                   "{\"id\": 5}]"_json);
+    }
+
+    SECTION("evaluates sort_by function with rvalue")
+    {
+        ast::FunctionExpressionNode node{
+            "sort_by",
+            {ast::ExpressionNode{
+                ast::LiteralNode{"[{\"id\": 3}, {\"id\": 5}, {\"id\": 1},"
+                                 "{\"id\": 4}, {\"id\": 2}]"}},
             ast::ExpressionArgumentNode{
                 ast::ExpressionNode{
                     ast::IdentifierNode{"id"}}}}};
@@ -2542,7 +3256,8 @@ TEST_CASE("Interpreter")
         interpreter.visit(&node);
 
         REQUIRE(interpreter.currentContext()
-                == "[{\"id\": 1}, {\"id\": 3}, {\"id\": 5}]"_json);
+                == "[{\"id\": 1}, {\"id\": 2}, {\"id\": 3}, {\"id\": 4}, "
+                   "{\"id\": 5}]"_json);
     }
 
     SECTION("starts_with function throws on invalid number of arguments")
@@ -2690,12 +3405,29 @@ TEST_CASE("Interpreter")
                           InvalidFunctionArgumentType);
     }
 
-    SECTION("evaluates to_array function on array to the array itself")
+    SECTION("evaluates to_array function on array to the array itself "
+            "with rvalue")
     {
         ast::FunctionExpressionNode node{
             "to_array",
             {ast::ExpressionNode{
                 ast::LiteralNode{"[1, 2, 3]"}}}};
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContextValue().which() == 0);
+        REQUIRE(interpreter.currentContext() == "[1, 2, 3]"_json);
+    }
+
+    SECTION("evaluates to_array function on array to the array itself "
+            "with lvalue ref")
+    {
+        ast::FunctionExpressionNode node{
+            "to_array",
+            {ast::ExpressionNode{
+                ast::IdentifierNode{"foo"}}}};
+        auto context = "{\"foo\": [1, 2, 3]}"_json;
+        interpreter.setContext(context);
 
         interpreter.visit(&node);
 
@@ -2761,12 +3493,28 @@ TEST_CASE("Interpreter")
                           InvalidFunctionArgumentType);
     }
 
-    SECTION("evaluates to_string function on string to the string itself")
+    SECTION("evaluates to_string function on string to the string itself "
+            "with rvalue")
     {
         ast::FunctionExpressionNode node{
             "to_string",
             {ast::ExpressionNode{
                 ast::LiteralNode{"\"string\""}}}};
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContext() == "\"string\""_json);
+    }
+
+    SECTION("evaluates to_string function on string to the string itself "
+            "with lvalue ref")
+    {
+        ast::FunctionExpressionNode node{
+            "to_string",
+            {ast::ExpressionNode{
+                ast::IdentifierNode{"foo"}}}};
+        auto context = "{\"foo\": \"string\"}"_json;
+        interpreter.setContext(context);
 
         interpreter.visit(&node);
 
@@ -2832,7 +3580,8 @@ TEST_CASE("Interpreter")
                           InvalidFunctionArgumentType);
     }
 
-    SECTION("evaluates to_number function on number and string to number")
+    SECTION("evaluates to_number function on number and string to number "
+            "with rvalue")
     {
         ast::FunctionExpressionNode node1{
             "to_number",
@@ -2851,6 +3600,42 @@ TEST_CASE("Interpreter")
         auto result1 = interpreter.currentContext();
         interpreter.visit(&node2);
         auto result2 = interpreter.currentContext();
+        interpreter.visit(&node3);
+        auto result3 = interpreter.currentContext();
+
+        REQUIRE(result1 == "1.2"_json);
+        REQUIRE(result2 == "-2.7"_json);
+        REQUIRE(result3 == "null"_json);
+    }
+
+    SECTION("evaluates to_number function on number and string to number "
+            "with lvalue ref")
+    {
+        ast::FunctionExpressionNode node1{
+            "to_number",
+            {ast::ExpressionNode{
+                ast::IdentifierNode{"a"}}}};
+        ast::FunctionExpressionNode node2{
+            "to_number",
+            {ast::ExpressionNode{
+                ast::IdentifierNode{"b"}}}};
+        ast::FunctionExpressionNode node3{
+            "to_number",
+            {ast::ExpressionNode{
+                ast::IdentifierNode{"c"}}}};
+        Json context {
+            {"a", 1.2},
+            {"b", "-2.7"},
+            {"c", "not a number"}
+        };
+
+        interpreter.setContext(context);
+        interpreter.visit(&node1);
+        auto result1 = interpreter.currentContext();
+        interpreter.setContext(context);
+        interpreter.visit(&node2);
+        auto result2 = interpreter.currentContext();
+        interpreter.setContext(context);
         interpreter.visit(&node3);
         auto result3 = interpreter.currentContext();
 
@@ -2983,7 +3768,7 @@ TEST_CASE("Interpreter")
                           InvalidFunctionArgumentType);
     }
 
-    SECTION("evaluates values function")
+    SECTION("evaluates values function with rvalue")
     {
         ast::FunctionExpressionNode node{
             "values",
@@ -2993,5 +3778,31 @@ TEST_CASE("Interpreter")
         interpreter.visit(&node);
 
         REQUIRE(interpreter.currentContext() == "[1, 2]"_json);
+    }
+
+    SECTION("evaluates values function with lvalue ref")
+    {
+        ast::FunctionExpressionNode node{
+            "values",
+            {ast::ExpressionNode{
+                ast::IdentifierNode{"foo"}}}};
+        auto context = "{\"foo\": {\"id1\": 1, \"id2\": 2}}"_json;
+        interpreter.setContext(context);
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContext() == "[1, 2]"_json);
+    }
+
+    SECTION("evaluating an expression argument node directly does nothing")
+    {
+        ast::ExpressionArgumentNode node{
+            ast::ExpressionNode{
+                ast::IdentifierNode{"foo"}}};
+        interpreter.setContext("\"test\""_json);
+
+        interpreter.visit(&node);
+
+        REQUIRE(interpreter.currentContext() == "\"test\""_json);
     }
 }

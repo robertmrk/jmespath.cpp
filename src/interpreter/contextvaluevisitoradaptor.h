@@ -27,7 +27,7 @@
 ****************************************************************************/
 #ifndef CONTEXTVALUEVISITORADAPTOR_H
 #define CONTEXTVALUEVISITORADAPTOR_H
-#include "src/interpreter/interpreter2.h"
+#include "src/interpreter/interpreter.h"
 #include "jmespath/exceptions.h"
 #include <boost/variant.hpp>
 #include <boost/hana.hpp>

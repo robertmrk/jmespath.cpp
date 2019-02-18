@@ -25,7 +25,7 @@ if (JMESPATH_BUILD_TESTS)
         ${CMAKE_CURRENT_SOURCE_DIR}/identifiernode_test.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/rawstringnode_test.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/variantnode_test.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/interpreter_test2.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/interpreter_test.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/variantvisitoradaptor_test.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/subexpressionnode_test.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/literalnode_test.cpp
