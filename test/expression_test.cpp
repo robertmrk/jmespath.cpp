@@ -119,6 +119,16 @@ TEST_CASE("Expression")
         REQUIRE(expression.toString() == expressionString);
     }
 
+    SECTION("can be assigned with expression string literal")
+    {
+        const char* expressionString = "\"id\"[5]";
+        Expression expression;
+
+        expression = expressionString;
+
+        REQUIRE(expression.toString() == expressionString);
+    }
+
     SECTION("throws when constructed from an invalid expression string")
     {
         REQUIRE_THROWS_AS(Expression{"\"id\"["}, SyntaxError);

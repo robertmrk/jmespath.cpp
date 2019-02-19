@@ -95,30 +95,6 @@ public:
      */
     Expression& operator= (Expression&& other);
     /**
-     * @brief Assigns @a expressionString to this expression and returns a
-     * reference to this expression.
-     *
-     * @a ExpressionString should describe a valid JMESPath expression.
-     * @param[in] expressionString The string representation of a JMESPath
-     * expression.
-     * @return Reference to this expression.
-     * @throws SyntaxError When the syntax of the specified
-     * *expressionString* is invalid.
-     */
-    Expression& operator= (const String& expressionString);
-    /**
-     * @brief Move-assigns @a expressionString to this expression and returns a
-     * reference to this expression.
-     *
-     * @a ExpressionString should describe a valid JMESPath expression.
-     * @param[in] expressionString The string representation of a JMESPath
-     * expression.
-     * @return Reference to this expression.
-     * @throws SyntaxError When the syntax of the specified
-     * *expressionString* is invalid.
-     */
-    Expression& operator= (String&& expressionString);
-    /**
      * @brief Equality compares this expression to the @a other.
      * @param[in] other The expression that should be compared.
      * @return Returns true if this object is equal to the @a other, otherwise

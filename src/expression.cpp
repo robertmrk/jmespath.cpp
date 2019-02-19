@@ -95,20 +95,6 @@ void Expression::parseExpression(const String& expressionString)
     *m_astRoot = s_parser.parse(expressionString);
 }
 
-Expression& Expression::operator=(const String& expressionString)
-{
-    parseExpression(expressionString);
-    m_expressionString = expressionString;
-    return *this;
-}
-
-Expression& Expression::operator=(String &&expressionString)
-{
-    parseExpression(expressionString);
-    m_expressionString = std::move(expressionString);
-    return *this;
-}
-
 bool Expression::operator==(const Expression &other) const
 {
     if (this != &other)
