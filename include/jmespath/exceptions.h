@@ -32,23 +32,35 @@
 
 namespace jmespath {
 /**
+ * @defgroup error_info Error info types
+ * Additional information about the error that might be attached to exceptions.
+ */
+/**
+ * @ingroup error_info
  * @brief InfoSearchExpression contains the JMESPath expression being evaluated
  */
 using InfoSearchExpression
     = boost::error_info<struct tag_search_expression, std::string>;
 /**
+ * @ingroup error_info
  * @brief InfoSyntaxErrorLocation contains the location of the syntax error
  * in the JMESPath expression
  */
 using InfoSyntaxErrorLocation
     = boost::error_info<struct tag_syntax_error_location, long>;
 /**
+ * @ingroup error_info
  * @brief InfoFunctionName contains the name of the built in JMESpath function.
  */
 using InfoFunctionName
     = boost::error_info<struct tag_function_name, std::string>;
 
 /**
+ * @defgroup exceptions Exception classes
+ * Exception types that the public interface of the library might throw.
+ */
+/**
+ * @ingroup exceptions
  * @brief The Exception struct is the common base class for
  * for all the exceptions thrown by the library
  */
@@ -61,6 +73,7 @@ private:
     virtual void anchor();
 };
 /**
+ * @ingroup exceptions
  * @brief The SyntaxError struct represents a syntax error in
  * the evaluated expression
  */
@@ -73,6 +86,7 @@ private:
     virtual void anchor();
 };
 /**
+ * @ingroup exceptions
  * @brief The InvalidAgrument struct signals a function call with illegal
  * arguments
  */
@@ -85,6 +99,7 @@ private:
     virtual void anchor();
 };
 /**
+ * @ingroup exceptions
  * @brief The InvalidValue struct represents an invalid value in the JMESPath
  * expression.
  */
@@ -97,6 +112,7 @@ private:
     virtual void anchor();
 };
 /**
+ * @ingroup exceptions
  * @brief The UnknownFunction struct represents a call to a JMESPath built in
  * function which doesn't exists.
  */
@@ -109,6 +125,7 @@ private:
     virtual void anchor();
 };
 /**
+ * @ingroup exceptions
  * @brief The InvalidFunctionArgumentArity struct signals the a JMESPath built
  * in function was called with an unexpected number of arguments.
  */
@@ -121,6 +138,7 @@ private:
     virtual void anchor();
 };
 /**
+ * @ingroup exceptions
  * @brief The InvalidFunctionArgumentType struct represents a call to a JMESPath
  * built in function with an unexpected type of argument.
  */

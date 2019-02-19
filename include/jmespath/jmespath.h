@@ -33,12 +33,269 @@
 #include <jmespath/expression.h>
 
 /**
+ * @mainpage %jmespath.cpp
+ *
+ * %jmespath.cpp is a C++ implementation of <a href="http://jmespath.org">
+ * JMESPath</a>, a query language for JSON.
+ * It can be used to extract and transform elements of a JSON document.
+ *
+ * @section example JMESPath expression example
+ *
+ * Input JSON document:
+ * @code{.javascript}
+ * {
+ *   "locations": [
+ *     {"name": "Seattle", "state": "WA"},
+ *     {"name": "New York", "state": "NY"},
+ *     {"name": "Bellevue", "state": "WA"},
+ *     {"name": "Olympia", "state": "WA"}
+ *   ]
+ * }
+ * @endcode
+ *
+ * JMESPath expression:
+ * @code{.javascript}
+ * locations[?state == 'WA'].name | sort(@) | {WashingtonCities: join(', ', @)}
+ * @endcode
+ *
+ * Result of evaluating the expression:
+ * @code{.javascript}
+ * {"WashingtonCities": "Bellevue, Olympia, Seattle"}
+ * @endcode
+ *
+ * For more examples take a look at the
+ * <a href="http://jmespath.org/tutorial.html">JMESPath Tutorial</a> or the
+ * <a href="http://jmespath.org/examples.html">JMESPath Examples</a> pages.
+ *
+ * @section usage Using jmespath.cpp
+ *
+ * For installation instructions check out the @ref install page.
+ *
+ * To use the public functions and classes of %jmespath.cpp you should include
+ * the header file `"#include <jmespath/jmespath.h>"`.
+ * The public interface is declared in the `"jmespath"` namespace.
+ * @code{.cpp}
+ * #include <iostream>
+ * #include <jmespath/jmespath.h>
+ *
+ * namespace jp = jmespath;
+ *
+ * int main(int argc, char *argv[])
+ * {
+ *     auto data = R"({
+ *         "locations": [
+ *             {"name": "Seattle", "state": "WA"},
+ *             {"name": "New York", "state": "NY"},
+ *             {"name": "Bellevue", "state": "WA"},
+ *             {"name": "Olympia", "state": "WA"}
+ *         ]
+ *     })"_json;
+ *     jp::Expression expression = "locations[?state == 'WA'].name | sort(@) | "
+ *                                 "{WashingtonCities: join(', ', @)}";
+ *     std::cout << jp::search(expression, data) << std::endl;
+ *     return 0;
+ * }
+ * @endcode
+ *
+ * @subsection search Search function
+ * The main entry point of the library is the @ref jmespath::search function
+ * which takes a JMESPath expression as its first argument and a JSON document
+ * as the second argument and returns the result of the evaluated expression
+ * as a new JSON document.
+ * @code{.cpp}
+ * auto input = R"({"foo": "bar"})"_json;
+ * auto result = jmespath::search("foo", input);
+ * @endcode
+ *
+ * Besided passing the input document as an lvalue reference you can also pass
+ * it as an rvalue reference, which would allow the library to take advantage
+ * of move operations internally and produce the output document in a more
+ * efficient and faster manner.
+ * @code{.cpp}
+ * auto input = R"({"foo": "bar"})"_json;
+ * auto result = jmespath::search("foo", std::move(input));
+ * @endcode
+ *
+ * @subsection expression Expression class
+ * The @ref jmespath::Expression class allows to store a parsed JMESPath
+ * expression which is usefull if you want to evaluate the same expression
+ * on multiple JSON documents.
+ * @code{.cpp}
+ * jmespath::Expression expression {"foo"};
+ * auto result1 = jmespath::search(expression, R"({"foo": "bar"})"_json);
+ * auto result2 = jmespath::search(expression, R"({"foo": {"bar": "baz"}})"_json);
+ * @endcode
+ *
+ * By importing the names from the @ref jmespath::literals namespace you can
+ * also use user defined literals to define JMESPath expressions.
+ * @code{.cpp}
+ * using namespace jmespath::literals;
+ *
+ * auto expression = "foo"_jmespath;
+ * auto result1 = jmespath::search(expression, R"({"foo": "bar"})"_json);
+ * auto result2 = jmespath::search(expression, R"({"foo": {"bar": "baz"}})"_json);
+ * @endcode
+ *
+ * @subsection json JSON documents
+ * For the handling of JSON documents and values %jmespath.cpp relies on the
+ * excelent <a href="https://github.com/nlohmann/json">nlohmann_json</a>
+ * library.
+ *
+ * For defining JSON values you can either use `"_json"` user defined literal
+ * or the @ref jmespath::Json type which is just an alias for
+ * <a href="https://github.com/nlohmann/json">nlohmann_json</a>
+ * @code{.cpp}
+ * jmespath::Json jsonObject {{"foo", "bar"}};
+ * @endcode
+ *
+ * or you can also include the header of the
+ * <a href="https://github.com/nlohmann/json">nlohmann_json</a> library and use
+ * the `"nlohmann::json"` type directly.
+ * @code{.cpp}
+ * #include <nlohmann/json.hpp>
+ *
+ * nlohmann::json jsonObject {{"foo", "bar"}};
+ * @endcode
+ *
+ * @subsection error Error handling
+ * All the exceptions that might get thrown by @ref jmespath::search or
+ * @ref jmespath::Expression are listed on the @ref exceptions page.
+ *
+ * The library uses the
+ * <a href="https://www.boost.org/doc/libs/1_69_0/libs/exception/doc/
+ * boost-exception.html">Boost Exception</a> library for throwing exceptions.
+ * Which means that the thrown exceptions can
+ * <a href="https://www.boost.org/doc/libs/1_69_0/libs/exception/doc/
+ * tutorial_transporting_data.html">carry additional data attached</a>
+ * to them. All the additional data that exceptions might carry is listed on
+ * the @ref error_info page.
+ *
+ * This additional information can be used for example to pinpoint exactly
+ * which part of a JMESPath expression caused a parsing failure.
+ * @code{.cpp}
+ * jmespath::Expression expression;
+ *
+ * try
+ * {
+ *      expression = "foo?";
+ * }
+ * catch (jmespath::SyntaxError& error)
+ * {
+ *      if (const std::string* searchExpression
+ *              = boost::get_error_info<jmespath::InfoSearchExpression>(error))
+ *      {
+ *          std::cerr << "Failed parsing expression: "
+ *                    << *searchExpression << std::endl;
+ *      }
+ *      if (const long* location
+ *              = boost::get_error_info<jmespath::InfoSyntaxErrorLocation>(
+ *                  error))
+ *      {
+ *          std::cerr << "Error at position: " << *location << std::endl;
+ *      }
+ * }
+ * @endcode
+ * This code would produce the following output:
+ * @code
+ * Failed parsing expression: foo?
+ * Error at position: 3
+ * @endcode
+ *
+ * You can also use <a href="https://www.boost.org/doc/libs/1_69_0/libs/
+ * exception/doc/tutorial_diagnostic_information.html">
+ * boost::diagnostic_information</a> function to get all the additional
+ * information attached to an exception.
+ * @code{.cpp}
+ * jmespath::Expression expression;
+ *
+ * try
+ * {
+ *      expression = "foo?";
+ * }
+ * catch (jmespath::SyntaxError& error)
+ * {
+ *      std::cerr << boost::diagnostic_information(error) << std::endl;
+ * }
+ * @endcode
+ * This code would produce the following output:
+ * @code
+ * jmespath.cpp/src/parser/parser.h(90): Throw in function jmespath::parser::Parser::ResultType jmespath::parser::Parser<parser::Grammar>::parse(const jmespath::String &) [T = parser::Grammar]
+ * Dynamic exception type: boost::exception_detail::clone_impl<jmespath::SyntaxError>
+ * std::exception::what: std::exception
+ * [jmespath::tag_search_expression*] = foo?
+ * [jmespath::tag_syntax_error_location*] = 3
+ * @endcode
+ */
+
+/**
+ * @page install Installation and integration
+ * @section requirements Requirements
+ * To build, install and use the library you must have
+ * <a href="https://cmake.org/">CMake</a> installed, version 3.8 or later.
+ *
+ * @subsection compilers Supported compilers
+ * %jmespath.cpp needs a compiler that supports at least the c++14 standard.
+ * The currently supported and tested compilers are:
+ * - g++ versions: 5, 6, 7, 8
+ * - Clang versions: 4.0, 5.0, 6.0, 7
+ * - XCode versions: 9.0, 9.3, 10.1
+ * - Visual Studio 2017
+ *
+ * @subsection dependencies Library dependencies
+ * - <a href="https://www.boost.org/">boost</a> version 1.65 or later
+ * - <a href="https://github.com/nlohmann/json">nlohmann_json</a> version 3.4.0
+ * or later
+ *
+ * @section build_install Build and install
+ * To get the source code of the library either clone it from
+ * <a href="https://github.com/robertmrk/jmespath.cpp">github</a>
+ * @code{.bash}
+ * git clone https://github.com/robertmrk/jmespath.cpp.git
+ * @endcode
+ * or download the <a href="https://github.com/robertmrk/jmespath.cpp/releases">
+ * latest release</a> and extract it.
+ *
+ * In the terminal change the current directory to the location of the source
+ * code
+ * @code{.bash}
+ * cd <path_to_source>/jmespath.cpp
+ * @endcode
+ * Generate the project or makefiles for the build system of your choice with
+ * CMake, then build and install the library:
+ * @code{.bash}
+ * mkdir build
+ * cd build
+ * cmake .. -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DJMESPATH_BUILD_TESTS=OFF
+ * sudo cmake --build . --target install
+ * @endcode
+ *
+ * @section integration Integration
+ * To use the library in your CMake project you should find the library with
+ * `"find_package"` and link your target with `"jmespath::jmespath"`:
+ * @code
+ * cmake_minimum_required(VERSION 3.0)
+ * project(example)
+ *
+ * find_package(jmespath 0.1.0 CONFIG REQUIRED)
+ *
+ * add_executable(${PROJECT_NAME} main.cpp)
+ * target_link_libraries(${PROJECT_NAME} jmespath::jmespath)
+ * target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_14)
+ * @endcode
+ */
+
+/**
+ * @defgroup public The public API of the library
+ */
+
+/**
  * @brief The top level namespace which contains the public
  * functions of the library
  */
 namespace jmespath {
 
 /**
+ * @ingroup public
  * @brief Finds or creates the results for the @a expression evaluated on the
  * given @a document.
  *

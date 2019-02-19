@@ -37,6 +37,7 @@ namespace ast {
 class ExpressionNode;
 }
 /**
+ * @ingroup public
  * @brief The Expression class represents a JMESPath expression.
  *
  * The Expression class can be used to store a parsed JMESPath expression and
