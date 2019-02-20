@@ -25,29 +25,6 @@ matrix:
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test']
-          packages: ['g++-5', 'gcc-5']
-      before_install:
-        - cd ..
-        - wget http://sourceforge.net/projects/boost/files/boost/1.65.1/boost_1_65_1.tar.bz2/download -O boost.tar.bz2
-        - tar -xjf boost.tar.bz2
-        - export BOOST_ROOT=$PWD/boost_1_65_1
-        - wget https://github.com/nlohmann/json/archive/v3.4.0.tar.gz
-        - tar -xf v3.4.0.tar.gz
-        - cd json-3.4.0
-        - mkdir build
-        - cd build
-        - cmake .. -DJSON_BuildTests=OFF
-        - sudo make install
-        - cd ../..
-        - export CMAKE_CXX=g++-5
-        - export CMAKE_CC=gcc-5
-        - cd jmespath.cpp
-      env: COMPILER=g++-5
-    - os: linux
-      compiler: gcc
-      addons:
-        apt:
-          sources: ['ubuntu-toolchain-r-test']
           packages: ['g++-6', 'gcc-6']
       before_install:
         - cd ..

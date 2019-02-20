@@ -236,7 +236,7 @@
  * @subsection compilers Supported compilers
  * %jmespath.cpp needs a compiler that supports at least the c++14 standard.
  * The currently supported and tested compilers are:
- * - g++ versions: 5, 6, 7, 8
+ * - g++ versions: 6, 7, 8
  * - Clang versions: 4.0, 5.0, 6.0, 7
  * - XCode versions: 9.0, 9.3, 10.1
  * - Visual Studio 2017
