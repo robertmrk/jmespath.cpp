@@ -110,7 +110,7 @@ write_basic_package_version_file(
 )
 # generate packe config file
 configure_file("cmake/config.cmake.in"
-  "${CMAKE_BINARY_DIR}/${JMESPATH_CONFIG_FILE_NAME}"
+  "${CMAKE_CURRENT_BINARY_DIR}/${JMESPATH_CONFIG_FILE_NAME}"
   @ONLY
 )
 # generate and install package targets file
@@ -121,7 +121,7 @@ install(EXPORT ${JMESPATH_PACKAGE_NAME}
 )
 # install package config and version files
 install(FILES
-    "${CMAKE_BINARY_DIR}/${JMESPATH_CONFIG_FILE_NAME}"
-    "${CMAKE_BINARY_DIR}/${JMESPATH_CONFIGVERSION_FILE_NAME}"
+    "${CMAKE_CURRENT_BINARY_DIR}/${JMESPATH_CONFIG_FILE_NAME}"
+    "${CMAKE_CURRENT_BINARY_DIR}/${JMESPATH_CONFIGVERSION_FILE_NAME}"
     DESTINATION ${JMESPATH_CONFIG_INSTALL_DIR}
 )
