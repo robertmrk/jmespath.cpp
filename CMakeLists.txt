@@ -11,7 +11,6 @@ set(JMESPATH_TARGET_NAME "jmespath")
 SET(JMESPATH_TARGET_NAMESPACE_NAME "${JMESPATH_TARGET_NAME}::")
 set(JMESPATH_REQUIRED_BOOST_VERSION 1.65)
 set(JMESPATH_REQUIRED_JSON_VERSION 3.4.0)
-set(JMESPAHT_CONAN_PATHS_FILEPATH "${CMAKE_BINARY_DIR}/conan_paths.cmake")
 # set compiler specific flags
 if (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang"))
@@ -26,11 +25,6 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     set(JMESPATH_COMPILE_FLAGS "/EHsc /wd4348 /wd4068 /bigobj")
 endif()
 enable_testing()
-# include the conan_paths file if it exists
-if(EXISTS ${JMESPAHT_CONAN_PATHS_FILEPATH})
-  include(${JMESPAHT_CONAN_PATHS_FILEPATH})
-  message(STATUS, "Found ${JMESPAHT_CONAN_PATHS_FILEPATH}")
-endif()
 
 # find dependencies
 find_package(Boost ${JMESPATH_REQUIRED_BOOST_VERSION} REQUIRED)
