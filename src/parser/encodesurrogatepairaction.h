@@ -25,30 +25,38 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef JMESPATH_H
-#define JMESPATH_H
-#include <string>
-#include "jmespath/detail/types.h"
-#include "json.hpp"
+#ifndef ENCODESURROGATEPAIRACTION_H
+#define ENCODESURROGATEPAIRACTION_H
+#include "jmespath/types.h"
+
+namespace jmespath { namespace parser {
 
 /**
- * @brief The top level namespace which contains the public
- * functions of the library
+ * @brief The EncodeSurrogatePairAction class is a functor for encoding
+ * surrogate pair characters in UTF-32.
  */
-namespace jmespath {
-
-using detail::json;
-using detail::string;
-/**
- * @brief Finds or creates the results for the \a searchExpression
- * evaluated on the given \a document.
- *
- * The \a searchExpression string should be encoded in UTF-8.
- * @param searchExpression JMESPath search expression.
- * @param document Input JSON document
- * @return Result of the evaluation of the \a searchExpression in JSON format
- */
-json search(const string& searchExpression,
-            const json& document);
-} // namespace jmespath
-#endif // JMESPATH_H
+class EncodeSurrogatePairAction
+{
+public:
+    /**
+     * @brief The action's result type
+     */
+    using result_type =  UnicodeChar;
+    /**
+     * @brief Encodes a surrogate pair character
+     * @param[in] highSurrogate High surrogate
+     * @param[in] lowSurrogate Low surrogate
+     * @return The result of @a highSurrogate and @a lowSurrogate combined
+     * into a single codepoint
+     */
+    result_type operator()(UnicodeChar const& highSurrogate,
+                           UnicodeChar const& lowSurrogate) const
+    {
+        UnicodeChar unicodeChar = 0x10000;
+        unicodeChar += (highSurrogate & 0x03FF) << 10;
+        unicodeChar += (lowSurrogate & 0x03FF);
+        return unicodeChar;
+    }
+};
+}} // namespace jmespath::parser
+#endif // ENCODESURROGATEPAIRACTION_H

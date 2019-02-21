@@ -25,12 +25,39 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include <jmespath/jmespath.h>
+#include "fakeit.hpp"
+#include "src/ast/listwildcardnode.h"
+#include "src/interpreter/abstractvisitor.h"
 
-namespace jmespath {
-
-json search(const string &searchExpression, const json &document)
+TEST_CASE("ListWildcardNode")
 {
-    return {};
+    using namespace jmespath::ast;
+    using namespace jmespath::interpreter;
+    using namespace fakeit;
+
+    SECTION("can be constructed without parameters")
+    {
+        REQUIRE_NOTHROW(ListWildcardNode{});
+    }
+
+    SECTION("can be compared for equality")
+    {
+        ListWildcardNode node1;
+        ListWildcardNode node2;
+
+        REQUIRE(node1 == node2);
+    }
+
+    SECTION("accepts visitor")
+    {
+        ListWildcardNode node{};
+        Mock<AbstractVisitor> visitor;
+        When(OverloadedMethod(visitor, visit, void(const ListWildcardNode*)))
+                .AlwaysReturn();
+
+        node.accept(&visitor.get());
+
+        Verify(OverloadedMethod(visitor, visit, void(const ListWildcardNode*)))
+                .Once();
+    }
 }
-} // namespace jmespath

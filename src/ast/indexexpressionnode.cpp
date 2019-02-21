@@ -25,23 +25,53 @@
 ** DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef TYPES_H
-#define TYPES_H
-#include <string>
-#include "json.hpp"
+#include "src/ast/allnodes.h"
 
-/**
- * @namespace detail
- * @brief Contains the implementation details of the library
- */
-namespace jmespath { namespace detail {
-/**
- * @brief UTF-8 encoded string type
- */
-using string    = std::string;
-/**
- * @brief JSON data type
- */
-using json      = nlohmann::json;
-}} // namespace jmespath::detail
-#endif // TYPES_H
+namespace jmespath { namespace ast {
+
+IndexExpressionNode::IndexExpressionNode()
+    : BinaryExpressionNode()
+{
+}
+
+IndexExpressionNode::IndexExpressionNode(const BracketSpecifierNode
+                                         &bracketNode)
+    : BinaryExpressionNode(),
+      bracketSpecifier(bracketNode)
+{
+}
+
+IndexExpressionNode::IndexExpressionNode(const ExpressionNode &left,
+                                         const BracketSpecifierNode
+                                         &bracketNode,
+                                         const ExpressionNode &right)
+    : BinaryExpressionNode(left, right),
+      bracketSpecifier(bracketNode)
+{
+}
+
+bool IndexExpressionNode::operator ==(const IndexExpressionNode &other) const
+{
+    if (this != &other)
+    {
+        return BinaryExpressionNode::operator ==(other)
+                && (bracketSpecifier == other.bracketSpecifier);
+    }
+    return true;
+}
+
+bool IndexExpressionNode::isProjection() const
+{
+    return bracketSpecifier.isProjection();
+}
+
+bool IndexExpressionNode::stopsProjection() const
+{
+    return bracketSpecifier.stopsProjection();
+}
+
+void IndexExpressionNode::accept(interpreter::AbstractVisitor *visitor) const
+{
+    visitor->visit(this);
+}
+}} // namespace jmespath::ast

@@ -1,0 +1,7 @@
+include(CMakeFindDependencyMacro)
+# find library dependencies
+find_dependency(nlohmann_json @JMESPATH_REQUIRED_JSON_VERSION@ REQUIRED)
+find_dependency(Boost @JMESPATH_REQUIRED_BOOST_VERSION@ REQUIRED)
+
+# include the imported targets
+include(${CMAKE_CURRENT_LIST_DIR}/@JMESPATH_PACKAGE_NAME@Targets.cmake)

@@ -8,3 +8,5 @@ DS_Store
 doc/*
 !doc/Doxyfile
 
+# symlinked third party source files
+third_party/jmespath
