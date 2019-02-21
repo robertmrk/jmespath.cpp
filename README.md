@@ -58,6 +58,7 @@ int main(int argc, char *argv[])
 http://robertmrk.github.io/jmespath.cpp
 
 ## Install
+
 ### Requirements
 To build, install and use the library you must have [CMake](https://cmake.org/) installed, version 3.8 or later.
 
@@ -73,6 +74,7 @@ jmespath.cpp needs a compiler that supports at least the c++14 standard. The cur
 - [nlohmann_json](https://github.com/nlohmann/json) version 3.4.0 or later
 
 ### Install from source
+
 #### Build and install
 To get the source code of the library either clone it from [github](https://github.com/robertmrk/jmespath.cpp)
 ```bash
@@ -91,6 +93,7 @@ cd build
 cmake .. -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DJMESPATH_BUILD_TESTS=OFF
 sudo cmake --build . --target install
 ```
+
 #### Integration
 To use the library in your CMake project you should find the library with `find_package` and link your target with `jmespath::jmespath`:
 ```cmake
