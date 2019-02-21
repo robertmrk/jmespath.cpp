@@ -72,7 +72,8 @@ jmespath.cpp needs a compiler that supports at least the c++14 standard. The cur
 - [boost](https://www.boost.org/) version 1.65 or later
 - [nlohmann_json](https://github.com/nlohmann/json) version 3.4.0 or later
 
-### Build and install
+### Install from source
+#### Build and install
 To get the source code of the library either clone it from [github](https://github.com/robertmrk/jmespath.cpp)
 ```bash
 git clone https://github.com/robertmrk/jmespath.cpp.git
@@ -90,7 +91,7 @@ cd build
 cmake .. -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DJMESPATH_BUILD_TESTS=OFF
 sudo cmake --build . --target install
 ```
-### Integration
+#### Integration
 To use the library in your CMake project you should find the library with `find_package` and link your target with `jmespath::jmespath`:
 ```cmake
 cmake_minimum_required(VERSION 3.8)
@@ -102,3 +103,11 @@ add_executable(${PROJECT_NAME} main.cpp)
 target_link_libraries(${PROJECT_NAME} jmespath::jmespath)
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_14)
 ```
+
+### Install with Conan
+If you are using [Conan](https://www.conan.io/) to manage your dependencies,
+then add the followng remote:
+
+    $ conan remote add robertmrk https://api.bintray.com/conan/robertmrk/conan
+    
+and add jmespath.cpp/x.y.z@robertmrk/stable to your conanfile.py's requires, where x.y.z is the release version you want to use. Please file issues [here](https://github.com/robertmrk/conan-jmespath.cpp/issues) if you experience problems with the packages.

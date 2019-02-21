@@ -246,7 +246,8 @@
  * - <a href="https://github.com/nlohmann/json">nlohmann_json</a> version 3.4.0
  * or later
  *
- * @section build_install Build and install
+ * @subsection install_from_source Install from source
+ * @subsubsection build_install Build and install
  * To get the source code of the library either clone it from
  * <a href="https://github.com/robertmrk/jmespath.cpp">github</a>
  * @code{.bash}
@@ -269,7 +270,7 @@
  * sudo cmake --build . --target install
  * @endcode
  *
- * @section integration Integration
+ * @subsubsection integration Integration
  * To use the library in your CMake project you should find the library with
  * `"find_package"` and link your target with `"jmespath::jmespath"`:
  * @code
@@ -282,6 +283,18 @@
  * target_link_libraries(${PROJECT_NAME} jmespath::jmespath)
  * target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_14)
  * @endcode
+ *
+ * @subsection conan Install with Conan
+ * If you are using <a href="https://www.conan.io/">Conan</a> to manage your
+ * dependencies, then add the followng remote:
+ * @code{.bash}
+ * conan remote add robertmrk https://api.bintray.com/conan/robertmrk/conan
+ * @endcode
+ * and add `%jmespath.cpp/x.y.z@robertmrk/stable` to your conanfile.py's
+ * requires, where `x.y.z` is the release version you want to use. Please file
+ * issues
+ * <a href="https://github.com/robertmrk/conan-jmespath.cpp/issues">here</a>
+ * if you experience problems with the packages.
  */
 
 /**
