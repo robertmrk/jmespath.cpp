@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(jmespath.cpp VERSION 0.2.0 LANGUAGES CXX)
+project(jmespath.cpp VERSION 0.2.1 LANGUAGES CXX)
 
 ##
 ## CONFIGURATION
