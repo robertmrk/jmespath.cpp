@@ -286,13 +286,10 @@
  *
  * @subsection conan Install with Conan
  * If you are using <a href="https://www.conan.io/">Conan</a> to manage your
- * dependencies, then add the followng remote:
- * @code{.bash}
- * conan remote add robertmrk https://api.bintray.com/conan/robertmrk/conan
- * @endcode
- * and add `%jmespath.cpp/x.y.z@robertmrk/stable` to your conanfile.py's
- * requires, where `x.y.z` is the release version you want to use. Please file
- * issues
+ * dependencies, then add `%jmespath.cpp/x.y.z@robertmrk/stable` to your
+ * conanfile.py's requires, where `x.y.z` is the release version you want to
+ * use.
+ * Please file issues
  * <a href="https://github.com/robertmrk/conan-jmespath.cpp/issues">here</a>
  * if you experience problems with the packages.
  */

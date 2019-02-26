@@ -108,9 +108,6 @@ target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_14)
 ```
 
 ### Install with Conan
-If you are using [Conan](https://www.conan.io/) to manage your dependencies,
-then add the followng remote:
+If you are using [Conan](https://www.conan.io/) to manage your dependencies, then add jmespath.cpp/x.y.z@robertmrk/stable to your conanfile.py's requires, where x.y.z is the release version you want to use. 
 
-    $ conan remote add robertmrk https://api.bintray.com/conan/robertmrk/conan
-    
-and add jmespath.cpp/x.y.z@robertmrk/stable to your conanfile.py's requires, where x.y.z is the release version you want to use. Please file issues [here](https://github.com/robertmrk/conan-jmespath.cpp/issues) if you experience problems with the packages.
+Please file issues [here](https://github.com/robertmrk/conan-jmespath.cpp/issues) if you experience problems with the packages.
